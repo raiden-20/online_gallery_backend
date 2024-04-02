@@ -10,3 +10,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
     open-in-view: true
+minio:
+  host: http://localhost:9000
+  user: muser
+  password: mpassword

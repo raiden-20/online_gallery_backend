@@ -47,9 +47,26 @@ services:
     networks:
       - backend
 
+  minio:
+    container_name: minio
+    image: minio/minio:${MINIO_VERSION}
+    ports:
+      - ${MINIO_GUI_PORT}:9001
+      - ${MINIO_PORT}:9000
+    volumes:
+      - minio:/data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    networks:
+      - backend
+    command: server --console-address ":9001" /data
+
 networks:
   backend:
 
 volumes:
   postgres_db:
     name: postgres_db
+  minio:
+    name: minio
