@@ -1,0 +1,55 @@
+version: "3.9"
+services:
+  postgres_db:
+    container_name: postgres_db
+    image: postgres:${POSTGRES_VERSION}
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      KC_DB_USERNAME: ${KEYCLOAK_POSTGRES_USER}
+      KC_DB_PASSWORD: ${KEYCLOAK_POSTGRES_PASSWORD}
+    volumes:
+      - postgres_db:/var/lib/postgresql/data
+      - ./init_db/postgres_init_db.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - ${POSTGRES_PORT}:5432
+    healthcheck:
+      test: "CMD-SHELL pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"
+    networks:
+      - backend
+
+  keycloak:
+    container_name: keycloak
+    image: quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}
+    restart: unless-stopped
+    command:
+      ["start-dev"]
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: ${KEYCLOAK_POSTGRES_URL}
+      KC_DB_USERNAME: ${KEYCLOAK_POSTGRES_USER}
+      KC_DB_PASSWORD: ${KEYCLOAK_POSTGRES_PASSWORD}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+    volumes:
+      - ./keycloak/gallery_login:/opt/keycloak/themes/gallery_login
+    ports:
+      - ${KEYCLOAK_PORT}:8080
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://0.0.0.0:8080/realms/master" ]
+      start_period: 10s
+      interval: 30s
+      retries: 3
+      timeout: 5s
+    depends_on:
+      - postgres_db
+    networks:
+      - backend
+
+networks:
+  backend:
+
+volumes:
+  postgres_db:
+    name: postgres_db
