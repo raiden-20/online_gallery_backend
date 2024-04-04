@@ -4,14 +4,16 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.enums.Gender;
 
 import java.sql.Timestamp;
 import java.util.UUID;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Table(name = "customer")
 public class CustomerEntity {
 
@@ -34,6 +36,6 @@ public class CustomerEntity {
     @Column(name = "cover_url")
     String coverUrl;
 
-    @Column(name = "artist_url")
+    @Column(name = "artist_id")
     UUID artistId;
 }
