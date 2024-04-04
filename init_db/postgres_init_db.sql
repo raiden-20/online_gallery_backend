@@ -12,6 +12,7 @@ CREATE TABLE artist(
     artist_name VARCHAR(100) NOT NULL,
     avatar_url VARCHAR(500),
     cover_url VARCHAR(500),
+    description VARCHAR(500),
     views INT
 );
 
