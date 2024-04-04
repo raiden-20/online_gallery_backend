@@ -10,7 +10,18 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
     open-in-view: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8000/realms/online_gallery
+          jwk-ser-uri: http://localhost:8000/realms/online_gallery/protocol/openid-connect/certs
 minio:
   host: http://localhost:9000
   user: muser
   password: mpassword
+keycloak:
+  url: http://localhost:8000
+  realm: online_gallery
+  clientId: backend
+  secret: fXAvWBxMpzOGSYJvGRe4ZOOp3NFCwdSf
