@@ -10,7 +10,6 @@ import ru.vsu.cs.sheina.online_gallery_backend.service.KeycloakService;
 
 @RestController
 @RequestMapping("/change")
-@CrossOrigin
 @RequiredArgsConstructor
 public class UserController {
 
