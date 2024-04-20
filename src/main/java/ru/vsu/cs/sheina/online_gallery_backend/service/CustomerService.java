@@ -7,7 +7,6 @@ import ru.vsu.cs.sheina.online_gallery_backend.dto.CustomerFullDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.CustomerRegistrationDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.CustomerShortDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.CustomerEntity;
-import ru.vsu.cs.sheina.online_gallery_backend.entity.enums.Gender;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentials;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserAlreadyExistsException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
@@ -20,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.UUID;
 
 @Service
@@ -59,7 +59,7 @@ public class CustomerService {
             throw new BadCredentials();
         }
 
-        customerEntity.setGender(Gender.valueOf(gender));
+        customerEntity.setGender(gender);
         customerEntity.setDescription(description);
         customerEntity.setCustomerName(customerName);
 

@@ -3,7 +3,6 @@ package ru.vsu.cs.sheina.online_gallery_backend.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import ru.vsu.cs.sheina.online_gallery_backend.entity.enums.Gender;
 
 import java.sql.Timestamp;
 import java.util.UUID;
@@ -18,5 +17,5 @@ public class CustomerRegistrationDTO {
 
     Timestamp birthDate;
 
-    Gender gender;
+    String gender;
 }

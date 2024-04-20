@@ -6,7 +6,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import ru.vsu.cs.sheina.online_gallery_backend.entity.enums.Gender;
 
 import java.sql.Timestamp;
 import java.util.UUID;
@@ -25,7 +24,7 @@ public class CustomerEntity {
     String customerName;
 
     @Column(name = "gender")
-    Gender gender;
+    String gender;
 
     @Column(name = "birth_date")
     Timestamp birthDate;
