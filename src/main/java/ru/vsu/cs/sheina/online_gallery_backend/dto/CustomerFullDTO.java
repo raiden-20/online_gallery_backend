@@ -21,5 +21,7 @@ public class CustomerFullDTO {
 
     String coverUrl;
 
+    String description;
+
     UUID artistId;
 }

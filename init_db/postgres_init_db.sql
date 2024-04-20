@@ -23,6 +23,7 @@ CREATE TABLE customer(
     birth_date TIMESTAMP NOT NULL,
     avatar_url VARCHAR(500),
     cover_url VARCHAR(500),
+    description VARCHAR(200),
     artist_id UUID REFERENCES artist(id)
 );
 

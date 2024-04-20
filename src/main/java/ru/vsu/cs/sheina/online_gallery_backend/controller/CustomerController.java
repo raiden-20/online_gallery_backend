@@ -35,11 +35,12 @@ public class CustomerController {
                                              @RequestPart("customerName") String customerName,
                                              @RequestPart("birthDate") String birthDate,
                                              @RequestPart("gender") String gender,
+                                             @RequestPart("description") String description,
                                              @RequestPart("avatarUrl") String avatarUrl,
                                              @RequestPart("coverUrl") String coverUrl,
                                              @RequestPart("avatar") MultipartFile avatar,
                                              @RequestPart("cover") MultipartFile cover) {
-        customerService.setCustomerData(customerId, customerName, birthDate, gender, avatarUrl, coverUrl,
+        customerService.setCustomerData(customerId, customerName, birthDate, description, gender, avatarUrl, coverUrl,
                                                 avatar, cover);
         return ResponseEntity.ok("Data updated successfully");
     }

@@ -36,6 +36,9 @@ public class CustomerEntity {
     @Column(name = "cover_url")
     String coverUrl;
 
+    @Column(name = "description")
+    String description;
+
     @Column(name = "artist_id")
     UUID artistId;
 }

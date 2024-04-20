@@ -35,6 +35,7 @@ public class CustomerService {
 
         dto.setCustomerName(customerEntity.getCustomerName());
         dto.setGender(customerEntity.getGender());
+        dto.setDescription(customerEntity.getDescription());
         dto.setBirthDate(customerEntity.getBirthDate());
         dto.setArtistId(customerEntity.getArtistId());
         dto.setAvatarUrl(customerEntity.getAvatarUrl());
@@ -47,7 +48,7 @@ public class CustomerService {
         return !customerRepository.existsById(id);
     }
 
-    public void setCustomerData(String customerId, String customerName, String birthDate, String gender, String avatarUrl, String coverUrl, MultipartFile avatar, MultipartFile cover) {
+    public void setCustomerData(String customerId, String customerName, String birthDate, String description, String gender, String avatarUrl, String coverUrl, MultipartFile avatar, MultipartFile cover) {
         CustomerEntity customerEntity = customerRepository.findById(UUID.fromString(customerId)).orElseThrow(UserNotFoundException::new);
         try {
             DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -59,6 +60,7 @@ public class CustomerService {
         }
 
         customerEntity.setGender(Gender.valueOf(gender));
+        customerEntity.setDescription(description);
         customerEntity.setCustomerName(customerName);
 
         if (!avatar.isEmpty()){
