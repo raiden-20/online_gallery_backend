@@ -24,4 +24,6 @@ keycloak:
   url: http://localhost:8000
   realm: online_gallery
   clientId: backend
-  secret: fXAvWBxMpzOGSYJvGRe4ZOOp3NFCwdSf
+  clientSecret: fXAvWBxMpzOGSYJvGRe4ZOOp3NFCwdSf
+  username: backend@backend
+  password: 123456789
