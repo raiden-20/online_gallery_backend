@@ -8,6 +8,7 @@ import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.field.DeleteDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.EmailDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.PasswordDTO;
 import org.keycloak.representations.idm.CredentialRepresentation;
@@ -55,5 +56,12 @@ public class KeycloakService {
         passwordCred.setValue(passwordDTO.getPassword());
 
         userResource.resetPassword(passwordCred);
+    }
+
+    public void deleteAccount(DeleteDTO deleteDTO) {
+        RealmResource realmResource = keycloak.realm(realm);
+        UsersResource usersResource = realmResource.users();
+
+        usersResource.delete(String.valueOf(deleteDTO.getId()));
     }
 }

@@ -109,4 +109,9 @@ public class ArtistService {
                 .map(art -> new ArtistShortDTO(art.getId(), art.getArtistName(), art.getAvatarUrl(), art.getViews()))
                 .toList();
     }
+
+    public void deleteAccount(UUID artistId) {
+        ArtistEntity artistEntity = artistRepository.findById(artistId).orElseThrow(UserNotFoundException::new);
+        artistRepository.delete(artistEntity);
+    }
 }

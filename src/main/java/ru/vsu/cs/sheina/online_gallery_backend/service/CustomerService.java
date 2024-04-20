@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.CustomerFullDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.CustomerRegistrationDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.CustomerShortDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.field.DeleteDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.CustomerEntity;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentials;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserAlreadyExistsException;
@@ -28,6 +29,7 @@ public class CustomerService {
 
     private final CustomerRepository customerRepository;
     private final FileService fileService;
+    private final ArtistService artistService;
 
     public CustomerFullDTO getCustomerData(UUID id) {
         CustomerEntity customerEntity = customerRepository.findById(id).orElseThrow(UserNotFoundException::new);
@@ -118,5 +120,15 @@ public class CustomerService {
                 .filter(cust -> cust.getCustomerName().toUpperCase().contains(input.toUpperCase()))
                 .map(cust -> new CustomerShortDTO(cust.getId(), cust.getCustomerName(), cust.getAvatarUrl()))
                 .toList();
+    }
+
+    public void deleteAccount(DeleteDTO deleteDTO) {
+        CustomerEntity customerEntity = customerRepository.findById(deleteDTO.getId()).orElseThrow(UserNotFoundException::new);
+
+        if (customerEntity.getArtistId() != null) {
+            artistService.deleteAccount(customerEntity.getArtistId());
+        }
+
+        customerRepository.delete(customerEntity);
     }
 }
