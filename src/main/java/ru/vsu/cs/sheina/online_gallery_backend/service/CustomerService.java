@@ -101,6 +101,7 @@ public class CustomerService {
         customerEntity.setId(customerRegistrationDTO.getCustomerId());
         customerEntity.setCustomerName(customerRegistrationDTO.getCustomerName());
         customerEntity.setGender(customerRegistrationDTO.getGender());
+        customerEntity.setDescription("");
         customerEntity.setBirthDate(customerRegistrationDTO.getBirthDate());
         customerEntity.setAvatarUrl("");
         customerEntity.setCoverUrl("");
@@ -125,10 +126,10 @@ public class CustomerService {
     public void deleteAccount(DeleteDTO deleteDTO) {
         CustomerEntity customerEntity = customerRepository.findById(deleteDTO.getId()).orElseThrow(UserNotFoundException::new);
 
+        customerRepository.delete(customerEntity);
+
         if (customerEntity.getArtistId() != null) {
             artistService.deleteAccount(customerEntity.getArtistId());
         }
-
-        customerRepository.delete(customerEntity);
     }
 }
