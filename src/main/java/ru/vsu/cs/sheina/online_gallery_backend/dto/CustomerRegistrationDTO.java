@@ -11,8 +11,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CustomerRegistrationDTO {
 
-    UUID customerId;
-
     String customerName;
 
     Timestamp birthDate;

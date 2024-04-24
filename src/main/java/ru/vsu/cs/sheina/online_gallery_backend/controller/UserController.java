@@ -17,22 +17,24 @@ public class UserController {
     private final CustomerService customerService;
 
     @PutMapping("/change/email")
-    public ResponseEntity<?> changeEmail(@RequestBody EmailDTO emailDTO) {
-        keycloakService.changeEmail(emailDTO);
+    public ResponseEntity<?> changeEmail(@RequestBody EmailDTO emailDTO,
+                                         @RequestHeader("Authorization") String token) {
+        keycloakService.changeEmail(emailDTO, token);
         return ResponseEntity.ok("Check your new mailbox");
     }
 
     @PutMapping("/change/password")
-    public ResponseEntity<?> changePassword(@RequestBody PasswordDTO passwordDTO){
-        keycloakService.changePassword(passwordDTO);
+    public ResponseEntity<?> changePassword(@RequestBody PasswordDTO passwordDTO,
+                                            @RequestHeader("Authorization") String token){
+        keycloakService.changePassword(passwordDTO, token);
         return ResponseEntity.ok("Data updated successfully");
     }
 
 
     @DeleteMapping("/account")
-    public ResponseEntity<?> deleteAccount(@RequestBody DeleteDTO deleteDTO) {
-        keycloakService.deleteAccount(deleteDTO);
-        customerService.deleteAccount(deleteDTO);
+    public ResponseEntity<?> deleteAccount(@RequestHeader("Authorization") String token) {
+        keycloakService.deleteAccount(token);
+        customerService.deleteAccount(token);
         return ResponseEntity.ok("Account deleted successfully");
     }
 }

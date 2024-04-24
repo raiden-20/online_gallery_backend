@@ -26,20 +26,21 @@ public class ArtistController {
     }
 
     @PutMapping(value = "/artist/data", consumes = "multipart/form-data")
-    public ResponseEntity<?> setArtistData(@RequestPart("artistId") String artistId,
-                                           @RequestPart("artistName") String artistName,
+    public ResponseEntity<?> setArtistData(@RequestPart("artistName") String artistName,
                                            @RequestPart("avatarUrl") String avatarUrl,
                                            @RequestPart("coverUrl") String coverUrl,
                                            @RequestPart("description") String description,
                                            @RequestPart("avatar") MultipartFile avatar,
-                                           @RequestPart("cover") MultipartFile cover) {
-        artistService.setArtistData(artistId, artistName, avatarUrl, coverUrl, description, avatar, cover);
+                                           @RequestPart("cover") MultipartFile cover,
+                                           @RequestHeader("Authorization") String token) {
+        artistService.setArtistData(token, artistName, avatarUrl, coverUrl, description, avatar, cover);
         return ResponseEntity.ok("Data updated successfully");
     }
 
     @PostMapping("/artist/create")
-    public ResponseEntity<?> createArtist(@RequestBody ArtistRegistrationDTO artistRegistrationDTO){
-        UUID id = artistService.createArtist(artistRegistrationDTO);
+    public ResponseEntity<?> createArtist(@RequestBody ArtistRegistrationDTO artistRegistrationDTO,
+                                          @RequestHeader("Authorization") String token){
+        UUID id = artistService.createArtist(artistRegistrationDTO, token);
         return ResponseEntity.ok(id);
     }
 

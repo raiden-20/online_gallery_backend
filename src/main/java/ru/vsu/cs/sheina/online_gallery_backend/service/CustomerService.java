@@ -12,6 +12,7 @@ import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentials;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserAlreadyExistsException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.CustomerRepository;
+import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -30,6 +31,7 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final FileService fileService;
     private final ArtistService artistService;
+    private final JWTParser jwtParser;
 
     public CustomerFullDTO getCustomerData(UUID id) {
         CustomerEntity customerEntity = customerRepository.findById(id).orElseThrow(UserNotFoundException::new);
@@ -50,8 +52,10 @@ public class CustomerService {
         return !customerRepository.existsById(id);
     }
 
-    public void setCustomerData(String customerId, String customerName, String birthDate, String description, String gender, String avatarUrl, String coverUrl, MultipartFile avatar, MultipartFile cover) {
-        CustomerEntity customerEntity = customerRepository.findById(UUID.fromString(customerId)).orElseThrow(UserNotFoundException::new);
+    public void setCustomerData(String token, String customerName, String birthDate, String description, String gender, String avatarUrl, String coverUrl, MultipartFile avatar, MultipartFile cover) {
+        UUID userId = jwtParser.getIdFromAccessToken(token);
+
+        CustomerEntity customerEntity = customerRepository.findById(userId).orElseThrow(UserNotFoundException::new);
         try {
             DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
             Date date = formatter.parse(birthDate);
@@ -69,7 +73,7 @@ public class CustomerService {
             if (!customerEntity.getAvatarUrl().isEmpty()) {
                 fileService.deleteFile(customerEntity.getAvatarUrl());
             }
-            String url = fileService.saveFile(avatar, customerId);
+            String url = fileService.saveFile(avatar);
             customerEntity.setAvatarUrl(url);
         } else if (avatarUrl.equals("delete") && avatar.isEmpty()) {
             fileService.deleteFile(customerEntity.getAvatarUrl());
@@ -80,7 +84,7 @@ public class CustomerService {
             if (!customerEntity.getCoverUrl().isEmpty()) {
                 fileService.deleteFile(customerEntity.getCoverUrl());
             }
-            String url = fileService.saveFile(cover, customerId);
+            String url = fileService.saveFile(cover);
             customerEntity.setCoverUrl(url);
         } else if (coverUrl.equals("delete") && cover.isEmpty()) {
             fileService.deleteFile(customerEntity.getCoverUrl());
@@ -90,15 +94,16 @@ public class CustomerService {
         customerRepository.save(customerEntity);
     }
 
-    public void createCustomer(CustomerRegistrationDTO customerRegistrationDTO) {
+    public void createCustomer(CustomerRegistrationDTO customerRegistrationDTO, String token) {
+        UUID userId = jwtParser.getIdFromAccessToken(token);
 
-        if (customerRepository.existsById(customerRegistrationDTO.getCustomerId())) {
+        if (customerRepository.existsById(userId)) {
             throw new UserAlreadyExistsException();
         }
 
         CustomerEntity customerEntity = new CustomerEntity();
 
-        customerEntity.setId(customerRegistrationDTO.getCustomerId());
+        customerEntity.setId(userId);
         customerEntity.setCustomerName(customerRegistrationDTO.getCustomerName());
         customerEntity.setGender(customerRegistrationDTO.getGender());
         customerEntity.setDescription("");
@@ -123,8 +128,10 @@ public class CustomerService {
                 .toList();
     }
 
-    public void deleteAccount(DeleteDTO deleteDTO) {
-        CustomerEntity customerEntity = customerRepository.findById(deleteDTO.getId()).orElseThrow(UserNotFoundException::new);
+    public void deleteAccount(String token) {
+        UUID userId = jwtParser.getIdFromAccessToken(token);
+
+        CustomerEntity customerEntity = customerRepository.findById(userId).orElseThrow(UserNotFoundException::new);
 
         customerRepository.delete(customerEntity);
 

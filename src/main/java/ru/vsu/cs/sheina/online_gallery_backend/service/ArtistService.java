@@ -12,6 +12,7 @@ import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserAlreadyExistsExcep
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.ArtistRepository;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.CustomerRepository;
+import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
 
 import java.util.List;
 import java.util.UUID;
@@ -23,6 +24,7 @@ public class ArtistService {
     private final ArtistRepository artistRepository;
     private final CustomerRepository customerRepository;
     private final FileService fileService;
+    private final JWTParser jwtParser;
 
     public ArtistFullDTO getArtistData(UUID id) {
         ArtistEntity artistEntity = artistRepository.findById(id).orElseThrow(UserNotFoundException::new);
@@ -43,8 +45,11 @@ public class ArtistService {
         return dto;
     }
 
-    public void setArtistData(String artistId, String artistName, String avatarUrl, String coverUrl, String description, MultipartFile avatar, MultipartFile cover) {
-        ArtistEntity artistEntity = artistRepository.findById(UUID.fromString(artistId)).orElseThrow(UserNotFoundException::new);
+    public void setArtistData(String token, String artistName, String avatarUrl, String coverUrl, String description, MultipartFile avatar, MultipartFile cover) {
+        UUID customerId = jwtParser.getIdFromAccessToken(token);
+        UUID artistId = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new).getArtistId();
+
+        ArtistEntity artistEntity = artistRepository.findById(artistId).orElseThrow(UserNotFoundException::new);
 
         artistEntity.setArtistName(artistName);
         artistEntity.setDescription(description);
@@ -53,7 +58,7 @@ public class ArtistService {
             if (!artistEntity.getAvatarUrl().isEmpty()) {
                 fileService.deleteFile(artistEntity.getAvatarUrl());
             }
-            String url = fileService.saveFile(avatar, artistId);
+            String url = fileService.saveFile(avatar);
             artistEntity.setAvatarUrl(url);
         } else if (avatarUrl.equals("delete") && avatar.isEmpty()) {
             fileService.deleteFile(artistEntity.getAvatarUrl());
@@ -64,7 +69,7 @@ public class ArtistService {
             if (!artistEntity.getCoverUrl().isEmpty()) {
                 fileService.deleteFile(artistEntity.getCoverUrl());
             }
-            String url = fileService.saveFile(cover, artistId);
+            String url = fileService.saveFile(cover);
             artistEntity.setCoverUrl(url);
         } else if (coverUrl.equals("delete") && cover.isEmpty()) {
             fileService.deleteFile(artistEntity.getCoverUrl());
@@ -74,8 +79,10 @@ public class ArtistService {
         artistRepository.save(artistEntity);
     }
 
-    public UUID createArtist(ArtistRegistrationDTO artistRegistrationDTO) {
-        CustomerEntity customerEntity = customerRepository.findById(artistRegistrationDTO.getCustomerId()).orElseThrow(UserNotFoundException::new);
+    public UUID createArtist(ArtistRegistrationDTO artistRegistrationDTO, String token) {
+        UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         if (customerEntity.getArtistId() != null){
             throw new UserAlreadyExistsException();
         }
