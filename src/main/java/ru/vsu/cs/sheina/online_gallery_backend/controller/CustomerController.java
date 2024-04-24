@@ -31,23 +31,24 @@ public class CustomerController {
     }
 
     @PutMapping(value = "/customer/data", consumes = "multipart/form-data")
-    public ResponseEntity<?> setCustomerData(@RequestPart("customerId") String customerId,
-                                             @RequestPart("customerName") String customerName,
+    public ResponseEntity<?> setCustomerData(@RequestPart("customerName") String customerName,
                                              @RequestPart("birthDate") String birthDate,
                                              @RequestPart("gender") String gender,
                                              @RequestPart("description") String description,
                                              @RequestPart("avatarUrl") String avatarUrl,
                                              @RequestPart("coverUrl") String coverUrl,
                                              @RequestPart("avatar") MultipartFile avatar,
-                                             @RequestPart("cover") MultipartFile cover) {
-        customerService.setCustomerData(customerId, customerName, birthDate, description, gender, avatarUrl, coverUrl,
+                                             @RequestPart("cover") MultipartFile cover,
+                                             @RequestHeader("Authorization") String token) {
+        customerService.setCustomerData(token, customerName, birthDate, description, gender, avatarUrl, coverUrl,
                                                 avatar, cover);
         return ResponseEntity.ok("Data updated successfully");
     }
 
     @PostMapping("/customer/create")
-    public ResponseEntity<?> createCustomer(@RequestBody CustomerRegistrationDTO customerRegistrationDTO){
-        customerService.createCustomer(customerRegistrationDTO);
+    public ResponseEntity<?> createCustomer(@RequestBody CustomerRegistrationDTO customerRegistrationDTO,
+                                            @RequestHeader("Authorization") String token){
+        customerService.createCustomer(customerRegistrationDTO, token);
         return ResponseEntity.ok("User is registered");
     }
 

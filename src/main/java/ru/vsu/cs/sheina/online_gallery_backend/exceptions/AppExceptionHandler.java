@@ -14,14 +14,4 @@ public class AppExceptionHandler {
     public ResponseEntity<?> handleException(AppException appException) {
         return ResponseEntity.status(appException.getStatus()).body(appException.getMessage());
     }
-
-    @ExceptionHandler
-    public ResponseEntity<?> handleException(InvalidJwtException invalidJwtException) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Bad token");
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<?> handleException(MalformedClaimException malformedClaimException) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Bad token");
-    }
 }

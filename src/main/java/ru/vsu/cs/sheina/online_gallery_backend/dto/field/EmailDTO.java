@@ -9,7 +9,5 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class EmailDTO {
 
-    UUID id;
-
     String email;
 }
