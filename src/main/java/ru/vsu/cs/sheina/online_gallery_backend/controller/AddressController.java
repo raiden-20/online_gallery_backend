@@ -5,7 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.address.AddressDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.address.AddressNewDTO;
-import ru.vsu.cs.sheina.online_gallery_backend.dto.field.AddressIdDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdDTO;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,20 +22,23 @@ public class AddressController {
     }
 
     @PostMapping("/address")
-    public ResponseEntity<?> addNewAddress(@RequestBody AddressNewDTO addressNewDTO) {
-        addressService.addNewAddress(addressNewDTO);
+    public ResponseEntity<?> addNewAddress(@RequestBody AddressNewDTO addressNewDTO,
+                                           @RequestHeader("Authorization") String token) {
+        addressService.addNewAddress(addressNewDTO, token);
         return ResponseEntity.ok("Address added successfully");
     }
 
     @PutMapping("/address")
-    public ResponseEntity<?> changeAddress(@RequestBody AddressDTO addressDTO) {
-        addressService.changeAddress(addressDTO);
+    public ResponseEntity<?> changeAddress(@RequestBody AddressDTO addressDTO,
+                                           @RequestHeader("Authorization") String token) {
+        addressService.changeAddress(addressDTO, token);
         return ResponseEntity.ok("Address changed successfully");
     }
 
     @DeleteMapping("/address")
-    public ResponseEntity<?> deleteAddress(@RequestBody AddressIdDTO addressIdDTO) {
-        addressService.deleteAddress(addressIdDTO);
+    public ResponseEntity<?> deleteAddress(@RequestBody IntIdDTO intIdDTO,
+                                           @RequestHeader("Authorization") String token) {
+        addressService.deleteAddress(intIdDTO, token);
         return ResponseEntity.ok("Address deleted successfully");
     }
 }
