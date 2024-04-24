@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.card.CardDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.card.CardNewDTO;
-import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,9 +34,9 @@ public class CardController {
     }
 
     @DeleteMapping("/card")
-    public ResponseEntity<?> deleteCard(@RequestBody IntIdDTO intIdDTO,
+    public ResponseEntity<?> deleteCard(@RequestBody IntIdRequestDTO intIdRequestDTO,
                                         @RequestHeader("Authorization") String token) {
-        cardService.deleteCard(intIdDTO, token);
+        cardService.deleteCard(intIdRequestDTO, token);
         return ResponseEntity.ok("Card deleted successfully");
     }
 }

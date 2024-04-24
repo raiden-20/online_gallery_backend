@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.address.AddressDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.address.AddressNewDTO;
-import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
 
 import java.util.List;
 
@@ -36,9 +36,9 @@ public class AddressController {
     }
 
     @DeleteMapping("/address")
-    public ResponseEntity<?> deleteAddress(@RequestBody IntIdDTO intIdDTO,
+    public ResponseEntity<?> deleteAddress(@RequestBody IntIdRequestDTO intIdRequestDTO,
                                            @RequestHeader("Authorization") String token) {
-        addressService.deleteAddress(intIdDTO, token);
+        addressService.deleteAddress(intIdRequestDTO, token);
         return ResponseEntity.ok("Address deleted successfully");
     }
 }
