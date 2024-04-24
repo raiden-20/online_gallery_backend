@@ -18,7 +18,7 @@ public class PublicSubscription {
 
     @PostMapping("/action")
     public ResponseEntity<?> actionWithSubscription(@RequestBody UUIDRequestDTO uuidRequestDTO,
-                                                @RequestHeader("Authorization") String token) {
+                                                    @RequestHeader("Authorization") String token) {
         publicSubscriptionService.actionWithSubscription(uuidRequestDTO, token);
         return ResponseEntity.ok("Public subscription changed successfully");
     }

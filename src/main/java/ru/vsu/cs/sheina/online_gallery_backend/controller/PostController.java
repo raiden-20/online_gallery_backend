@@ -26,7 +26,7 @@ public class PostController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> createPost(@RequestPart(value = "files") List<MultipartFile> photos,
+    public ResponseEntity<?> createPost(@RequestPart(name = "photos", value = "files") List<MultipartFile> photos,
                                         @RequestPart("title") String title,
                                         @RequestPart("text") String text,
                                         @RequestHeader("Authorization") String token) {
@@ -35,7 +35,7 @@ public class PostController {
     }
 
     @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> createPost(@RequestPart(value = "files") List<MultipartFile> photos,
+    public ResponseEntity<?> createPost(@RequestPart(name = "photos", value = "files") List<MultipartFile> photos,
                                         @RequestPart("deletePhotoUrls") List<String> deletePhotoUrls,
                                         @RequestPart("postId") String postId,
                                         @RequestPart("title") String title,

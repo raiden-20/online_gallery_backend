@@ -26,7 +26,7 @@ public class CartController {
     @DeleteMapping()
     public ResponseEntity<?> deleteArtFromCart(@RequestBody IntIdRequestDTO intIdRequestDTO,
                                                @RequestHeader("Authorization") String token) {
-        cartService.deleteArt(intIdRequestDTO, token);
+        cartService.deleteArtFromCart(intIdRequestDTO, token);
         return ResponseEntity.ok("Art deleted from cart");
     }
 
@@ -39,7 +39,7 @@ public class CartController {
     @PostMapping("/buy")
     public ResponseEntity<?> buyArtsFromCart(@RequestBody PurchaseDTO purchaseDTO,
                                              @RequestHeader("Authorization") String token) {
-        cartService.buy(purchaseDTO, token);
-        return ResponseEntity.ok("Purchase completed successfully");
+        Integer orderId = cartService.buy(purchaseDTO, token);
+        return ResponseEntity.ok(orderId);
     }
 }
