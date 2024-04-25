@@ -8,6 +8,7 @@ import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.subscription.PriceDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.subscription.SubscribeDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.subscription.PrivateSubscriptionDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.service.PrivateSubscriptionService;
 
 import java.util.List;
 import java.util.UUID;
