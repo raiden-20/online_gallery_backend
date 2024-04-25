@@ -68,6 +68,7 @@ CREATE TABLE customer_private_subscription(
     id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
     private_subscription_id INT REFERENCES private_subscription(id),
     customer_id UUID REFERENCES customer(id),
+    payment_date TIMESTAMP,
     create_date TIMESTAMP
 );
 
@@ -80,6 +81,7 @@ CREATE TABLE art_private_subscription(
 CREATE TABLE post(
     id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
     artist_id UUID REFERENCES artist(id),
+    title VARCHAR(200)
     body VARCHAR(500),
     created_at TIMESTAMP
 );
@@ -87,7 +89,8 @@ CREATE TABLE post(
 CREATE TABLE post_photo(
     id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
     post_id INT REFERENCES post(id),
-    photo_url VARCHAR(500)
+    photo_url VARCHAR(500),
+    default_photo BOOLEAN
 );
 
 CREATE TABLE cart(
