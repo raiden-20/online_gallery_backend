@@ -6,7 +6,7 @@ import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.springframework.stereotype.Component;
-import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentials;
+import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentialsException;
 
 import java.util.UUID;
 
@@ -25,7 +25,7 @@ public class JWTParser {
 
             return UUID.fromString(jwtClaims.getStringClaimValue("sub"));
         } catch (InvalidJwtException | MalformedClaimException e) {
-            throw new BadCredentials();
+            throw new BadCredentialsException();
         }
     }
 }

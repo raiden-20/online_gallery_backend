@@ -6,9 +6,8 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.CustomerFullDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.CustomerRegistrationDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.CustomerShortDTO;
-import ru.vsu.cs.sheina.online_gallery_backend.dto.field.DeleteDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.CustomerEntity;
-import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentials;
+import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentialsException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserAlreadyExistsException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.CustomerRepository;
@@ -18,10 +17,8 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.UUID;
 
 @Service
@@ -62,7 +59,7 @@ public class CustomerService {
             Timestamp timeStampDate = new Timestamp(date.getTime());
             customerEntity.setBirthDate(timeStampDate);
         } catch (ParseException e) {
-            throw new BadCredentials();
+            throw new BadCredentialsException();
         }
 
         customerEntity.setGender(gender);
