@@ -41,9 +41,8 @@ public class PrivateSubscription {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createSubscription(@RequestBody PriceDTO priceDTO,
-                                                @RequestHeader("Authorization") String token) {
-        privateSubscriptionService.createSubscription(priceDTO, token);
+    public ResponseEntity<?> createSubscription(@RequestBody PriceDTO priceDTO) {
+        privateSubscriptionService.createSubscription(priceDTO);
         return ResponseEntity.ok("Private subscription created successfully");
     }
 
@@ -65,10 +64,15 @@ public class PrivateSubscription {
         return ResponseEntity.ok(customers);
     }
 
-    @GetMapping("/search/{role}/object={input}")
-    public ResponseEntity<?> searchByPublicSubscription(@PathVariable String role,
-                                                        @PathVariable String input,
+    @GetMapping("/search/customer/object={input}")
+    public ResponseEntity<?> searchCustomersByPublicSubscription(@PathVariable String input,
                                                         @RequestHeader("Authorization") String token) {
-        return ResponseEntity.ok(privateSubscriptionService.getUsers(role, input, token));
+        return ResponseEntity.ok(privateSubscriptionService.searchCustomerUsers(input, token));
+    }
+
+    @GetMapping("/search/artist/object={input}")
+    public ResponseEntity<?> searchArtistsByPublicSubscription(@PathVariable String input,
+                                                        @RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(privateSubscriptionService.searchArtistUsers(input, token));
     }
 }

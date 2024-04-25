@@ -36,10 +36,15 @@ public class PublicSubscription {
         return ResponseEntity.ok(customers);
     }
 
-    @GetMapping("/search/{role}/object={input}")
-    public ResponseEntity<?> searchByPublicSubscription(@PathVariable String role,
-                                                        @PathVariable String input,
-                                                        @RequestHeader("Authorization") String token) {
-        return ResponseEntity.ok(publicSubscriptionService.getUsers(role, input, token));
+    @GetMapping("/search/customer/object={input}")
+    public ResponseEntity<?> searchCustomersByPublicSubscription(@PathVariable String input,
+                                                                 @RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(publicSubscriptionService.searchCustomerUsers(input, token));
+    }
+
+    @GetMapping("/search/artist/object={input}")
+    public ResponseEntity<?> searchArtistsByPublicSubscription(@PathVariable String input,
+                                                               @RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(publicSubscriptionService.searchArtistUsers(input, token));
     }
 }
