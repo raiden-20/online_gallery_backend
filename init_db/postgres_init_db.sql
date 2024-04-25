@@ -60,7 +60,15 @@ CREATE TABLE public_subscription(
 CREATE TABLE private_subscription(
     id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
     artist_id UUID REFERENCES artist(id),
-    customer_id UUID REFERENCES customer(id)
+    price REAL,
+    create_date TIMESTAMP
+);
+
+CREATE TABLE customer_subscription(
+    id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
+    private_subscription_id INT REFERENCES private_subscription(id),
+    customer_id UUID REFERENCES customer(id),
+    create_date TIMESTAMP
 );
 
 CREATE TABLE product_subscription(
