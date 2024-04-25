@@ -27,7 +27,7 @@ CREATE TABLE customer(
     artist_id UUID REFERENCES artist(id)
 );
 
-CREATE TABLE product(
+CREATE TABLE art(
      id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
      name VARCHAR(200),
      type VARCHAR(15),
@@ -45,9 +45,9 @@ CREATE TABLE product(
      views INT
 );
 
-CREATE TABLE product_photo(
+CREATE TABLE art_photo(
     id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
-    product_id INT REFERENCES product(id),
+    art_id INT REFERENCES art(id),
     photo_url VARCHAR(500)
 );
 
@@ -64,16 +64,16 @@ CREATE TABLE private_subscription(
     create_date TIMESTAMP
 );
 
-CREATE TABLE customer_subscription(
+CREATE TABLE customer_private_subscription(
     id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
     private_subscription_id INT REFERENCES private_subscription(id),
     customer_id UUID REFERENCES customer(id),
     create_date TIMESTAMP
 );
 
-CREATE TABLE product_subscription(
+CREATE TABLE art_private_subscription(
     id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
-    product_id INT REFERENCES product(id),
+    art_id INT REFERENCES art(id),
     subscription_id INT REFERENCES private_subscription(id)
 );
 
@@ -93,7 +93,7 @@ CREATE TABLE post_photo(
 CREATE TABLE cart(
     id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
     customer_id UUID REFERENCES customer(id),
-    product_id INT REFERENCES product(id)
+    art_id INT REFERENCES art(id)
 );
 
 CREATE TABLE card(
@@ -121,7 +121,7 @@ CREATE TABLE order_(
     id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
     customer_id UUID REFERENCES customer(id),
     artist_id UUID REFERENCES artist(id),
-    product_id INT REFERENCES product(id),
+    art_id INT REFERENCES art(id),
     status VARCHAR(10),
     artist_comment VARCHAR(300),
     card_id INT REFERENCES card(id),
