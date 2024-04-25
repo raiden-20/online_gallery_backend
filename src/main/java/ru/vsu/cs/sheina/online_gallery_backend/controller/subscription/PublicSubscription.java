@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.ArtistShortDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.CustomerShortDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.UUIDRequestDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.service.PublicSubscriptionService;
 
 import java.util.List;
 
@@ -35,10 +36,15 @@ public class PublicSubscription {
         return ResponseEntity.ok(customers);
     }
 
-    @GetMapping("/search/{role}/object={input}")
-    public ResponseEntity<?> searchByPublicSubscription(@PathVariable String role,
-                                                        @PathVariable String input,
-                                                        @RequestHeader("Authorization") String token) {
-        return ResponseEntity.ok(publicSubscriptionService.getUsers(role, input, token));
+    @GetMapping("/search/customer/object={input}")
+    public ResponseEntity<?> searchCustomersByPublicSubscription(@PathVariable String input,
+                                                                 @RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(publicSubscriptionService.searchCustomerUsers(input, token));
+    }
+
+    @GetMapping("/search/artist/object={input}")
+    public ResponseEntity<?> searchArtistsByPublicSubscription(@PathVariable String input,
+                                                               @RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(publicSubscriptionService.searchArtistUsers(input, token));
     }
 }

@@ -63,7 +63,7 @@ public class ArtController {
 
     @DeleteMapping("/art")
     public ResponseEntity<?> deleteArt(@RequestBody IntIdRequestDTO intIdRequestDTO,
-                                    @RequestHeader("Authorization") String token) {
+                                       @RequestHeader("Authorization") String token) {
         artService.deleteArt(intIdRequestDTO, token);
         return ResponseEntity.ok("Art deleted successfully");
     }
