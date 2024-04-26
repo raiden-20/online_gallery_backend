@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.address.AddressDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.address.AddressNewDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.service.AddressService;
 
 import java.util.List;
 
