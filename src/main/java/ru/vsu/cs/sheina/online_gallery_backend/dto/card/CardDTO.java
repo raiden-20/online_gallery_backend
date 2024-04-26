@@ -13,6 +13,8 @@ public class CardDTO {
 
     Integer cardId;
 
+    String type;
+
     String number;
 
     Timestamp date;

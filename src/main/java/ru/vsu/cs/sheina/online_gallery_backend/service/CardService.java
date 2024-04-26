@@ -26,7 +26,7 @@ public class CardService {
     public List<CardDTO> getCards(String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
         return cardRepository.findAllByCustomerId(customerId).stream()
-                .map(ent -> new CardDTO(ent.getId(), ent.getNumber(), ent.getDate(), ent.getCvv(), ent.getIsDefault()))
+                .map(ent -> new CardDTO(ent.getId(), ent.getType(), ent.getNumber(), ent.getDate(), ent.getCvv(), ent.getIsDefault()))
                 .toList();
     }
 
@@ -52,6 +52,16 @@ public class CardService {
             cardEntity.setIsDefault(false);
         }
 
+        int first = cardNewDTO.getNumber().charAt(0);
+
+        switch (first) {
+            case 4 -> cardEntity.setType("Visa");
+            case 5 -> cardEntity.setType("MasterCard");
+            case 6 -> cardEntity.setType("UnionPay");
+            case 2 -> cardEntity.setType("Мир");
+            default -> cardEntity.setType("");
+        }
+
         cardRepository.save(cardEntity);
     }
 
@@ -67,6 +77,16 @@ public class CardService {
         cardEntity.setNumber(cardDTO.getNumber());
         cardEntity.setDate(cardDTO.getDate());
         cardEntity.setCvv(cardDTO.getCvv());
+
+        int first = cardDTO.getNumber().charAt(0);
+
+        switch (first) {
+            case 4 -> cardEntity.setType("Visa");
+            case 5 -> cardEntity.setType("MasterCard");
+            case 6 -> cardEntity.setType("UnionPay");
+            case 2 -> cardEntity.setType("Мир");
+            default -> cardEntity.setType("");
+        }
 
         if (cardDTO.getIsDefault()) {
             Optional<CardEntity> cardDefaultOpt = cardRepository.findByCustomerIdAndIsDefault(customerId, true);
