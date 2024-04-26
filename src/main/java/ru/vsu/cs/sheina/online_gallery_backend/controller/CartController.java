@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.art.ArtShortDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.order.PurchaseDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.service.CartService;
 
 import java.util.List;
 
@@ -37,9 +38,8 @@ public class CartController {
     }
 
     @PostMapping("/buy")
-    public ResponseEntity<?> buyArtsFromCart(@RequestBody PurchaseDTO purchaseDTO,
-                                             @RequestHeader("Authorization") String token) {
-        Integer orderId = cartService.buy(purchaseDTO, token);
-        return ResponseEntity.ok(orderId);
+    public ResponseEntity<?> buyArtsFromCart(@RequestBody PurchaseDTO purchaseDTO) {
+        List<Integer> orderIds = cartService.buy(purchaseDTO);
+        return ResponseEntity.ok(orderIds);
     }
 }
