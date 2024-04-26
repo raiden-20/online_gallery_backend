@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.card.CardDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.card.CardNewDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.entity.AddressEntity;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.CardEntity;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentialsException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.ForbiddenActionException;
@@ -37,7 +38,19 @@ public class CardService {
         cardEntity.setCvv(cardEntity.getCvv());
         cardEntity.setCustomerId(customerId);
 
-        cardEntity.setIsDefault(!cardRepository.existsByCustomerIdAndIsDefault(customerId, true));
+        cardEntity.setIsDefault(cardRepository.existsByCustomerIdAndIsDefault(customerId, true));
+
+        if (cardNewDTO.getIsDefault()) {
+            Optional<CardEntity> defaultCardOpt = cardRepository.findByCustomerIdAndIsDefault(customerId, true);
+            if (defaultCardOpt.isPresent()) {
+                CardEntity defaultCard = defaultCardOpt.get();
+                defaultCard.setIsDefault(false);
+                cardRepository.save(defaultCard);
+            }
+            cardEntity.setIsDefault(true);
+        } else {
+            cardEntity.setIsDefault(false);
+        }
 
         cardRepository.save(cardEntity);
     }
@@ -56,11 +69,11 @@ public class CardService {
         cardEntity.setCvv(cardDTO.getCvv());
 
         if (cardDTO.getIsDefault()) {
-            Optional<CardEntity> cardDefault = cardRepository.findByCustomerIdAndIsDefault(customerId, true);
-            if (cardDefault.isPresent()) {
-                CardEntity cardDefaultEntity = cardDefault.get();
-                cardDefaultEntity.setIsDefault(false);
-                cardRepository.save(cardDefaultEntity);
+            Optional<CardEntity> cardDefaultOpt = cardRepository.findByCustomerIdAndIsDefault(customerId, true);
+            if (cardDefaultOpt.isPresent()) {
+                CardEntity cardDefault = cardDefaultOpt.get();
+                cardDefault.setIsDefault(false);
+                cardRepository.save(cardDefault);
             }
             cardEntity.setIsDefault(true);
         } else {
@@ -72,6 +85,8 @@ public class CardService {
 
     public void deleteCard(IntIdRequestDTO intIdRequestDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        //TODO проверка для заказов
 
         CardEntity cardEntity = cardRepository.findById(intIdRequestDTO.getId()).orElseThrow(BadCredentialsException::new);
 
