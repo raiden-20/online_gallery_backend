@@ -48,7 +48,8 @@ CREATE TABLE art(
 CREATE TABLE art_photo(
     id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
     art_id INT REFERENCES art(id),
-    photo_url VARCHAR(500)
+    photo_url VARCHAR(500),
+    default_photo BOOLEAN
 );
 
 CREATE TABLE public_subscription(
