@@ -4,13 +4,11 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.UUID;
-
 @Entity
 @Getter
 @Setter
-@Table(name = "art_private_subscription")
-public class ArtPrivateSubscriptionEntity {
+@Table(name = "art_photo")
+public class ArtPhotoEntity {
 
     @Id
     @Column(name = "id")
@@ -20,6 +18,9 @@ public class ArtPrivateSubscriptionEntity {
     @Column(name = "art_id")
     Integer artId;
 
-    @Column(name = "subscription_id")
-    Integer subscriptionId;
+    @Column(name = "photo_url")
+    String photoUrl;
+
+    @Column(name = "default_photo")
+    Boolean defaultPhoto;
 }
