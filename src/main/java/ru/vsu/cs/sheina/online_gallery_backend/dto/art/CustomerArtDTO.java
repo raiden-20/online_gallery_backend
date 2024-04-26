@@ -17,11 +17,7 @@ public class CustomerArtDTO {
 
     String photoUrl;
 
-    UUID customerId;
-
-    String avatarUrl;
-
-    String customerName;
-
     Double price;
+
+    Boolean isPrivate;
 }
