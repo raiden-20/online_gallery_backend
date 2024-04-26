@@ -23,8 +23,6 @@ public class ArtFullDTO {
 
     String status;
 
-    Boolean available;
-
     UUID customerId;
 
     String customerName;

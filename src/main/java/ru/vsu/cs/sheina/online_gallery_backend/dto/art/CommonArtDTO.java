@@ -21,11 +21,9 @@ public class CommonArtDTO {
 
     String artistName;
 
-    String status;
+    String avatarUrl;
 
     UUID customerId;
-
-    String avatarUrl;
 
     String customerName;
 }

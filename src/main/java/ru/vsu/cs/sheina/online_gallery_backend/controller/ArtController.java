@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.ArtistShortDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.art.*;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.service.ArtService;
 
 import java.util.List;
 import java.util.UUID;
@@ -37,8 +38,9 @@ public class ArtController {
     }
 
     @GetMapping("/art/{artId}")
-    public ResponseEntity<?> getArt(@PathVariable UUID artId) {
-        ArtFullDTO artFullDTO = artService.getArt(artId);
+    public ResponseEntity<?> getArt(@PathVariable Integer artId,
+                                    @RequestHeader("Authorization") String token) {
+        ArtFullDTO artFullDTO = artService.getArt(artId, token);
         return ResponseEntity.ok(artFullDTO);
     }
 
@@ -46,8 +48,9 @@ public class ArtController {
     public ResponseEntity<?> changeArt(@RequestPart("artId") String artId,
                                        @RequestPart("name") String name,
                                        @RequestPart("type") String type,
-                                       @RequestPart(name = "photos", value = "files") List<MultipartFile> photos,
+                                       @RequestPart(name = "newPhotos", value = "files") List<MultipartFile> newPhotos,
                                        @RequestPart("deletePhotoUrls") List<String> deletePhotoUrls,
+                                       @RequestPart("changeMainPhoto") String changeMainPhoto,
                                        @RequestPart("isPrivate") String isPrivate,
                                        @RequestPart("price") String price,
                                        @RequestPart("description") String description,
@@ -56,7 +59,7 @@ public class ArtController {
                                        @RequestPart("tags") List<String> tags,
                                        @RequestPart("materials") List<String> materials,
                                        @RequestHeader("Authorization") String token) {
-        artService.changeArt(artId, name, type, photos, deletePhotoUrls, isPrivate, price,
+        artService.changeArt(artId, name, type, newPhotos, deletePhotoUrls, changeMainPhoto, isPrivate, price,
                 description, size, frame, tags, materials, token);
         return ResponseEntity.ok("Art created successfully");
     }
@@ -69,8 +72,9 @@ public class ArtController {
     }
 
     @GetMapping("/art/artist/{artistId}")
-    public ResponseEntity<?> getAllArtistArts(@PathVariable UUID artistId) {
-        List<ArtistArtDTO> arts = artService.getArtistArt(artistId);
+    public ResponseEntity<?> getAllArtistArts(@PathVariable UUID artistId,
+                                              @RequestHeader("Authorization") String token) {
+        List<ArtistArtDTO> arts = artService.getArtistArt(artistId, token);
         return ResponseEntity.ok(arts);
     }
 
