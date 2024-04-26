@@ -103,6 +103,7 @@ CREATE TABLE cart(
 CREATE TABLE card(
     id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
     customer_id UUID REFERENCES customer(id),
+    type VARCHAR(20),
     number VARCHAR(20),
     date TIMESTAMP,
     cvv INT,

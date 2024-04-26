@@ -21,6 +21,9 @@ public class CardEntity {
     @Column(name = "customer_id")
     UUID customerId;
 
+    @Column(name = "type")
+    String type;
+
     @Column(name = "number")
     String number;
 
