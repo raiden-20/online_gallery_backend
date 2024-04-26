@@ -29,6 +29,7 @@ public class PrivateSubscriptionService {
 
     private final PrivateSubscriptionRepository privateSubscriptionRepository;
     private final CardRepository cardRepository;
+    private final ArtService artService;
     private final CustomerPrivateSubscriptionRepository customerPrivateSubscriptionRepository;
     private final CustomerRepository customerRepository;
     private final ArtistRepository artistRepository;
@@ -152,15 +153,13 @@ public class PrivateSubscriptionService {
     }
 
     public void deleteSubscription(String token) {
-        //TODO перенести приватные товары в общий доступ
-        //artService.movePrivatePaintings(subscriptionId);
-
         UUID customerId = jwtParser.getIdFromAccessToken(token);
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         UUID artistId = customerEntity.getArtistId();
         PrivateSubscriptionEntity entity = privateSubscriptionRepository.findByArtistId(artistId).orElseThrow(BadCredentialsException::new);
 
         customerPrivateSubscriptionRepository.deleteAllByPrivateSubscriptionId(entity.getId());
+        artService.movePrivatePaintings(entity.getId());
         privateSubscriptionRepository.deleteById(entity.getId());
     }
 
