@@ -1,0 +1,89 @@
+package ru.vsu.cs.sheina.online_gallery_backend.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.card.CardDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.card.CardNewDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.entity.CardEntity;
+import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentialsException;
+import ru.vsu.cs.sheina.online_gallery_backend.exceptions.ForbiddenActionException;
+import ru.vsu.cs.sheina.online_gallery_backend.repository.CardRepository;
+import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class CardService {
+
+    private final JWTParser jwtParser;
+    private final CardRepository cardRepository;
+
+    public List<CardDTO> getCards(String token) {
+        UUID customerId = jwtParser.getIdFromAccessToken(token);
+        return cardRepository.findAllByCustomerId(customerId).stream()
+                .map(ent -> new CardDTO(ent.getId(), ent.getNumber(), ent.getDate(), ent.getCvv(), ent.getIsDefault()))
+                .toList();
+    }
+
+    public void addCard(CardNewDTO cardNewDTO, String token) {
+        UUID customerId = jwtParser.getIdFromAccessToken(token);
+        CardEntity cardEntity = new CardEntity();
+        cardEntity.setNumber(cardNewDTO.getNumber());
+        cardEntity.setDate(cardNewDTO.getDate());
+        cardEntity.setCvv(cardEntity.getCvv());
+        cardEntity.setCustomerId(customerId);
+
+        cardEntity.setIsDefault(!cardRepository.existsByCustomerIdAndIsDefault(customerId, true));
+
+        cardRepository.save(cardEntity);
+    }
+
+    public void changeCard(CardDTO cardDTO, String token) {
+        UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        CardEntity cardEntity = cardRepository.findById(cardDTO.getCardId()).orElseThrow(BadCredentialsException::new);
+
+        if (cardEntity.getCustomerId() != customerId) {
+            throw new ForbiddenActionException();
+        }
+
+        cardEntity.setNumber(cardDTO.getNumber());
+        cardEntity.setDate(cardDTO.getDate());
+        cardEntity.setCvv(cardDTO.getCvv());
+
+        if (cardDTO.getIsDefault()) {
+            Optional<CardEntity> cardDefault = cardRepository.findByCustomerIdAndIsDefault(customerId, true);
+            if (cardDefault.isPresent()) {
+                CardEntity cardDefaultEntity = cardDefault.get();
+                cardDefaultEntity.setIsDefault(false);
+                cardRepository.save(cardDefaultEntity);
+            }
+            cardEntity.setIsDefault(true);
+        } else {
+            cardEntity.setIsDefault(false);
+        }
+
+        cardRepository.save(cardEntity);
+    }
+
+    public void deleteCard(IntIdRequestDTO intIdRequestDTO, String token) {
+        UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        CardEntity cardEntity = cardRepository.findById(intIdRequestDTO.getId()).orElseThrow(BadCredentialsException::new);
+
+        if (cardEntity.getCustomerId() != customerId) {
+            throw new ForbiddenActionException();
+        }
+        cardRepository.deleteById(intIdRequestDTO.getId());
+
+        List<CardEntity> cards = cardRepository.findAllByCustomerId(customerId);
+        if (!cards.isEmpty()) {
+            cards.get(0).setIsDefault(true);
+            cardRepository.save(cards.get(0));
+        }
+    }
+}

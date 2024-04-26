@@ -9,8 +9,6 @@ import java.sql.Timestamp;
 @RequiredArgsConstructor
 public class CardNewDTO {
 
-    Integer cardId;
-
     String number;
 
     Timestamp date;
