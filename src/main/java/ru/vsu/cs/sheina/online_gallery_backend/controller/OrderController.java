@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.order.OrderDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.order.OrderShortDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.service.OrderService;
 
 import java.util.List;
 import java.util.UUID;

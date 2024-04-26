@@ -88,11 +88,13 @@ public class CartService {
         return dtos;
     }
 
-    public List<Integer> buy(PurchaseDTO purchaseDTO) {
+    public List<Integer> buy(PurchaseDTO purchaseDTO, String token) {
+        UUID customerId = jwtParser.getIdFromAccessToken(token);
+
         List<Integer> orderIds = new ArrayList<>();
 
         for (Integer artId: purchaseDTO.getArts().keySet()) {
-            orderIds.add(orderService.createOrder(artId, purchaseDTO.getCardId(), purchaseDTO.getAddressId(), purchaseDTO.getArts().get(artId)));
+            orderIds.add(orderService.createOrder(artId, customerId, purchaseDTO.getCardId(), purchaseDTO.getAddressId(), purchaseDTO.getArts().get(artId)));
             cartRepository.deleteAllByArtId(artId);
         }
 

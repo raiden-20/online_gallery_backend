@@ -38,8 +38,9 @@ public class CartController {
     }
 
     @PostMapping("/buy")
-    public ResponseEntity<?> buyArtsFromCart(@RequestBody PurchaseDTO purchaseDTO) {
-        List<Integer> orderIds = cartService.buy(purchaseDTO);
+    public ResponseEntity<?> buyArtsFromCart(@RequestBody PurchaseDTO purchaseDTO,
+                                             @RequestHeader("Authorization") String token) {
+        List<Integer> orderIds = cartService.buy(purchaseDTO, token);
         return ResponseEntity.ok(orderIds);
     }
 }
