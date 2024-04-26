@@ -6,6 +6,9 @@ import org.springframework.web.bind.annotation.*;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.card.CardDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.card.CardNewDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.service.CardService;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
