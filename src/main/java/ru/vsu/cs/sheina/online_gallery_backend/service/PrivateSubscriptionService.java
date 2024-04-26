@@ -11,10 +11,7 @@ import ru.vsu.cs.sheina.online_gallery_backend.entity.*;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadActionException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentialsException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
-import ru.vsu.cs.sheina.online_gallery_backend.repository.ArtistRepository;
-import ru.vsu.cs.sheina.online_gallery_backend.repository.CustomerPrivateSubscriptionRepository;
-import ru.vsu.cs.sheina.online_gallery_backend.repository.CustomerRepository;
-import ru.vsu.cs.sheina.online_gallery_backend.repository.PrivateSubscriptionRepository;
+import ru.vsu.cs.sheina.online_gallery_backend.repository.*;
 import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
 
 import java.sql.Timestamp;
