@@ -129,7 +129,7 @@ public class ArtService {
             artFullDTO.setStatus("AVAILABLE");
         } else if (!token.isEmpty() && artEntity.getOwnerId() == null) {
             UUID customerId = jwtParser.getIdFromAccessToken(token);
-            if (cartRepository.existByCustomerIdAndArtId(customerId, artId)) {
+            if (cartRepository.existsByCustomerIdAndArtId(customerId, artId)) {
                 artFullDTO.setStatus("CART");
             } else {
                 artFullDTO.setStatus("AVAILABLE");
