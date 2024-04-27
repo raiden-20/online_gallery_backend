@@ -82,7 +82,7 @@ CREATE TABLE art_private_subscription(
 CREATE TABLE post(
     id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
     artist_id UUID REFERENCES artist(id),
-    title VARCHAR(200)
+    title VARCHAR(200),
     body VARCHAR(500),
     created_at TIMESTAMP
 );
