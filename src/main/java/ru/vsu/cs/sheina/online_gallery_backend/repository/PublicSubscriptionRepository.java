@@ -16,4 +16,6 @@ public interface PublicSubscriptionRepository extends JpaRepository<PublicSubscr
     List<PublicSubscriptionEntity> findAllByArtistId(UUID artistId);
 
     void deleteById(Integer id);
+
+    Boolean existsByArtistIdAndCustomerId(UUID artistId, UUID customerId);
 }

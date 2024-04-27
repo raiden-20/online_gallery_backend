@@ -11,6 +11,8 @@ public interface CustomerPrivateSubscriptionRepository extends JpaRepository<Cus
 
     boolean existsByCustomerIdAndPrivateSubscriptionId(UUID customerId, Integer subscriptionId);
 
+    Integer countByPrivateSubscriptionId(Integer id);
+
     void deleteAllByCustomerIdAndPrivateSubscriptionId(UUID customerId, Integer subscriptionId);
 
     void deleteAllByPrivateSubscriptionId(Integer subscriptionId);

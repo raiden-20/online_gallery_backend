@@ -3,18 +3,18 @@ package ru.vsu.cs.sheina.online_gallery_backend.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import ru.vsu.cs.sheina.online_gallery_backend.controller.subscription.PublicSubscription;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.ArtistFullDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.ArtistRegistrationDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.ArtistShortDTO;
-import ru.vsu.cs.sheina.online_gallery_backend.entity.ArtistEntity;
-import ru.vsu.cs.sheina.online_gallery_backend.entity.CustomerEntity;
+import ru.vsu.cs.sheina.online_gallery_backend.entity.*;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserAlreadyExistsException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
-import ru.vsu.cs.sheina.online_gallery_backend.repository.ArtistRepository;
-import ru.vsu.cs.sheina.online_gallery_backend.repository.CustomerRepository;
+import ru.vsu.cs.sheina.online_gallery_backend.repository.*;
 import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -23,10 +23,14 @@ public class ArtistService {
 
     private final ArtistRepository artistRepository;
     private final CustomerRepository customerRepository;
+    private final ArtRepository artRepository;
+    private final PublicSubscriptionRepository publicSubscriptionRepository;
+    private final CustomerPrivateSubscriptionRepository customerPrivateSubscriptionRepository;
+    private final PrivateSubscriptionRepository privateSubscriptionRepository;
     private final FileService fileService;
     private final JWTParser jwtParser;
 
-    public ArtistFullDTO getArtistData(UUID id) {
+    public ArtistFullDTO getArtistData(UUID id, String token) {
         ArtistEntity artistEntity = artistRepository.findById(id).orElseThrow(UserNotFoundException::new);
         CustomerEntity customerEntity = customerRepository.findByArtistId(id).orElseThrow(UserNotFoundException::new);
 
@@ -41,6 +45,35 @@ public class ArtistService {
         dto.setAvatarUrl(artistEntity.getAvatarUrl());
         dto.setCoverUrl(artistEntity.getCoverUrl());
         dto.setCustomerId(customerEntity.getId());
+
+        Optional<PrivateSubscriptionEntity> privateSubscriptionOpt = privateSubscriptionRepository.findByArtistId(id);
+
+        if (!token.isEmpty()) {
+            UUID customerId = jwtParser.getIdFromAccessToken(token);
+            dto.setIsPublicSubscribe(publicSubscriptionRepository.existsByArtistIdAndCustomerId(id, customerId));
+            privateSubscriptionOpt.ifPresent(subscriptionEntity -> dto.setIsPrivateSubscribe(customerPrivateSubscriptionRepository.existsByCustomerIdAndPrivateSubscriptionId(customerId,
+                    subscriptionEntity.getId())));
+        } else {
+            dto.setIsPrivateSubscribe(false);
+            dto.setIsPublicSubscribe(false);
+        }
+
+        List<ArtEntity> arts = artRepository.findAllByArtistId(id);
+
+        int countSoldArts = 0;
+        Double salesAmount = 0.0;
+
+        for (ArtEntity art: arts) {
+            if (art.getSold()) {
+                countSoldArts++;
+                salesAmount += art.getPrice();
+            }
+        }
+
+        dto.setCountSoldArts(countSoldArts);
+        dto.setSalesAmount(salesAmount);
+
+        privateSubscriptionOpt.ifPresent(privateSubscriptionEntity -> dto.setCountSubscribers(customerPrivateSubscriptionRepository.countByPrivateSubscriptionId(privateSubscriptionEntity.getId())));
 
         return dto;
     }
