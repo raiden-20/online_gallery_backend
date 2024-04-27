@@ -93,8 +93,6 @@ public class AddressService {
     public void deleteAddress(IntIdRequestDTO intIdRequestDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
 
-        //TODO проверка для заказов
-
         AddressEntity addressEntity = addressRepository.findById(intIdRequestDTO.getId()).orElseThrow(BadCredentialsException::new);
 
         if (addressEntity.getCustomerId() != customerId) {
