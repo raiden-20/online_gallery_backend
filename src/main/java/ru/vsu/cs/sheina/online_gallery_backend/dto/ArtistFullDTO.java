@@ -18,4 +18,14 @@ public class ArtistFullDTO {
     UUID customerId;
 
     String description;
+
+    Integer countSoldArts;
+
+    Double salesAmount;
+
+    Integer countSubscribers;
+
+    Boolean isPublicSubscribe;
+
+    Boolean isPrivateSubscribe;
 }

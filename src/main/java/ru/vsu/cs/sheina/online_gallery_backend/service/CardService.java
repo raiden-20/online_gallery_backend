@@ -106,8 +106,6 @@ public class CardService {
     public void deleteCard(IntIdRequestDTO intIdRequestDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
 
-        //TODO проверка для заказов
-
         CardEntity cardEntity = cardRepository.findById(intIdRequestDTO.getId()).orElseThrow(BadCredentialsException::new);
 
         if (cardEntity.getCustomerId() != customerId) {
