@@ -18,15 +18,15 @@ public class CustomerController {
 
     private final CustomerService customerService;
 
-    @GetMapping("/customer/{id}")
-    public ResponseEntity<?> getCustomerData(@PathVariable UUID id) {
-        CustomerFullDTO customerFullDTO = customerService.getCustomerData(id);
+    @GetMapping("/customer/{customerId}")
+    public ResponseEntity<?> getCustomerData(@PathVariable UUID customerId) {
+        CustomerFullDTO customerFullDTO = customerService.getCustomerData(customerId);
         return ResponseEntity.ok(customerFullDTO);
     }
 
-    @GetMapping("/customer/{id}/first-entry")
-    public ResponseEntity<?> isFirstEntry(@PathVariable UUID id) {
-        return ResponseEntity.ok(customerService.isFirstEntry(id));
+    @GetMapping("/customer/first-entry")
+    public ResponseEntity<?> isFirstEntry(@RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(customerService.isFirstEntry(token));
     }
 
     @PutMapping(value = "/customer/data", consumes = "multipart/form-data")

@@ -29,9 +29,9 @@ public class ArtistService {
     private final FileService fileService;
     private final JWTParser jwtParser;
 
-    public ArtistFullDTO getArtistData(UUID id, String token) {
-        ArtistEntity artistEntity = artistRepository.findById(id).orElseThrow(UserNotFoundException::new);
-        CustomerEntity customerEntity = customerRepository.findByArtistId(id).orElseThrow(UserNotFoundException::new);
+    public ArtistFullDTO getArtistData(UUID artistId, String currentId) {
+        ArtistEntity artistEntity = artistRepository.findById(artistId).orElseThrow(UserNotFoundException::new);
+        CustomerEntity customerEntity = customerRepository.findByArtistId(artistId).orElseThrow(UserNotFoundException::new);
 
         int views = artistEntity.getViews();
         artistEntity.setViews(++views);
@@ -45,11 +45,11 @@ public class ArtistService {
         dto.setCoverUrl(artistEntity.getCoverUrl());
         dto.setCustomerId(customerEntity.getId());
 
-        Optional<PrivateSubscriptionEntity> privateSubscriptionOpt = privateSubscriptionRepository.findByArtistId(id);
+        Optional<PrivateSubscriptionEntity> privateSubscriptionOpt = privateSubscriptionRepository.findByArtistId(artistId);
 
-        if (!token.isEmpty()) {
-            UUID customerId = jwtParser.getIdFromAccessToken(token);
-            dto.setIsPublicSubscribe(publicSubscriptionRepository.existsByArtistIdAndCustomerId(id, customerId));
+        if (!currentId.equals("null")) {
+            UUID customerId = UUID.fromString(currentId);
+            dto.setIsPublicSubscribe(publicSubscriptionRepository.existsByArtistIdAndCustomerId(artistId, customerId));
             privateSubscriptionOpt.ifPresent(subscriptionEntity -> dto.setIsPrivateSubscribe(customerPrivateSubscriptionRepository.existsByCustomerIdAndPrivateSubscriptionId(customerId,
                     subscriptionEntity.getId())));
         } else {
@@ -57,7 +57,7 @@ public class ArtistService {
             dto.setIsPublicSubscribe(false);
         }
 
-        List<ArtEntity> arts = artRepository.findAllByArtistId(id);
+        List<ArtEntity> arts = artRepository.findAllByArtistId(artistId);
 
         int countSoldArts = 0;
         Double salesAmount = 0.0;

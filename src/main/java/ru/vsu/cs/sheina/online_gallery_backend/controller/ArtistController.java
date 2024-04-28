@@ -18,10 +18,10 @@ public class ArtistController {
 
     private final ArtistService artistService;
 
-    @GetMapping("/artist/{id}")
-    public ResponseEntity<?> getArtistData(@PathVariable UUID id,
-                                           @RequestHeader("Authorization") String token) {
-        ArtistFullDTO artistFullDTO = artistService.getArtistData(id, token);
+    @GetMapping("/artist/artistId={artistId}&currentId={currentId}")
+    public ResponseEntity<?> getArtistData(@PathVariable UUID artistId,
+                                           @PathVariable String currentId) {
+        ArtistFullDTO artistFullDTO = artistService.getArtistData(artistId, currentId);
         return ResponseEntity.ok(artistFullDTO);
     }
 

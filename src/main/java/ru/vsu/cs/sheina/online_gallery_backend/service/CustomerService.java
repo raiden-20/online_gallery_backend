@@ -45,7 +45,8 @@ public class CustomerService {
         return dto;
     }
 
-    public Boolean isFirstEntry(UUID id) {
+    public Boolean isFirstEntry(String token) {
+        UUID id = jwtParser.getIdFromAccessToken(token);
         return !customerRepository.existsById(id);
     }
 
