@@ -1,6 +1,7 @@
 package ru.vsu.cs.sheina.online_gallery_backend.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.CartEntity;
 
 import java.util.List;
@@ -13,6 +14,7 @@ public interface CartRepository extends JpaRepository<CartEntity, Integer> {
 
     Optional<CartEntity> findByCustomerIdAndArtId(UUID customerId, Integer artId);
 
+    @Transactional
     void deleteAllByArtId(Integer artId);
     List<CartEntity> findAllByCustomerId(UUID customerId);
 }

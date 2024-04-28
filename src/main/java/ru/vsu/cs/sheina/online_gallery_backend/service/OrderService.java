@@ -31,7 +31,7 @@ public class OrderService {
     private final CardRepository cardRepository;
     private final AddressRepository addressRepository;
     
-    public Integer createOrder(Integer artId, UUID customerId, Integer cardId, Integer addressId, Boolean anonim) {
+    public Integer createOrder(Integer artId, UUID customerId, Integer cardId, Integer addressId, Boolean anonymous) {
         ArtEntity artEntity = artRepository.findById(artId).orElseThrow(BadCredentialsException::new);
 
         OrderEntity orderEntity = new OrderEntity();
@@ -46,8 +46,12 @@ public class OrderService {
 
         orderRepository.save(orderEntity);
 
-        artEntity.setOwnerId(customerId);
         artEntity.setSold(true);
+        if (anonymous) {
+            artEntity.setOwnerId(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+        } else {
+            artEntity.setOwnerId(customerId);
+        }
         artRepository.save(artEntity);
 
         return orderEntity.getId();
@@ -100,6 +104,10 @@ public class OrderService {
             throw new ForbiddenActionException();
         }
 
+        if (!orderEntity.getStatus().equals("PROGRESS")){
+            throw new BadActionException("Bad action");
+        }
+
         orderEntity.setStatus("FINISHED");
         orderRepository.save(orderEntity);
     }
@@ -143,15 +151,13 @@ public class OrderService {
         CustomerEntity customerEntity = customerRepository.findById(orderEntity.getCustomerId()).orElseThrow(UserNotFoundException::new);
         ArtistEntity artistEntity = artistRepository.findById(orderEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
         ArtEntity artEntity = artRepository.findById(orderEntity.getArtId()).orElseThrow(BadCredentialsException::new);
-        Optional<CardEntity> cardOpt = cardRepository.findById(orderEntity.getCardId());
-        Optional<AddressEntity> addressOpt = addressRepository.findById(orderEntity.getAddressId());
         Optional<ArtPhotoEntity> artPhotoOpt = artPhotoRepository.findByArtIdAndAndDefaultPhoto(artEntity.getId(), true);
 
         OrderDTO orderDTO = new OrderDTO();
         orderDTO.setOrderId(orderId);
 
-        if (addressOpt.isPresent()) {
-            AddressEntity addressEntity = addressOpt.get();
+        if (orderEntity.getAddressId() != null) {
+            AddressEntity addressEntity = addressRepository.findById(orderEntity.getAddressId()).orElseThrow(BadCredentialsException::new);
             orderDTO.setName(addressEntity.getName());
             orderDTO.setCountry(addressEntity.getCountry());
             orderDTO.setRegion(addressEntity.getRegion());
@@ -160,8 +166,8 @@ public class OrderService {
             orderDTO.setLocation(addressEntity.getLocation());
         }
 
-        if (cardOpt.isPresent()) {
-            CardEntity cardEntity = cardOpt.get();
+        if (orderEntity.getCardId() != null) {
+            CardEntity cardEntity = cardRepository.findById(orderEntity.getCardId()).orElseThrow(BadCredentialsException::new);
             orderDTO.setCardType(cardEntity.getType());
             orderDTO.setNumber(cardEntity.getNumber());
         }
