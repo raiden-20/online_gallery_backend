@@ -28,8 +28,8 @@ public class SecurityConfig {
                 .and()
                 .authorizeHttpRequests()
 //                    .requestMatchers("/change/**").hasRole(Role.USER.name())
-                    .requestMatchers("/customers", "/artists", "search/**", "/artist/{id}", "/customer/{id}",
-                            "/art/{artId}", "/art/artist/{artistId}", "/art/customer/{customerId}", "/art/{type}").permitAll()
+                    .requestMatchers("/customers", "/artists", "/search/**", "/artist/{id}", "/customer/{id}",
+                            "/art/{artId}", "/art/artist/{artistId}", "/art/customer/{customerId}", "/{type}").permitAll()
                     .anyRequest().authenticated();
 
         http
