@@ -5,41 +5,28 @@ import lombok.RequiredArgsConstructor;
 
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.UUID;
 
 @Data
 @RequiredArgsConstructor
-public class ArtFullDTO {
+public class ArtCreateDTO {
 
     String name;
 
     String type;
 
-    List<String> photoUrls;
-
-    Double price;
-
     Boolean isPrivate;
 
-    UUID artistId;
-
-    String status;
-
-    UUID customerId;
-
-    String customerName;
+    Double price;
 
     String description;
 
     String size;
+
+    Boolean frame;
 
     Timestamp createDate;
 
     List<String> tags;
 
     List<String> materials;
-
-    Boolean frame;
-
-    Timestamp publishDate;
 }

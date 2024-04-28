@@ -3,9 +3,9 @@ package ru.vsu.cs.sheina.online_gallery_backend.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import ru.vsu.cs.sheina.online_gallery_backend.dto.CustomerFullDTO;
-import ru.vsu.cs.sheina.online_gallery_backend.dto.CustomerRegistrationDTO;
-import ru.vsu.cs.sheina.online_gallery_backend.dto.CustomerShortDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.customer.CustomerFullDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.customer.CustomerRegistrationDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.customer.CustomerShortDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.CustomerEntity;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentialsException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserAlreadyExistsException;
@@ -45,7 +45,8 @@ public class CustomerService {
         return dto;
     }
 
-    public Boolean isFirstEntry(UUID id) {
+    public Boolean isFirstEntry(String token) {
+        UUID id = jwtParser.getIdFromAccessToken(token);
         return !customerRepository.existsById(id);
     }
 

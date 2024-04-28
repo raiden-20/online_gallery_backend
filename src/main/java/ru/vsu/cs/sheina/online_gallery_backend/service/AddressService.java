@@ -7,9 +7,12 @@ import ru.vsu.cs.sheina.online_gallery_backend.dto.address.AddressNewDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.AddressEntity;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.CardEntity;
+import ru.vsu.cs.sheina.online_gallery_backend.entity.OrderEntity;
+import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadActionException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentialsException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.ForbiddenActionException;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.AddressRepository;
+import ru.vsu.cs.sheina.online_gallery_backend.repository.OrderRepository;
 import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
 
 import java.util.List;
@@ -21,6 +24,7 @@ import java.util.UUID;
 public class AddressService {
 
     private final AddressRepository addressRepository;
+    private final OrderRepository orderRepository;
     private final JWTParser jwtParser;
 
     public List<AddressDTO> getAddresses(String token) {
@@ -42,8 +46,6 @@ public class AddressService {
         addressEntity.setLocation(addressNewDTO.getLocation());
         addressEntity.setIndex(addressNewDTO.getIndex());
 
-        addressEntity.setIsDefault(addressRepository.existsByCustomerIdAndIsDefault(customerId, true));
-
         if (addressNewDTO.getIsDefault()) {
             Optional<AddressEntity> defaultAddressOpt = addressRepository.findByCustomerIdAndIsDefault(customerId, true);
             if (defaultAddressOpt.isPresent()) {
@@ -53,7 +55,7 @@ public class AddressService {
             }
             addressEntity.setIsDefault(true);
         } else {
-            addressEntity.setIsDefault(false);
+            addressEntity.setIsDefault(!addressRepository.existsByCustomerIdAndIsDefault(customerId, true));
         }
 
         addressRepository.save(addressEntity);
@@ -64,7 +66,7 @@ public class AddressService {
 
         AddressEntity addressEntity = addressRepository.findById(addressDTO.getAddressId()).orElseThrow(BadCredentialsException::new);
 
-        if (addressEntity.getCustomerId() != customerId) {
+        if (!addressEntity.getCustomerId().equals(customerId)) {
             throw new ForbiddenActionException();
         }
 
@@ -95,8 +97,15 @@ public class AddressService {
 
         AddressEntity addressEntity = addressRepository.findById(intIdRequestDTO.getId()).orElseThrow(BadCredentialsException::new);
 
-        if (addressEntity.getCustomerId() != customerId) {
+        if (!addressEntity.getCustomerId().equals(customerId)) {
             throw new ForbiddenActionException();
+        }
+        for(OrderEntity order: orderRepository.findAllByCardId(addressEntity.getId())) {
+            if (!order.getStatus().equals("FINISHED")){
+                throw new BadActionException("Address is used in active orders");
+            }
+            order.setAddressId(null);
+            orderRepository.save(order);
         }
         addressRepository.deleteById(intIdRequestDTO.getId());
 

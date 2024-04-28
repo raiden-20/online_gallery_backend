@@ -10,5 +10,7 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Integer> {
 
     List<OrderEntity> findAllByCustomerId(UUID customerId);
 
+    List<OrderEntity> findAllByCardId(Integer cardId);
+
     List<OrderEntity> findAllByArtistId(UUID artistId);
 }

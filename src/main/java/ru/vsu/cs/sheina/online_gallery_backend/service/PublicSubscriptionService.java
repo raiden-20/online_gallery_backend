@@ -2,8 +2,8 @@ package ru.vsu.cs.sheina.online_gallery_backend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.vsu.cs.sheina.online_gallery_backend.dto.ArtistShortDTO;
-import ru.vsu.cs.sheina.online_gallery_backend.dto.CustomerShortDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.artist.ArtistShortDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.customer.CustomerShortDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.UUIDRequestDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.CustomerEntity;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.PublicSubscriptionEntity;
@@ -74,7 +74,7 @@ public class PublicSubscriptionService {
 
         UUID artistId = customerEntity.getArtistId();
 
-        if (!artistRepository.existsById(artistId)) {
+        if (artistId == null) {
             throw new UserNotFoundException();
         }
 
@@ -92,7 +92,7 @@ public class PublicSubscriptionService {
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         UUID artistId = customerEntity.getArtistId();
 
-        if (!artistRepository.existsById(artistId)) {
+        if (artistId == null) {
             throw new UserNotFoundException();
         }
 

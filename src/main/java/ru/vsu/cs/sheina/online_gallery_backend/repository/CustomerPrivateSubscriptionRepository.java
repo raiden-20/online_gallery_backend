@@ -1,6 +1,7 @@
 package ru.vsu.cs.sheina.online_gallery_backend.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.CustomerPrivateSubscriptionEntity;
 
 import java.util.Optional;
@@ -13,7 +14,11 @@ public interface CustomerPrivateSubscriptionRepository extends JpaRepository<Cus
 
     Integer countByPrivateSubscriptionId(Integer id);
 
-    void deleteAllByCustomerIdAndPrivateSubscriptionId(UUID customerId, Integer subscriptionId);
+    @Transactional
+    void deleteAllByCardId(Integer cardId);
+
+    @Transactional
+    void deleteByCustomerIdAndPrivateSubscriptionId(UUID customerId, Integer subscriptionId);
 
     void deleteAllByPrivateSubscriptionId(Integer subscriptionId);
 

@@ -2,8 +2,8 @@ package ru.vsu.cs.sheina.online_gallery_backend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.vsu.cs.sheina.online_gallery_backend.dto.CustomerShortDTO;
-import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.customer.CustomerShortDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.field.UUIDRequestDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.subscription.PriceDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.subscription.PrivateSubscriptionDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.subscription.SubscribeDTO;
@@ -15,10 +15,7 @@ import ru.vsu.cs.sheina.online_gallery_backend.repository.*;
 import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -55,31 +52,33 @@ public class PrivateSubscriptionService {
         CustomerPrivateSubscriptionEntity cusPrivSubEntity = new CustomerPrivateSubscriptionEntity();
         cusPrivSubEntity.setPrivateSubscriptionId(subscription.getId());
         cusPrivSubEntity.setCustomerId(customerId);
+        cusPrivSubEntity.setCardId(subscribeDTO.getCardId());
         cusPrivSubEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
 
-        Timestamp paymentDate = new Timestamp(cusPrivSubEntity.getCreateDate().getTime() + DAYS_BETWEEN_PAYMENT * 24 * 60 * 60 * 1000);
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(cusPrivSubEntity.getCreateDate());
+        cal.add(Calendar.DAY_OF_WEEK, DAYS_BETWEEN_PAYMENT);
 
-        cusPrivSubEntity.setPaymentDate(paymentDate);
+        cusPrivSubEntity.setPaymentDate(new Timestamp(cal.getTime().getTime()));
 
         customerPrivateSubscriptionRepository.save(cusPrivSubEntity);
     }
 
-    public void unsubscribe(IntIdRequestDTO intIdRequestDTO, String token) {
+    public void unsubscribe(UUIDRequestDTO uuidRequestDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+        UUID artistId = uuidRequestDTO.getId();
 
         if (!customerRepository.existsById(customerId)) {
             throw new UserNotFoundException();
         }
 
-        if (!privateSubscriptionRepository.existsById(intIdRequestDTO.getId())) {
-            throw new BadCredentialsException();
-        }
+        PrivateSubscriptionEntity privateSubscriptionEntity = privateSubscriptionRepository.findByArtistId(artistId).orElseThrow(BadCredentialsException::new);
 
-        if (!customerPrivateSubscriptionRepository.existsByCustomerIdAndPrivateSubscriptionId(customerId, intIdRequestDTO.getId())) {
+        if (!customerPrivateSubscriptionRepository.existsByCustomerIdAndPrivateSubscriptionId(customerId, privateSubscriptionEntity.getId())) {
             throw new BadActionException("You don't have a subscription");
         }
 
-        customerPrivateSubscriptionRepository.deleteAllByCustomerIdAndPrivateSubscriptionId(customerId, intIdRequestDTO.getId());
+        customerPrivateSubscriptionRepository.deleteByCustomerIdAndPrivateSubscriptionId(customerId, privateSubscriptionEntity.getId());
     }
 
     public List<PrivateSubscriptionDTO> getSubscriptions(String token) {
@@ -97,7 +96,8 @@ public class PrivateSubscriptionService {
             ArtistEntity artistEntity = artistRepository.findById(privateSubscriptionEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
 
             if (entity.getPaymentDate().before(new Timestamp(System.currentTimeMillis()))) {
-                changePaymentDate(entity);
+                entity.setPaymentDate(changePaymentDate(entity));
+                customerPrivateSubscriptionRepository.save(entity);
             }
 
             PrivateSubscriptionDTO dto = new PrivateSubscriptionDTO();
@@ -206,12 +206,17 @@ public class PrivateSubscriptionService {
         return dtos;
     }
 
-    private void changePaymentDate(CustomerPrivateSubscriptionEntity entity) {
+    private Timestamp changePaymentDate(CustomerPrivateSubscriptionEntity entity) {
         Timestamp currentDate = new Timestamp(System.currentTimeMillis());
         Timestamp paymentDate = entity.getPaymentDate();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(entity.getCreateDate());
 
         while (currentDate.after(paymentDate)) {
-            paymentDate = new Timestamp(paymentDate.getTime() + DAYS_BETWEEN_PAYMENT * 24 * 60 * 60 * 1000);
+            cal.add(Calendar.DAY_OF_WEEK, DAYS_BETWEEN_PAYMENT);
+            paymentDate = new Timestamp(cal.getTime().getTime());
         }
+
+        return paymentDate;
     }
 }

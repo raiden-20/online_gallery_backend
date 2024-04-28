@@ -65,13 +65,6 @@ CREATE TABLE private_subscription(
     create_date TIMESTAMP
 );
 
-CREATE TABLE customer_private_subscription(
-    id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
-    private_subscription_id INT REFERENCES private_subscription(id),
-    customer_id UUID REFERENCES customer(id),
-    payment_date TIMESTAMP,
-    create_date TIMESTAMP
-);
 
 CREATE TABLE art_private_subscription(
     id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
@@ -110,6 +103,15 @@ CREATE TABLE card(
     is_default BOOLEAN
 );
 
+CREATE TABLE customer_private_subscription(
+    id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
+    private_subscription_id INT REFERENCES private_subscription(id),
+    customer_id UUID REFERENCES customer(id),
+    card_id INT REFERENCES card(id),
+    payment_date TIMESTAMP,
+    create_date TIMESTAMP
+);
+
 CREATE TABLE address(
     id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
     customer_id UUID REFERENCES customer(id),
@@ -131,6 +133,11 @@ CREATE TABLE order_(
     artist_comment VARCHAR(300),
     card_id INT REFERENCES card(id),
     address_id INT REFERENCES address(id)
+);
+
+INSERT INTO customer (id, customer_name, gender, birth_date, avatar_url, description)
+VALUES (
+    '00000000-0000-0000-0000-000000000000', 'anonymous', 'MAN', '2024-04-28', ' ', 'anonymous'
 );
 
 CREATE USER keycloak_pg_user_secret WITH PASSWORD 'keycloak_pg_pass_secret';

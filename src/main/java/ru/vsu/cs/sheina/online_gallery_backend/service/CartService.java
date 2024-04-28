@@ -39,6 +39,10 @@ public class CartService {
             throw new BadCredentialsException();
         }
 
+        if (cartRepository.existsByCustomerIdAndArtId(customerId, intIdRequestDTO.getId())) {
+            throw new BadActionException("Art has already been added to the cart");
+        }
+
         CartEntity cartEntity = new CartEntity();
         cartEntity.setCustomerId(customerId);
         cartEntity.setArtId(intIdRequestDTO.getId());

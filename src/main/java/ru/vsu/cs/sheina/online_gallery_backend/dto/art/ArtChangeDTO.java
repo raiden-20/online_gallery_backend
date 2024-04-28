@@ -3,43 +3,33 @@ package ru.vsu.cs.sheina.online_gallery_backend.dto.art;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
-import java.sql.Timestamp;
 import java.util.List;
-import java.util.UUID;
 
 @Data
 @RequiredArgsConstructor
-public class ArtFullDTO {
+public class ArtChangeDTO {
+
+    Integer artId;
 
     String name;
 
     String type;
 
-    List<String> photoUrls;
+    List<String> deletePhotoUrls;
 
-    Double price;
+    Boolean changeMainPhoto;
 
     Boolean isPrivate;
 
-    UUID artistId;
-
-    String status;
-
-    UUID customerId;
-
-    String customerName;
+    Double price;
 
     String description;
 
     String size;
 
-    Timestamp createDate;
+    Boolean frame;
 
     List<String> tags;
 
     List<String> materials;
-
-    Boolean frame;
-
-    Timestamp publishDate;
 }
