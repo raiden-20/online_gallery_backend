@@ -3,8 +3,8 @@ package ru.vsu.cs.sheina.online_gallery_backend.controller.subscription;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.vsu.cs.sheina.online_gallery_backend.dto.CustomerShortDTO;
-import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.customer.CustomerShortDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.field.UUIDRequestDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.subscription.PriceDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.subscription.SubscribeDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.subscription.PrivateSubscriptionDTO;
@@ -22,15 +22,15 @@ public class PrivateSubscription {
 
     @PostMapping("/subscribe")
     public ResponseEntity<?> subscribe(@RequestBody SubscribeDTO subscribeDTO,
-                                             @RequestHeader("Authorization") String token) {
+                                       @RequestHeader("Authorization") String token) {
         privateSubscriptionService.subscribe(subscribeDTO, token);
         return ResponseEntity.ok("You subscribed successfully");
     }
 
     @DeleteMapping("/unsubscribe")
-    public ResponseEntity<?> unsubscribe(@RequestBody IntIdRequestDTO intIdRequestDTO,
-                                             @RequestHeader("Authorization") String token) {
-        privateSubscriptionService.unsubscribe(intIdRequestDTO, token);
+    public ResponseEntity<?> unsubscribe(@RequestBody UUIDRequestDTO uuidRequestDTO,
+                                         @RequestHeader("Authorization") String token) {
+        privateSubscriptionService.unsubscribe(uuidRequestDTO, token);
         return ResponseEntity.ok("You unsubscribed successfully");
     }
 
