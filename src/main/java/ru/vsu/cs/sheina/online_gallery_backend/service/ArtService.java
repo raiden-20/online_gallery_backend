@@ -354,68 +354,85 @@ public class ArtService {
         List<CommonArtDTO> dtos = new ArrayList<>();
 
         for (ArtEntity entity: entities) {
-            CommonArtDTO dto = new CommonArtDTO();
-            dto.setArtId(entity.getId());
-            dto.setName(entity.getName());
-            dto.setPrice(entity.getPrice());
-
-            ArtistEntity artistEntity = artistRepository.findById(entity.getArtistId()).get();
-
-            dto.setArtistId(artistEntity.getId());
-            dto.setArtistName(artistEntity.getArtistName());
-
-            if (entity.getOwnerId() == null) {
-                dto.setCustomerId(null);
-                dto.setCustomerName(null);
-                dto.setAvatarUrl(null);
-            } else {
-                CustomerEntity customerEntity = customerRepository.findById(entity.getOwnerId()).get();
-                dto.setCustomerId(customerEntity.getId());
-                dto.setCustomerName(customerEntity.getCustomerName());
-                dto.setAvatarUrl(customerEntity.getAvatarUrl());
-            }
-
-            Optional<ArtPhotoEntity> artPhotoEntity = artPhotoRepository.findByArtIdAndAndDefaultPhoto(entity.getId(), true);
-            if (artPhotoEntity.isPresent()) {
-                dto.setPhotoUrl(artPhotoEntity.get().getPhotoUrl());
-            } else {
-                dto.setPhotoUrl("");
-            }
-
-            dtos.add(dto);
+            dtos.add(commonArtDTOByEntity(entity));
         }
 
         return dtos;
     }
 
-    public List<ArtShortDTO> searchArt(String input) {
+    public List<CommonArtDTO> searchPaintings(String input) {
         List<ArtEntity> artEntities = artRepository.findAll().stream()
                 .filter(art -> !artPrivateSubscriptionRepository.existsByArtId(art.getId()))
+                .filter(art -> art.getType().equals("PAINTING"))
                 .filter(art -> art.getName().toUpperCase().contains(input.toUpperCase()))
                 .toList();
 
-        List<ArtShortDTO> dtos = new ArrayList<>();
+        List<CommonArtDTO> dtos = new ArrayList<>();
 
         for (ArtEntity art: artEntities) {
-            ArtShortDTO dto = new ArtShortDTO();
-            dto.setArtId(art.getId());
-            dto.setName(art.getName());
-            dto.setPrice(art.getPrice());
-            dto.setArtistId(art.getArtistId());
+            dtos.add(commonArtDTOByEntity(art));
+        }
+        return dtos;
+    }
 
-            Optional<ArtPhotoEntity> artPhotoEntity = artPhotoRepository.findByArtIdAndAndDefaultPhoto(art.getId(), true);
-            if (artPhotoEntity.isPresent()) {
-                dto.setPhotoUrl(artPhotoEntity.get().getPhotoUrl());
-            } else {
-                dto.setPhotoUrl("");
-            }
+    public List<CommonArtDTO> searchPhotos(String input) {
+        List<ArtEntity> artEntities = artRepository.findAll().stream()
+                .filter(art -> !artPrivateSubscriptionRepository.existsByArtId(art.getId()))
+                .filter(art -> art.getType().equals("PHOTO"))
+                .filter(art -> art.getName().toUpperCase().contains(input.toUpperCase()))
+                .toList();
 
-            ArtistEntity artistEntity = artistRepository.findById(art.getArtistId()).orElseThrow(UserNotFoundException::new);
-            dto.setArtistName(artistEntity.getArtistName());
+        List<CommonArtDTO> dtos = new ArrayList<>();
 
-            dtos.add(dto);
+        for (ArtEntity art: artEntities) {
+            dtos.add(commonArtDTOByEntity(art));
+        }
+        return dtos;
+    }
+
+    public List<CommonArtDTO> searchSculptures(String input) {
+        List<ArtEntity> artEntities = artRepository.findAll().stream()
+                .filter(art -> !artPrivateSubscriptionRepository.existsByArtId(art.getId()))
+                .filter(art -> art.getType().equals("SCULPTURE"))
+                .filter(art -> art.getName().toUpperCase().contains(input.toUpperCase()))
+                .toList();
+
+        List<CommonArtDTO> dtos = new ArrayList<>();
+
+        for (ArtEntity art: artEntities) {
+            dtos.add(commonArtDTOByEntity(art));
+        }
+        return dtos;
+    }
+
+    private CommonArtDTO commonArtDTOByEntity(ArtEntity entity) {
+        CommonArtDTO dto = new CommonArtDTO();
+        dto.setArtId(entity.getId());
+        dto.setName(entity.getName());
+        dto.setPrice(entity.getPrice());
+
+        ArtistEntity artistEntity = artistRepository.findById(entity.getArtistId()).get();
+
+        dto.setArtistId(artistEntity.getId());
+        dto.setArtistName(artistEntity.getArtistName());
+
+        if (entity.getOwnerId() == null) {
+            dto.setCustomerId(null);
+            dto.setCustomerName(null);
+            dto.setAvatarUrl(null);
+        } else {
+            CustomerEntity customerEntity = customerRepository.findById(entity.getOwnerId()).get();
+            dto.setCustomerId(customerEntity.getId());
+            dto.setCustomerName(customerEntity.getCustomerName());
+            dto.setAvatarUrl(customerEntity.getAvatarUrl());
         }
 
-        return dtos;
+        Optional<ArtPhotoEntity> artPhotoEntity = artPhotoRepository.findByArtIdAndAndDefaultPhoto(entity.getId(), true);
+        if (artPhotoEntity.isPresent()) {
+            dto.setPhotoUrl(artPhotoEntity.get().getPhotoUrl());
+        } else {
+            dto.setPhotoUrl("");
+        }
+        return dto;
     }
 }

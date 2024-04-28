@@ -22,8 +22,7 @@ public class ArtController {
             MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<?> createArt(@RequestPart("ArtCreateDTO") ArtCreateDTO artCreateDTO,
                                        @RequestPart(value = "photos") List<MultipartFile> photos,
-                                       @RequestHeader("Authorization") String token
-                                       ) {
+                                       @RequestHeader("Authorization") String token) {
         artService.createArt(artCreateDTO, photos, token);
         return ResponseEntity.ok("Art created successfully");
     }
@@ -70,9 +69,21 @@ public class ArtController {
         return ResponseEntity.ok(arts);
     }
 
-    @GetMapping("/search/art/object={input}")
-    public ResponseEntity<?> searchArtist(@PathVariable String input) {
-        List<ArtShortDTO> arts = artService.searchArt(input);
+    @GetMapping("/search/paintings/object={input}")
+    public ResponseEntity<?> searchPaintings(@PathVariable String input) {
+        List<CommonArtDTO> arts = artService.searchPaintings(input);
+        return ResponseEntity.ok(arts);
+    }
+
+    @GetMapping("/search/photos/object={input}")
+    public ResponseEntity<?> searchPhotos(@PathVariable String input) {
+        List<CommonArtDTO> arts = artService.searchPhotos(input);
+        return ResponseEntity.ok(arts);
+    }
+
+    @GetMapping("/search/sculptures/object={input}")
+    public ResponseEntity<?> searchSculptures(@PathVariable String input) {
+        List<CommonArtDTO> arts = artService.searchSculptures(input);
         return ResponseEntity.ok(arts);
     }
 }
