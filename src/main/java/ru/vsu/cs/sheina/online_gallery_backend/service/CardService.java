@@ -7,9 +7,13 @@ import ru.vsu.cs.sheina.online_gallery_backend.dto.card.CardNewDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.AddressEntity;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.CardEntity;
+import ru.vsu.cs.sheina.online_gallery_backend.entity.CustomerPrivateSubscriptionEntity;
+import ru.vsu.cs.sheina.online_gallery_backend.entity.OrderEntity;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentialsException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.ForbiddenActionException;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.CardRepository;
+import ru.vsu.cs.sheina.online_gallery_backend.repository.CustomerPrivateSubscriptionRepository;
+import ru.vsu.cs.sheina.online_gallery_backend.repository.OrderRepository;
 import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
 
 import java.util.List;
@@ -22,6 +26,8 @@ public class CardService {
 
     private final JWTParser jwtParser;
     private final CardRepository cardRepository;
+    private final CustomerPrivateSubscriptionRepository customerPrivateSubscriptionRepository;
+    private final OrderRepository orderRepository;
 
     public List<CardDTO> getCards(String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
@@ -35,10 +41,8 @@ public class CardService {
         CardEntity cardEntity = new CardEntity();
         cardEntity.setNumber(cardNewDTO.getNumber());
         cardEntity.setDate(cardNewDTO.getDate());
-        cardEntity.setCvv(cardEntity.getCvv());
+        cardEntity.setCvv(cardNewDTO.getCvv());
         cardEntity.setCustomerId(customerId);
-
-        cardEntity.setIsDefault(cardRepository.existsByCustomerIdAndIsDefault(customerId, true));
 
         if (cardNewDTO.getIsDefault()) {
             Optional<CardEntity> defaultCardOpt = cardRepository.findByCustomerIdAndIsDefault(customerId, true);
@@ -49,10 +53,10 @@ public class CardService {
             }
             cardEntity.setIsDefault(true);
         } else {
-            cardEntity.setIsDefault(false);
+            cardEntity.setIsDefault(!cardRepository.existsByCustomerIdAndIsDefault(customerId, true));
         }
 
-        int first = cardNewDTO.getNumber().charAt(0);
+        int first = Integer.parseInt(cardNewDTO.getNumber().substring(0, 1));
 
         switch (first) {
             case 4 -> cardEntity.setType("Visa");
@@ -70,7 +74,7 @@ public class CardService {
 
         CardEntity cardEntity = cardRepository.findById(cardDTO.getCardId()).orElseThrow(BadCredentialsException::new);
 
-        if (cardEntity.getCustomerId() != customerId) {
+        if (!cardEntity.getCustomerId().equals(customerId)) {
             throw new ForbiddenActionException();
         }
 
@@ -78,7 +82,7 @@ public class CardService {
         cardEntity.setDate(cardDTO.getDate());
         cardEntity.setCvv(cardDTO.getCvv());
 
-        int first = cardDTO.getNumber().charAt(0);
+        int first = Integer.parseInt(cardDTO.getNumber().substring(0, 1));
 
         switch (first) {
             case 4 -> cardEntity.setType("Visa");
@@ -108,8 +112,14 @@ public class CardService {
 
         CardEntity cardEntity = cardRepository.findById(intIdRequestDTO.getId()).orElseThrow(BadCredentialsException::new);
 
-        if (cardEntity.getCustomerId() != customerId) {
+        if (!cardEntity.getCustomerId().equals(customerId)) {
             throw new ForbiddenActionException();
+        }
+
+        customerPrivateSubscriptionRepository.deleteAllByCardId(cardEntity.getId());
+        for(OrderEntity order: orderRepository.findAllByCardId(cardEntity.getId())) {
+            order.setCardId(null);
+            orderRepository.save(order);
         }
         cardRepository.deleteById(intIdRequestDTO.getId());
 
