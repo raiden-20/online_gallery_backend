@@ -5,7 +5,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.vsu.cs.sheina.online_gallery_backend.dto.PostDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.post.PostChangeDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.post.PostCreateDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.post.PostDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.service.PostService;
 
@@ -27,22 +29,18 @@ public class PostController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> createPost(@RequestPart(name = "photos", value = "files") List<MultipartFile> photos,
-                                        @RequestPart("title") String title,
-                                        @RequestPart("text") String text,
+    public ResponseEntity<?> createPost(@RequestPart(value = "photos") List<MultipartFile> photos,
+                                        @RequestPart("PostCreateDTO") PostCreateDTO postCreateDTO,
                                         @RequestHeader("Authorization") String token) {
-        postService.createPost(photos, title, text, token);
+        postService.createPost(photos, postCreateDTO, token);
         return ResponseEntity.ok("Post created successfully");
     }
 
     @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> createPost(@RequestPart(name = "photos", value = "files") List<MultipartFile> photos,
-                                        @RequestPart("deletePhotoUrls") List<String> deletePhotoUrls,
-                                        @RequestPart("postId") String postId,
-                                        @RequestPart("title") String title,
-                                        @RequestPart("text") String text,
+    public ResponseEntity<?> changePost(@RequestPart(value = "newPhotos") List<MultipartFile> newPhotos,
+                                        @RequestPart("PostChangeDTO") PostChangeDTO postChangeDTO,
                                         @RequestHeader("Authorization") String token) {
-        postService.changePost(photos, deletePhotoUrls, postId, title, text, token);
+        postService.changePost(newPhotos, postChangeDTO, token);
         return ResponseEntity.ok("Post changed successfully");
     }
 

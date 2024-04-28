@@ -3,7 +3,9 @@ package ru.vsu.cs.sheina.online_gallery_backend.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import ru.vsu.cs.sheina.online_gallery_backend.dto.PostDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.post.PostChangeDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.post.PostCreateDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.post.PostDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.CustomerEntity;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.PostEntity;
@@ -15,6 +17,7 @@ import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.*;
 import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -34,9 +37,11 @@ public class PostService {
 
     public List<PostDTO> getPosts(UUID artistId, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+        CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         PrivateSubscriptionEntity privateSubscriptionEntity = privateSubscriptionRepository.findByArtistId(artistId).orElseThrow(BadCredentialsException::new);
 
-        if (!customerPrivateSubscriptionRepository.existsByCustomerIdAndPrivateSubscriptionId(customerId, privateSubscriptionEntity.getId())) {
+        if (!customerPrivateSubscriptionRepository.existsByCustomerIdAndPrivateSubscriptionId(customerId, privateSubscriptionEntity.getId())
+                && !customerEntity.getArtistId().equals(artistId)) {
             throw new ForbiddenActionException();
         }
 
@@ -69,15 +74,16 @@ public class PostService {
         return dtos;
     }
 
-    public void createPost(List<MultipartFile> photos, String title, String text, String token) {
+    public void createPost(List<MultipartFile> photos, PostCreateDTO postCreateDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         UUID artistId = customerEntity.getArtistId();
 
         PostEntity postEntity = new PostEntity();
         postEntity.setArtistId(artistId);
-        postEntity.setTitle(title);
-        postEntity.setBody(text);
+        postEntity.setTitle(postCreateDTO.getTitle());
+        postEntity.setBody(postCreateDTO.getText());
+        postEntity.setCreatedAt(new Timestamp(System.currentTimeMillis()));
         postRepository.save(postEntity);
 
         for (int i = 0; i < photos.size(); i++) {
@@ -91,29 +97,29 @@ public class PostService {
         }
     }
 
-    public void changePost(List<MultipartFile> photos, List<String> deletePhotoUrls, String postId, String title, String text, String token) {
+    public void changePost(List<MultipartFile> photos, PostChangeDTO postChangeDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         UUID artistId = customerEntity.getArtistId();
 
-        PostEntity postEntity = postRepository.findById(Integer.valueOf(postId)).orElseThrow(BadCredentialsException::new);
+        PostEntity postEntity = postRepository.findById(postChangeDTO.getPostId()).orElseThrow(BadCredentialsException::new);
 
         if (postEntity.getArtistId() != artistId) {
             throw new ForbiddenActionException();
         }
 
-        postEntity.setTitle(title);
-        postEntity.setBody(text);
+        postEntity.setTitle(postChangeDTO.getTitle());
+        postEntity.setBody(postChangeDTO.getText());
 
-        for (String url: deletePhotoUrls) {
+        for (String url: postChangeDTO.getDeletePhotoUrls()) {
             fileService.deleteFile(url);
-            postPhotoRepository.deleteAllByPostIdAndAndPhotoUrl(Integer.valueOf(postId), url);
+            postPhotoRepository.deleteAllByPostIdAndAndPhotoUrl(postChangeDTO.getPostId(), url);
         }
 
         for (int i = 0; i < photos.size(); i++) {
             PostPhotoEntity postPhotoEntity = new PostPhotoEntity();
 
-            postPhotoEntity.setPostId(Integer.valueOf(postId));
+            postPhotoEntity.setPostId(postChangeDTO.getPostId());
             postPhotoEntity.setPhotoUrl(fileService.saveFile(photos.get(i)));
 
             postPhotoEntity.setDefaultPhoto(i == 0);
@@ -129,7 +135,7 @@ public class PostService {
 
         PostEntity postEntity = postRepository.findById(intIdRequestDTO.getId()).orElseThrow(BadCredentialsException::new);
 
-        if (postEntity.getArtistId() != artistId) {
+        if (!postEntity.getArtistId().equals(artistId)) {
             throw new ForbiddenActionException();
         }
 
