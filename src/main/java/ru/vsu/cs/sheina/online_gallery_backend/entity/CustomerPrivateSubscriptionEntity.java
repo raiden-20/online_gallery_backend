@@ -24,6 +24,9 @@ public class CustomerPrivateSubscriptionEntity {
     @Column(name = "customer_id")
     UUID customerId;
 
+    @Column(name = "card_id")
+    Integer cardId;
+
     @Column(name = "payment_date")
     Timestamp paymentDate;
 

@@ -2,12 +2,11 @@ package ru.vsu.cs.sheina.online_gallery_backend.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.vsu.cs.sheina.online_gallery_backend.dto.CustomerFullDTO;
-import ru.vsu.cs.sheina.online_gallery_backend.dto.CustomerRegistrationDTO;
-import ru.vsu.cs.sheina.online_gallery_backend.dto.CustomerShortDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.customer.CustomerFullDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.customer.CustomerRegistrationDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.customer.CustomerShortDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.service.CustomerService;
 
 import java.util.List;
