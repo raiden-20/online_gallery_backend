@@ -1,5 +1,6 @@
 package ru.vsu.cs.sheina.online_gallery_backend.entity;
 
+import io.hypersistence.utils.hibernate.type.array.ListArrayType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -47,12 +48,12 @@ public class ArtEntity {
     @Column(name = "create_date")
     Timestamp createDate;
 
-    @Column(name = "tags")
-    @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
+    @Type(ListArrayType.class)
+    @Column(name = "tags", columnDefinition = "varchar[]")
     List<String> tags;
 
-    @Column(name = "materials")
-    @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
+    @Type(ListArrayType.class)
+    @Column(name = "materials", columnDefinition = "varchar[]")
     List<String> materials;
 
     @Column(name = "frame")

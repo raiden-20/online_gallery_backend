@@ -5,7 +5,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.vsu.cs.sheina.online_gallery_backend.dto.ArtistShortDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.art.*;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.service.ArtService;
@@ -19,49 +18,30 @@ public class ArtController {
 
     private final ArtService artService;
 
-    @PostMapping(value = "/art", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> createArt(@RequestPart("name") String name,
-                                       @RequestPart("type") String type,
-                                       @RequestPart(name = "photos", value = "files") List<MultipartFile> photos,
-                                       @RequestPart("isPrivate") String isPrivate,
-                                       @RequestPart("price") String price,
-                                       @RequestPart("description") String description,
-                                       @RequestPart("size") String size,
-                                       @RequestPart("frame") String frame,
-                                       @RequestPart("tags") List<String> tags,
-                                       @RequestPart("materials") List<String> materials,
+    @PostMapping(value = "/art", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE,
+            MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<?> createArt(@RequestPart("ArtCreateDTO") ArtCreateDTO artCreateDTO,
+                                       @RequestPart(value = "photos") List<MultipartFile> photos,
                                        @RequestHeader("Authorization") String token
                                        ) {
-        artService.createArt(name, type, photos, isPrivate, price,
-                                description, size, frame, tags, materials, token);
+        artService.createArt(artCreateDTO, photos, token);
         return ResponseEntity.ok("Art created successfully");
     }
 
-    @GetMapping("/art/{artId}")
+    @GetMapping("/art/artId={artId}&currentId={currentId}")
     public ResponseEntity<?> getArt(@PathVariable Integer artId,
-                                    @RequestHeader("Authorization") String token) {
-        ArtFullDTO artFullDTO = artService.getArt(artId, token);
+                                    @PathVariable String currentId) {
+        ArtFullDTO artFullDTO = artService.getArt(artId, currentId);
         return ResponseEntity.ok(artFullDTO);
     }
 
-    @PutMapping(value = "/art", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> changeArt(@RequestPart("artId") String artId,
-                                       @RequestPart("name") String name,
-                                       @RequestPart("type") String type,
-                                       @RequestPart(name = "newPhotos", value = "files") List<MultipartFile> newPhotos,
-                                       @RequestPart("deletePhotoUrls") List<String> deletePhotoUrls,
-                                       @RequestPart("changeMainPhoto") String changeMainPhoto,
-                                       @RequestPart("isPrivate") String isPrivate,
-                                       @RequestPart("price") String price,
-                                       @RequestPart("description") String description,
-                                       @RequestPart("size") String size,
-                                       @RequestPart("frame") String frame,
-                                       @RequestPart("tags") List<String> tags,
-                                       @RequestPart("materials") List<String> materials,
+    @PutMapping(value = "/art", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE,
+            MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<?> changeArt(@RequestPart("ArtChangeDTO") ArtChangeDTO artChangeDTO,
+                                       @RequestPart(value = "newPhotos") List<MultipartFile> newPhotos,
                                        @RequestHeader("Authorization") String token) {
-        artService.changeArt(artId, name, type, newPhotos, deletePhotoUrls, changeMainPhoto, isPrivate, price,
-                description, size, frame, tags, materials, token);
-        return ResponseEntity.ok("Art created successfully");
+        artService.changeArt(artChangeDTO, newPhotos, token);
+        return ResponseEntity.ok("Art changed successfully");
     }
 
     @DeleteMapping("/art")
@@ -71,10 +51,10 @@ public class ArtController {
         return ResponseEntity.ok("Art deleted successfully");
     }
 
-    @GetMapping("/art/artist/{artistId}")
+    @GetMapping("/art/artist/artistId={artistId}&currentId={currentId}")
     public ResponseEntity<?> getAllArtistArts(@PathVariable UUID artistId,
-                                              @RequestHeader("Authorization") String token) {
-        List<ArtistArtDTO> arts = artService.getArtistArt(artistId, token);
+                                              @PathVariable String currentId) {
+        List<ArtistArtDTO> arts = artService.getArtistArt(artistId, currentId);
         return ResponseEntity.ok(arts);
     }
 
@@ -84,7 +64,7 @@ public class ArtController {
         return ResponseEntity.ok(arts);
     }
 
-    @GetMapping("/art/{type}")
+    @GetMapping("/{type}")
     public ResponseEntity<?> getArts(@PathVariable String type) {
         List<CommonArtDTO> arts = artService.getAllArtsByType(type);
         return ResponseEntity.ok(arts);
