@@ -159,6 +159,10 @@ public class ArtService {
 
         artFullDTO.setPhotoUrls(urls);
 
+        int views = artEntity.getViews();
+        artEntity.setViews(++views);
+        artRepository.save(artEntity);
+
         return artFullDTO;
     }
 
