@@ -1,4 +1,4 @@
-package ru.vsu.cs.sheina.online_gallery_backend.dto;
+package ru.vsu.cs.sheina.online_gallery_backend.dto.artist;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -3,10 +3,9 @@ package ru.vsu.cs.sheina.online_gallery_backend.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import ru.vsu.cs.sheina.online_gallery_backend.controller.subscription.PublicSubscription;
-import ru.vsu.cs.sheina.online_gallery_backend.dto.ArtistFullDTO;
-import ru.vsu.cs.sheina.online_gallery_backend.dto.ArtistRegistrationDTO;
-import ru.vsu.cs.sheina.online_gallery_backend.dto.ArtistShortDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.artist.ArtistFullDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.artist.ArtistRegistrationDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.artist.ArtistShortDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.*;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserAlreadyExistsException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
@@ -73,7 +72,11 @@ public class ArtistService {
         dto.setCountSoldArts(countSoldArts);
         dto.setSalesAmount(salesAmount);
 
-        privateSubscriptionOpt.ifPresent(privateSubscriptionEntity -> dto.setCountSubscribers(customerPrivateSubscriptionRepository.countByPrivateSubscriptionId(privateSubscriptionEntity.getId())));
+        if (privateSubscriptionOpt.isPresent()) {
+            dto.setCountSubscribers(customerPrivateSubscriptionRepository.countByPrivateSubscriptionId(privateSubscriptionOpt.get().getId()));
+        } else {
+            dto.setCountSubscribers(null);
+        }
 
         return dto;
     }
