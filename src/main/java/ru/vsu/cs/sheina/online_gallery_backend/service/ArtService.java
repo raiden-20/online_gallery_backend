@@ -342,7 +342,7 @@ public class ArtService {
             throw new BadCredentialsException();
         }
         String artType = switch (type) {
-            case "paintings" -> "PICTURE";
+            case "paintings" -> "PAINTING";
             case "photos" -> "PHOTO";
             case "sculptures" -> "SCULPTURE";
             default -> "";
