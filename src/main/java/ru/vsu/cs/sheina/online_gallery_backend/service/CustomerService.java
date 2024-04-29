@@ -8,6 +8,7 @@ import ru.vsu.cs.sheina.online_gallery_backend.dto.customer.CustomerRegistration
 import ru.vsu.cs.sheina.online_gallery_backend.dto.customer.CustomerShortDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.CustomerEntity;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentialsException;
+import ru.vsu.cs.sheina.online_gallery_backend.exceptions.ForbiddenActionException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserAlreadyExistsException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.CustomerRepository;
@@ -31,6 +32,9 @@ public class CustomerService {
     private final JWTParser jwtParser;
 
     public CustomerFullDTO getCustomerData(UUID id) {
+        if (id.compareTo(UUID.fromString("00000000-0000-0000-0000-000000000000")) == 0) {
+            throw new ForbiddenActionException();
+        }
         CustomerEntity customerEntity = customerRepository.findById(id).orElseThrow(UserNotFoundException::new);
         CustomerFullDTO dto = new CustomerFullDTO();
 
@@ -115,12 +119,14 @@ public class CustomerService {
 
     public List<CustomerShortDTO> getCustomers() {
         return customerRepository.findAll().stream()
+                .filter(ent -> ent.getId().compareTo(UUID.fromString("00000000-0000-0000-0000-000000000000")) != 0)
                 .map(cust -> new CustomerShortDTO(cust.getId(), cust.getCustomerName(), cust.getAvatarUrl()))
                 .toList();
     }
 
     public List<CustomerShortDTO> searchCustomer(String input) {
         return customerRepository.findAll().stream()
+                .filter(ent -> ent.getId().compareTo(UUID.fromString("00000000-0000-0000-0000-000000000000")) != 0)
                 .filter(cust -> cust.getCustomerName().toUpperCase().contains(input.toUpperCase()))
                 .map(cust -> new CustomerShortDTO(cust.getId(), cust.getCustomerName(), cust.getAvatarUrl()))
                 .toList();
