@@ -23,6 +23,8 @@ public class ArtFullDTO {
 
     UUID artistId;
 
+    String artistName;
+
     String status;
 
     UUID customerId;

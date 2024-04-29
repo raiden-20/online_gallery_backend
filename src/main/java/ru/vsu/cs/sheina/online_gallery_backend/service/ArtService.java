@@ -99,6 +99,7 @@ public class ArtService {
         artFullDTO.setType(artEntity.getType());
         artFullDTO.setPrice(artEntity.getPrice());
         artFullDTO.setArtistId(artEntity.getArtistId());
+        artFullDTO.setArtistName(artEntity.getName());
         artFullDTO.setDescription(artEntity.getDescription());
         artFullDTO.setSize(artEntity.getSize());
         artFullDTO.setCreateDate(artEntity.getCreateDate());
@@ -347,8 +348,8 @@ public class ArtService {
             default -> "";
         };
 
-        List<ArtEntity> entities = artRepository.findAllByType(artType)
-                .stream().filter(art -> !artPrivateSubscriptionRepository.existsByArtId(art.getId()))
+        List<ArtEntity> entities = artRepository.findAllByType(artType).stream()
+                .filter(art -> !artPrivateSubscriptionRepository.existsByArtId(art.getId()) || art.getSold())
                 .toList();
 
         List<CommonArtDTO> dtos = new ArrayList<>();
@@ -362,7 +363,7 @@ public class ArtService {
 
     public List<CommonArtDTO> searchPaintings(String input) {
         List<ArtEntity> artEntities = artRepository.findAll().stream()
-                .filter(art -> !artPrivateSubscriptionRepository.existsByArtId(art.getId()))
+                .filter(art -> !artPrivateSubscriptionRepository.existsByArtId(art.getId()) || art.getSold())
                 .filter(art -> art.getType().equals("PAINTING"))
                 .filter(art -> art.getName().toUpperCase().contains(input.toUpperCase()))
                 .toList();
@@ -377,7 +378,7 @@ public class ArtService {
 
     public List<CommonArtDTO> searchPhotos(String input) {
         List<ArtEntity> artEntities = artRepository.findAll().stream()
-                .filter(art -> !artPrivateSubscriptionRepository.existsByArtId(art.getId()))
+                .filter(art -> !artPrivateSubscriptionRepository.existsByArtId(art.getId()) || art.getSold())
                 .filter(art -> art.getType().equals("PHOTO"))
                 .filter(art -> art.getName().toUpperCase().contains(input.toUpperCase()))
                 .toList();
@@ -392,7 +393,7 @@ public class ArtService {
 
     public List<CommonArtDTO> searchSculptures(String input) {
         List<ArtEntity> artEntities = artRepository.findAll().stream()
-                .filter(art -> !artPrivateSubscriptionRepository.existsByArtId(art.getId()))
+                .filter(art -> !artPrivateSubscriptionRepository.existsByArtId(art.getId()) || art.getSold())
                 .filter(art -> art.getType().equals("SCULPTURE"))
                 .filter(art -> art.getName().toUpperCase().contains(input.toUpperCase()))
                 .toList();
@@ -415,6 +416,12 @@ public class ArtService {
 
         dto.setArtistId(artistEntity.getId());
         dto.setArtistName(artistEntity.getArtistName());
+
+        if(artPrivateSubscriptionRepository.existsByArtId(entity.getId())) {
+            dto.setIsPrivate(true);
+        } else {
+            dto.setIsPrivate(false);
+        }
 
         if (entity.getOwnerId() == null) {
             dto.setCustomerId(null);

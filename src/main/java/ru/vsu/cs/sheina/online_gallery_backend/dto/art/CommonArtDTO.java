@@ -17,6 +17,8 @@ public class CommonArtDTO {
 
     Double price;
 
+    Boolean isPrivate;
+
     UUID artistId;
 
     String artistName;
