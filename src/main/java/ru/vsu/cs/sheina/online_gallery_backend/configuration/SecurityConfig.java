@@ -29,7 +29,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests()
 //                    .requestMatchers("/change/**").hasRole(Role.USER.name())
                     .requestMatchers("/customers", "/artists", "/search/**", "/artist/{id}", "/customer/{id}",
-                            "/art/{artId}", "/art/artist/{artistId}", "/art/customer/{customerId}", "/{type}").permitAll()
+                            "/art/artId={artId}&currentId={currentId}", "/art/artist/artistId={artistId}&currentId={currentId}",
+                            "/art/customer/{customerId}","/paintings", "/photos", "/sculptures").permitAll()
                     .anyRequest().authenticated();
 
         http
