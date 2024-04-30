@@ -1,20 +1,20 @@
 version: "3.9"
 services:
-  nginx:
-    image: nginx:${NGINX_VERSION}
-    container_name: nginx
-    restart: on-failure
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-    ports:
-      - ${NGINX_PORT}:8080
-    healthcheck:  
-      test: ["CMD", "service", "nginx", "status"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-    networks:
-      - online_gallery
+  #  nginx:
+  #    image: nginx:${NGINX_VERSION}
+  #    container_name: nginx
+  #    restart: on-failure
+  #    volumes:
+  #      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+  #    ports:
+  #      - ${NGINX_PORT}:8080
+  #    healthcheck:
+  #      test: ["CMD", "service", "nginx", "status"]
+  #      interval: 10s
+  #      timeout: 10s
+  #      retries: 5
+  #    networks:
+  #      - online_gallery
 
   # backend:
   #   container_name: backend
