@@ -20,6 +20,7 @@ public interface CustomerPrivateSubscriptionRepository extends JpaRepository<Cus
     @Transactional
     void deleteByCustomerIdAndPrivateSubscriptionId(UUID customerId, Integer subscriptionId);
 
+    @Transactional
     void deleteAllByPrivateSubscriptionId(Integer subscriptionId);
 
     List<CustomerPrivateSubscriptionEntity> findAllByPrivateSubscriptionId(Integer subscriptionId);

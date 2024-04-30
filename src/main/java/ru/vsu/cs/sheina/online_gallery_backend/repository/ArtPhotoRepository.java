@@ -11,6 +11,7 @@ public interface ArtPhotoRepository extends JpaRepository<ArtPhotoEntity, Intege
 
     List<ArtPhotoEntity> findAllByArtId(Integer artId);
 
+    @Transactional
     void deleteAllByArtId(Integer artId);
 
     @Transactional
