@@ -32,7 +32,12 @@ public class SecurityConfig {
                             "/art/artId={artId}&currentId={currentId}", "/art/artist/artistId={artistId}&currentId={currentId}",
                             "/artist/artistId={artistId}&currentId={currentId}",
                             "/art/customer/{customerId}","/paintings", "/photos", "/sculptures").permitAll()
-                    .anyRequest().authenticated();
+                .and()
+                .authorizeHttpRequests()
+                .requestMatchers("swagger-ui/**", "swagger-ui**", "/v3/api-docs/**", "/v3/api-docs**")
+                .permitAll()
+                .anyRequest()
+                .authenticated();
 
         http
                 .oauth2ResourceServer()
