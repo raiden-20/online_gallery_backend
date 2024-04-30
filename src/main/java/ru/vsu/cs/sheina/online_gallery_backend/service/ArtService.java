@@ -112,7 +112,7 @@ public class ArtService {
             throw new ForbiddenActionException();
         } else if (!currentId.equals("null") && !artPrivateSubscriptionRepository.existsByArtId(artId)) {
             artFullDTO.setStatus("AVAILABLE");
-            artFullDTO.setIsPrivate(true);
+            artFullDTO.setIsPrivate(false);
         } else if (!currentId.equals("null") && artPrivateSubscriptionRepository.existsByArtId(artId)){
             UUID customerId = UUID.fromString(currentId);
             PrivateSubscriptionEntity privateSubscriptionEntity = privateSubscriptionRepository.findByArtistId(artEntity.getArtistId()).get();
@@ -121,7 +121,7 @@ public class ArtService {
             }
             artFullDTO.setIsPrivate(true);
         } else {
-            artFullDTO.setIsPrivate(true);
+            artFullDTO.setIsPrivate(false);
         }
 
         if (artEntity.getOwnerId() != null) {
