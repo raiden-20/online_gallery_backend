@@ -1,0 +1,5118 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+      "title": "Lindéro API",
+      "description": "The Lindéro project allows you to sell and buy paintings, sculptures and photographs. Sales are carried out through auction or at a fixed price.",
+      "contact": {
+        "name": "Elena Sheina",
+        "email": "lena_sheina@bk.ru"
+      },
+      "version": "0.0.1"
+    },
+    "servers": [
+      {
+        "url": "http://localhost:8080",
+        "description": "Dev server"
+      }
+    ],
+    "paths": {
+      "/post": {
+        "put": {
+          "tags": [
+            "Блог"
+          ],
+          "summary": "Изменить существующий пост",
+          "operationId": "changePost",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "required": [
+                    "PostChangeDTO",
+                    "newPhotos"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "newPhotos": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "format": "binary"
+                      }
+                    },
+                    "PostChangeDTO": {
+                      "$ref": "#/components/schemas/PostChangeDTO"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Пост успешно изменен",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Действие запрещено",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ForbiddenActionException"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Блог"
+          ],
+          "summary": "Создать пост",
+          "operationId": "createPost",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "required": [
+                    "PostCreateDTO",
+                    "photos"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "photos": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "format": "binary"
+                      }
+                    },
+                    "PostCreateDTO": {
+                      "$ref": "#/components/schemas/PostCreateDTO"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Пост успешно создан",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "Блог"
+          ],
+          "summary": "Удалить пост",
+          "operationId": "deletePost",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntIdRequestDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Пост успешно удален",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Действие запрещено",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ForbiddenActionException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/order/edit": {
+        "put": {
+          "tags": [
+            "Заказы"
+          ],
+          "summary": "Изменить комментарий у отправленного заказа",
+          "operationId": "edit",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderShortDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Комментарий изменен",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Статус заказа не соответствует действию",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ForbiddenActionException"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Действие запрещено",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ForbiddenActionException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/customer/data": {
+        "put": {
+          "tags": [
+            "Покупатель"
+          ],
+          "summary": "Изменение данных покупателя",
+          "operationId": "setCustomerData",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "required": [
+                    "avatar",
+                    "avatarUrl",
+                    "birthDate",
+                    "cover",
+                    "coverUrl",
+                    "customerName",
+                    "description",
+                    "gender"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "customerName": {
+                      "type": "string"
+                    },
+                    "birthDate": {
+                      "type": "string"
+                    },
+                    "gender": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "avatarUrl": {
+                      "type": "string"
+                    },
+                    "coverUrl": {
+                      "type": "string"
+                    },
+                    "avatar": {
+                      "type": "string",
+                      "format": "binary"
+                    },
+                    "cover": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Данные успешно изменены",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/change/password": {
+        "put": {
+          "tags": [
+            "Пользователь"
+          ],
+          "summary": "Изменить пароль",
+          "operationId": "changePassword",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasswordDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Пароль успешно изменен",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/change/email": {
+        "put": {
+          "tags": [
+            "Пользователь"
+          ],
+          "summary": "Изменить электронную почту",
+          "operationId": "changeEmail",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Проверьте свой электронный ящик",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Электронная почта уже занята",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/EmailAlreadyExistsException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/card": {
+        "put": {
+          "tags": [
+            "Банковская карта"
+          ],
+          "summary": "Изменить существующую карту",
+          "operationId": "changeCard",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CardDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Действие запрещено",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ForbiddenActionException"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Адрес успешно изменен",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Банковская карта"
+          ],
+          "summary": "Добавить новую карту",
+          "operationId": "addCard",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CardNewDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Карта успешно добавлена",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "Банковская карта"
+          ],
+          "summary": "Удалить существующую карту",
+          "operationId": "deleteCard",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntIdRequestDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Карта успешно удалена",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Действие запрещено",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ForbiddenActionException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/artist/data": {
+        "put": {
+          "tags": [
+            "Художник"
+          ],
+          "summary": "Изменить данные художника",
+          "operationId": "setArtistData",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "required": [
+                    "artistName",
+                    "avatar",
+                    "avatarUrl",
+                    "cover",
+                    "coverUrl",
+                    "description"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "artistName": {
+                      "type": "string"
+                    },
+                    "avatarUrl": {
+                      "type": "string"
+                    },
+                    "coverUrl": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "avatar": {
+                      "type": "string",
+                      "format": "binary"
+                    },
+                    "cover": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Данные успешно изменены",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/art": {
+        "put": {
+          "tags": [
+            "Произведение искусства"
+          ],
+          "summary": "Изменить данные товара",
+          "operationId": "changeArt",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "required": [
+                    "ArtChangeDTO",
+                    "newPhotos"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "ArtChangeDTO": {
+                      "$ref": "#/components/schemas/ArtChangeDTO"
+                    },
+                    "newPhotos": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "format": "binary"
+                      }
+                    }
+                  }
+                }
+              },
+              "application/octet-stream": {
+                "schema": {
+                  "required": [
+                    "ArtChangeDTO",
+                    "newPhotos"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "ArtChangeDTO": {
+                      "$ref": "#/components/schemas/ArtChangeDTO"
+                    },
+                    "newPhotos": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "format": "binary"
+                      }
+                    }
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "ArtChangeDTO",
+                    "newPhotos"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "ArtChangeDTO": {
+                      "$ref": "#/components/schemas/ArtChangeDTO"
+                    },
+                    "newPhotos": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "format": "binary"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Данные успешно изменены",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Конфликтующее действие",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadActionException"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Действие запрещено",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ForbiddenActionException"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Произведение искусства"
+          ],
+          "summary": "Добавить товар",
+          "operationId": "createArt",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "required": [
+                    "ArtCreateDTO",
+                    "photos"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "ArtCreateDTO": {
+                      "$ref": "#/components/schemas/ArtCreateDTO"
+                    },
+                    "photos": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "format": "binary"
+                      }
+                    }
+                  }
+                }
+              },
+              "application/octet-stream": {
+                "schema": {
+                  "required": [
+                    "ArtCreateDTO",
+                    "photos"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "ArtCreateDTO": {
+                      "$ref": "#/components/schemas/ArtCreateDTO"
+                    },
+                    "photos": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "format": "binary"
+                      }
+                    }
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "ArtCreateDTO",
+                    "photos"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "ArtCreateDTO": {
+                      "$ref": "#/components/schemas/ArtCreateDTO"
+                    },
+                    "photos": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "format": "binary"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "409": {
+              "description": "Конфликтующее действие",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadActionException"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Товар успешно добавлен",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "Произведение искусства"
+          ],
+          "summary": "Удалить товар",
+          "operationId": "deleteArt",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntIdRequestDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Товар успешно удален",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Действие запрещено",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ForbiddenActionException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/address": {
+        "put": {
+          "tags": [
+            "Адрес"
+          ],
+          "summary": "Изменить существующий адрес",
+          "operationId": "changeAddress",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Адрес успешно изменен",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Адрес"
+          ],
+          "summary": "Добавить новый адрес",
+          "operationId": "addNewAddress",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressNewDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Адрес успешно добавлен",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "Адрес"
+          ],
+          "summary": "Удалить существующий адрес",
+          "operationId": "deleteAddress",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntIdRequestDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Действие запрещено",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ForbiddenActionException"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Адрес используется в активном заказе и не может быть удален",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadActionException"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Адрес успешно удален",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/public/action": {
+        "post": {
+          "tags": [
+            "Подписка"
+          ],
+          "summary": "Подписаться/отписаться в зависимости от текущего статуса",
+          "operationId": "actionWithSubscription",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UUIDRequestDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Статус успешно изменен",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Конфликтующее действие",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadActionException"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/private/subscribe": {
+        "post": {
+          "tags": [
+            "Платная подписка"
+          ],
+          "summary": "Платно подписаться на художника",
+          "operationId": "subscribe",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscribeDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "409": {
+              "description": "Конфликтующее действие",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadActionException"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Подписка успешно оформлена",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/private/create": {
+        "post": {
+          "tags": [
+            "Платная подписка"
+          ],
+          "summary": "Создать платную подписку",
+          "operationId": "createSubscription",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "409": {
+              "description": "Конфликтующее действие",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadActionException"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Платная подписка успешно создана",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/order/send": {
+        "post": {
+          "tags": [
+            "Заказы"
+          ],
+          "summary": "Сменить статус заказа на \"Отправлено\"",
+          "operationId": "send",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderShortDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Статус изменен",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Действие запрещено",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ForbiddenActionException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/order/receive": {
+        "post": {
+          "tags": [
+            "Заказы"
+          ],
+          "summary": "Сменить статус заказа на \"Получено\"",
+          "operationId": "receive",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntIdRequestDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "409": {
+              "description": "Статус заказа не соответствует действию",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadActionException"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Статус изменен",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Действие запрещено",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ForbiddenActionException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/customer/create": {
+        "post": {
+          "tags": [
+            "Покупатель"
+          ],
+          "summary": "Создание аккаунта покупателя",
+          "operationId": "createCustomer",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerRegistrationDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "409": {
+              "description": "Покупатель уже существует",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UserAlreadyExistsException"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Покупатель успешно создан",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/cart": {
+        "get": {
+          "tags": [
+            "Корзина"
+          ],
+          "summary": "Получить все товары в корзине",
+          "operationId": "getCartData",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Отправлен список товаров",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ArtShortDTO"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Корзина"
+          ],
+          "summary": "Добавить товар в корзину",
+          "operationId": "addArtInCart",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntIdRequestDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Товар добавлен в корзину",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Товар уже находится в корзине",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadActionException"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "Корзина"
+          ],
+          "summary": "Удалить товар из корзины",
+          "operationId": "deleteArtFromCart",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntIdRequestDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Товар удален из корзины",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Данного товара нет в корзине",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadActionException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/cart/buy": {
+        "post": {
+          "tags": [
+            "Корзина"
+          ],
+          "summary": "Оплатить товары из корзины",
+          "operationId": "buyArtsFromCart",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Отправлен список id созданных заказов",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/artist/create": {
+        "post": {
+          "tags": [
+            "Художник"
+          ],
+          "summary": "Создать аккаунт художника",
+          "operationId": "createArtist",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArtistRegistrationDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "409": {
+              "description": "Статус заказа не соответствует действию",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadActionException"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Аккаунт успешно создан",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/{type}": {
+        "get": {
+          "tags": [
+            "Произведение искусства"
+          ],
+          "summary": "Получить все товары в зависимости от типа",
+          "operationId": "getArts",
+          "parameters": [
+            {
+              "name": "type",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Отправлен список товаров",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CommonArtDTO"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/search/sculptures/object={input}": {
+        "get": {
+          "tags": [
+            "Произведение искусства"
+          ],
+          "summary": "Поиск скульптур по названию",
+          "operationId": "searchSculptures",
+          "parameters": [
+            {
+              "name": "input",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Отправлен список скульптур",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CommonArtDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/search/photos/object={input}": {
+        "get": {
+          "tags": [
+            "Произведение искусства"
+          ],
+          "summary": "Поиск фотографий по названию",
+          "operationId": "searchPhotos",
+          "parameters": [
+            {
+              "name": "input",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Отправлен список фотографий",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CommonArtDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/search/paintings/object={input}": {
+        "get": {
+          "tags": [
+            "Произведение искусства"
+          ],
+          "summary": "Поиск картин по названию",
+          "operationId": "searchPaintings",
+          "parameters": [
+            {
+              "name": "input",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Отправлен список картин",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CommonArtDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/search/customer/object={input}": {
+        "get": {
+          "tags": [
+            "Покупатель"
+          ],
+          "summary": "Поиск покупателей по имени",
+          "operationId": "searchCustomer",
+          "parameters": [
+            {
+              "name": "input",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Отправлен список покупателей",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CustomerShortDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/search/artist/object={input}": {
+        "get": {
+          "tags": [
+            "Художник"
+          ],
+          "summary": "Поиск художников по имени",
+          "operationId": "searchArtist",
+          "parameters": [
+            {
+              "name": "input",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Отправлен список художников",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ArtistShortDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/public/subscriptions": {
+        "get": {
+          "tags": [
+            "Подписка"
+          ],
+          "summary": "Получить подписки",
+          "operationId": "getSubscriptions",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Отправлен список подписок",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ArtistShortDTO"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/public/subscribers": {
+        "get": {
+          "tags": [
+            "Подписка"
+          ],
+          "summary": "Получить подписчиков",
+          "operationId": "getSubscribers",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Отправлен список подписчиков",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CustomerShortDTO"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/public/search/customer/object={input}": {
+        "get": {
+          "tags": [
+            "Подписка"
+          ],
+          "summary": "Поиск подписчиков по имени",
+          "operationId": "searchCustomersByPublicSubscription",
+          "parameters": [
+            {
+              "name": "input",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Отправлен список подписчиков",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CustomerShortDTO"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/public/search/artist/object={input}": {
+        "get": {
+          "tags": [
+            "Подписка"
+          ],
+          "summary": "Поиск подписок по имени",
+          "operationId": "searchArtistsByPublicSubscription",
+          "parameters": [
+            {
+              "name": "input",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Отправлен список подписок",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CustomerShortDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/private/{artistId}": {
+        "get": {
+          "tags": [
+            "Платная подписка"
+          ],
+          "summary": "Получить данные подписки",
+          "operationId": "getSubscriptionData",
+          "parameters": [
+            {
+              "name": "artistId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Отправлены данные о платной подписке",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PriceDTO"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/private/subscriptions": {
+        "get": {
+          "tags": [
+            "Платная подписка"
+          ],
+          "summary": "Получить платные подписки",
+          "operationId": "getSubscriptions_1",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Отправлен список платных подписок",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PrivateSubscriptionDTO"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/private/subscribers": {
+        "get": {
+          "tags": [
+            "Платная подписка"
+          ],
+          "summary": "Получить список подписчиков",
+          "operationId": "getSubscribers_1",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Отправлен список подписчиков",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CustomerShortDTO"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/private/search/customer/object={input}": {
+        "get": {
+          "tags": [
+            "Платная подписка"
+          ],
+          "summary": "Поиск подписчиков по имени",
+          "operationId": "searchCustomersByPublicSubscription_1",
+          "parameters": [
+            {
+              "name": "input",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Отправлен список подписчиков",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CustomerShortDTO"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/private/search/artist/object={input}": {
+        "get": {
+          "tags": [
+            "Платная подписка"
+          ],
+          "summary": "Поиск подписок по имени",
+          "operationId": "searchArtistsByPublicSubscription_1",
+          "parameters": [
+            {
+              "name": "input",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Отправлен список подписок",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PrivateSubscriptionDTO"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/post/{artistId}": {
+        "get": {
+          "tags": [
+            "Блог"
+          ],
+          "summary": "Получить посты художника",
+          "operationId": "getPosts",
+          "parameters": [
+            {
+              "name": "artistId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Отправлен список постов",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PostDTO"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Действие запрещено",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ForbiddenActionException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/orders/{userId}": {
+        "get": {
+          "tags": [
+            "Заказы"
+          ],
+          "summary": "Получить все заказы пользователя",
+          "operationId": "getAllOrders",
+          "parameters": [
+            {
+              "name": "userId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Действие запрещено",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ForbiddenActionException"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Отправлен список заказов",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/OrderDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/order/{orderId}": {
+        "get": {
+          "tags": [
+            "Заказы"
+          ],
+          "summary": "Получить данные одного заказа",
+          "operationId": "getOrder",
+          "parameters": [
+            {
+              "name": "orderId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "format": "int32"
+              }
+            },
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Действие запрещено",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ForbiddenActionException"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Отправлены данные заказа",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/OrderDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/customers": {
+        "get": {
+          "tags": [
+            "Покупатель"
+          ],
+          "summary": "Получить всех покупателей",
+          "operationId": "getCustomers",
+          "responses": {
+            "200": {
+              "description": "Отправлен список всех покупателей",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CustomerShortDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/customer/{customerId}": {
+        "get": {
+          "tags": [
+            "Покупатель"
+          ],
+          "summary": "Получить данные покупателя",
+          "operationId": "getCustomerData",
+          "parameters": [
+            {
+              "name": "customerId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Действие запрещено",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ForbiddenActionException"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Отправлены данные покупателя",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CustomerFullDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/customer/first-entry": {
+        "get": {
+          "tags": [
+            "Покупатель"
+          ],
+          "summary": "Проверка первого входа покупателя",
+          "operationId": "isFirstEntry",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Отправлено логическое значение",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/cards": {
+        "get": {
+          "tags": [
+            "Банковская карта"
+          ],
+          "summary": "Получить все сохраненные карты пользователя",
+          "operationId": "getCards",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Отправлен список карт",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CardDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/artists": {
+        "get": {
+          "tags": [
+            "Художник"
+          ],
+          "summary": "Получить всех художников",
+          "operationId": "getArtists",
+          "responses": {
+            "200": {
+              "description": "Отправлен список художников",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ArtistShortDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/artist/artistId={artistId}&currentId={currentId}": {
+        "get": {
+          "tags": [
+            "Художник"
+          ],
+          "summary": "Получить данные художника",
+          "operationId": "getArtistData",
+          "parameters": [
+            {
+              "name": "artistId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            {
+              "name": "currentId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Отправлены данные художника",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ArtistFullDTO"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/art/customer/{customerId}": {
+        "get": {
+          "tags": [
+            "Произведение искусства"
+          ],
+          "summary": "Получить все товары покупателя",
+          "operationId": "getAllCustomerArts",
+          "parameters": [
+            {
+              "name": "customerId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Отправлен список товаров покупателя",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CustomerArtDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/art/artist/artistId={artistId}&currentId={currentId}": {
+        "get": {
+          "tags": [
+            "Произведение искусства"
+          ],
+          "summary": "Получить все товары художника",
+          "operationId": "getAllArtistArts",
+          "parameters": [
+            {
+              "name": "artistId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            {
+              "name": "currentId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Отправлен список товаров художника",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ArtistArtDTO"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/art/artId={artId}&currentId={currentId}": {
+        "get": {
+          "tags": [
+            "Произведение искусства"
+          ],
+          "summary": "Получить товар",
+          "operationId": "getArt",
+          "parameters": [
+            {
+              "name": "artId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "format": "int32"
+              }
+            },
+            {
+              "name": "currentId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Отправлены данные товара",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ArtFullDTO"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Действие запрещено",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ForbiddenActionException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/addresses": {
+        "get": {
+          "tags": [
+            "Адрес"
+          ],
+          "summary": "Получить все сохраненные адреса пользователя",
+          "operationId": "getAddresses",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Отправлен список адресов",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/AddressDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/private/unsubscribe": {
+        "delete": {
+          "tags": [
+            "Платная подписка"
+          ],
+          "summary": "Удалить платную подписку на художника",
+          "operationId": "unsubscribe",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UUIDRequestDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Подписка успешно удалена",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Конфликтующее действие",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadActionException"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/private/delete": {
+        "delete": {
+          "tags": [
+            "Платная подписка"
+          ],
+          "summary": "Удалить платную подписку",
+          "operationId": "deleteSubscription",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Платная подписка успешно удалена",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/account": {
+        "delete": {
+          "tags": [
+            "Пользователь"
+          ],
+          "summary": "Удалить аккаунт",
+          "operationId": "deleteAccount",
+          "parameters": [
+            {
+              "name": "Authorization",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "400": {
+              "description": "Неверные данные",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BadCredentialsException"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Аккаунт успешно удален",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "PostChangeDTO": {
+          "type": "object",
+          "properties": {
+            "postId": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "title": {
+              "type": "string"
+            },
+            "text": {
+              "type": "string"
+            },
+            "deletePhotoUrls": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "BadCredentialsException": {
+          "type": "object",
+          "properties": {
+            "cause": {
+              "type": "object",
+              "properties": {
+                "stackTrace": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "classLoaderName": {
+                        "type": "string"
+                      },
+                      "moduleName": {
+                        "type": "string"
+                      },
+                      "moduleVersion": {
+                        "type": "string"
+                      },
+                      "methodName": {
+                        "type": "string"
+                      },
+                      "fileName": {
+                        "type": "string"
+                      },
+                      "lineNumber": {
+                        "type": "integer",
+                        "format": "int32"
+                      },
+                      "nativeMethod": {
+                        "type": "boolean"
+                      },
+                      "className": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "suppressed": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "stackTrace": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "classLoaderName": {
+                              "type": "string"
+                            },
+                            "moduleName": {
+                              "type": "string"
+                            },
+                            "moduleVersion": {
+                              "type": "string"
+                            },
+                            "methodName": {
+                              "type": "string"
+                            },
+                            "fileName": {
+                              "type": "string"
+                            },
+                            "lineNumber": {
+                              "type": "integer",
+                              "format": "int32"
+                            },
+                            "nativeMethod": {
+                              "type": "boolean"
+                            },
+                            "className": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "localizedMessage": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "localizedMessage": {
+                  "type": "string"
+                }
+              }
+            },
+            "stackTrace": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "classLoaderName": {
+                    "type": "string"
+                  },
+                  "moduleName": {
+                    "type": "string"
+                  },
+                  "moduleVersion": {
+                    "type": "string"
+                  },
+                  "methodName": {
+                    "type": "string"
+                  },
+                  "fileName": {
+                    "type": "string"
+                  },
+                  "lineNumber": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "nativeMethod": {
+                    "type": "boolean"
+                  },
+                  "className": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "100 CONTINUE",
+                "101 SWITCHING_PROTOCOLS",
+                "102 PROCESSING",
+                "103 EARLY_HINTS",
+                "103 CHECKPOINT",
+                "200 OK",
+                "201 CREATED",
+                "202 ACCEPTED",
+                "203 NON_AUTHORITATIVE_INFORMATION",
+                "204 NO_CONTENT",
+                "205 RESET_CONTENT",
+                "206 PARTIAL_CONTENT",
+                "207 MULTI_STATUS",
+                "208 ALREADY_REPORTED",
+                "226 IM_USED",
+                "300 MULTIPLE_CHOICES",
+                "301 MOVED_PERMANENTLY",
+                "302 FOUND",
+                "302 MOVED_TEMPORARILY",
+                "303 SEE_OTHER",
+                "304 NOT_MODIFIED",
+                "305 USE_PROXY",
+                "307 TEMPORARY_REDIRECT",
+                "308 PERMANENT_REDIRECT",
+                "400 BAD_REQUEST",
+                "401 UNAUTHORIZED",
+                "402 PAYMENT_REQUIRED",
+                "403 FORBIDDEN",
+                "404 NOT_FOUND",
+                "405 METHOD_NOT_ALLOWED",
+                "406 NOT_ACCEPTABLE",
+                "407 PROXY_AUTHENTICATION_REQUIRED",
+                "408 REQUEST_TIMEOUT",
+                "409 CONFLICT",
+                "410 GONE",
+                "411 LENGTH_REQUIRED",
+                "412 PRECONDITION_FAILED",
+                "413 PAYLOAD_TOO_LARGE",
+                "413 REQUEST_ENTITY_TOO_LARGE",
+                "414 URI_TOO_LONG",
+                "414 REQUEST_URI_TOO_LONG",
+                "415 UNSUPPORTED_MEDIA_TYPE",
+                "416 REQUESTED_RANGE_NOT_SATISFIABLE",
+                "417 EXPECTATION_FAILED",
+                "418 I_AM_A_TEAPOT",
+                "419 INSUFFICIENT_SPACE_ON_RESOURCE",
+                "420 METHOD_FAILURE",
+                "421 DESTINATION_LOCKED",
+                "422 UNPROCESSABLE_ENTITY",
+                "423 LOCKED",
+                "424 FAILED_DEPENDENCY",
+                "425 TOO_EARLY",
+                "426 UPGRADE_REQUIRED",
+                "428 PRECONDITION_REQUIRED",
+                "429 TOO_MANY_REQUESTS",
+                "431 REQUEST_HEADER_FIELDS_TOO_LARGE",
+                "451 UNAVAILABLE_FOR_LEGAL_REASONS",
+                "500 INTERNAL_SERVER_ERROR",
+                "501 NOT_IMPLEMENTED",
+                "502 BAD_GATEWAY",
+                "503 SERVICE_UNAVAILABLE",
+                "504 GATEWAY_TIMEOUT",
+                "505 HTTP_VERSION_NOT_SUPPORTED",
+                "506 VARIANT_ALSO_NEGOTIATES",
+                "507 INSUFFICIENT_STORAGE",
+                "508 LOOP_DETECTED",
+                "509 BANDWIDTH_LIMIT_EXCEEDED",
+                "510 NOT_EXTENDED",
+                "511 NETWORK_AUTHENTICATION_REQUIRED"
+              ]
+            },
+            "message": {
+              "type": "string"
+            },
+            "suppressed": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "stackTrace": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "classLoaderName": {
+                          "type": "string"
+                        },
+                        "moduleName": {
+                          "type": "string"
+                        },
+                        "moduleVersion": {
+                          "type": "string"
+                        },
+                        "methodName": {
+                          "type": "string"
+                        },
+                        "fileName": {
+                          "type": "string"
+                        },
+                        "lineNumber": {
+                          "type": "integer",
+                          "format": "int32"
+                        },
+                        "nativeMethod": {
+                          "type": "boolean"
+                        },
+                        "className": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "localizedMessage": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "localizedMessage": {
+              "type": "string"
+            }
+          }
+        },
+        "ForbiddenActionException": {
+          "type": "object",
+          "properties": {
+            "cause": {
+              "type": "object",
+              "properties": {
+                "stackTrace": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "classLoaderName": {
+                        "type": "string"
+                      },
+                      "moduleName": {
+                        "type": "string"
+                      },
+                      "moduleVersion": {
+                        "type": "string"
+                      },
+                      "methodName": {
+                        "type": "string"
+                      },
+                      "fileName": {
+                        "type": "string"
+                      },
+                      "lineNumber": {
+                        "type": "integer",
+                        "format": "int32"
+                      },
+                      "nativeMethod": {
+                        "type": "boolean"
+                      },
+                      "className": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "suppressed": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "stackTrace": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "classLoaderName": {
+                              "type": "string"
+                            },
+                            "moduleName": {
+                              "type": "string"
+                            },
+                            "moduleVersion": {
+                              "type": "string"
+                            },
+                            "methodName": {
+                              "type": "string"
+                            },
+                            "fileName": {
+                              "type": "string"
+                            },
+                            "lineNumber": {
+                              "type": "integer",
+                              "format": "int32"
+                            },
+                            "nativeMethod": {
+                              "type": "boolean"
+                            },
+                            "className": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "localizedMessage": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "localizedMessage": {
+                  "type": "string"
+                }
+              }
+            },
+            "stackTrace": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "classLoaderName": {
+                    "type": "string"
+                  },
+                  "moduleName": {
+                    "type": "string"
+                  },
+                  "moduleVersion": {
+                    "type": "string"
+                  },
+                  "methodName": {
+                    "type": "string"
+                  },
+                  "fileName": {
+                    "type": "string"
+                  },
+                  "lineNumber": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "nativeMethod": {
+                    "type": "boolean"
+                  },
+                  "className": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "100 CONTINUE",
+                "101 SWITCHING_PROTOCOLS",
+                "102 PROCESSING",
+                "103 EARLY_HINTS",
+                "103 CHECKPOINT",
+                "200 OK",
+                "201 CREATED",
+                "202 ACCEPTED",
+                "203 NON_AUTHORITATIVE_INFORMATION",
+                "204 NO_CONTENT",
+                "205 RESET_CONTENT",
+                "206 PARTIAL_CONTENT",
+                "207 MULTI_STATUS",
+                "208 ALREADY_REPORTED",
+                "226 IM_USED",
+                "300 MULTIPLE_CHOICES",
+                "301 MOVED_PERMANENTLY",
+                "302 FOUND",
+                "302 MOVED_TEMPORARILY",
+                "303 SEE_OTHER",
+                "304 NOT_MODIFIED",
+                "305 USE_PROXY",
+                "307 TEMPORARY_REDIRECT",
+                "308 PERMANENT_REDIRECT",
+                "400 BAD_REQUEST",
+                "401 UNAUTHORIZED",
+                "402 PAYMENT_REQUIRED",
+                "403 FORBIDDEN",
+                "404 NOT_FOUND",
+                "405 METHOD_NOT_ALLOWED",
+                "406 NOT_ACCEPTABLE",
+                "407 PROXY_AUTHENTICATION_REQUIRED",
+                "408 REQUEST_TIMEOUT",
+                "409 CONFLICT",
+                "410 GONE",
+                "411 LENGTH_REQUIRED",
+                "412 PRECONDITION_FAILED",
+                "413 PAYLOAD_TOO_LARGE",
+                "413 REQUEST_ENTITY_TOO_LARGE",
+                "414 URI_TOO_LONG",
+                "414 REQUEST_URI_TOO_LONG",
+                "415 UNSUPPORTED_MEDIA_TYPE",
+                "416 REQUESTED_RANGE_NOT_SATISFIABLE",
+                "417 EXPECTATION_FAILED",
+                "418 I_AM_A_TEAPOT",
+                "419 INSUFFICIENT_SPACE_ON_RESOURCE",
+                "420 METHOD_FAILURE",
+                "421 DESTINATION_LOCKED",
+                "422 UNPROCESSABLE_ENTITY",
+                "423 LOCKED",
+                "424 FAILED_DEPENDENCY",
+                "425 TOO_EARLY",
+                "426 UPGRADE_REQUIRED",
+                "428 PRECONDITION_REQUIRED",
+                "429 TOO_MANY_REQUESTS",
+                "431 REQUEST_HEADER_FIELDS_TOO_LARGE",
+                "451 UNAVAILABLE_FOR_LEGAL_REASONS",
+                "500 INTERNAL_SERVER_ERROR",
+                "501 NOT_IMPLEMENTED",
+                "502 BAD_GATEWAY",
+                "503 SERVICE_UNAVAILABLE",
+                "504 GATEWAY_TIMEOUT",
+                "505 HTTP_VERSION_NOT_SUPPORTED",
+                "506 VARIANT_ALSO_NEGOTIATES",
+                "507 INSUFFICIENT_STORAGE",
+                "508 LOOP_DETECTED",
+                "509 BANDWIDTH_LIMIT_EXCEEDED",
+                "510 NOT_EXTENDED",
+                "511 NETWORK_AUTHENTICATION_REQUIRED"
+              ]
+            },
+            "message": {
+              "type": "string"
+            },
+            "suppressed": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "stackTrace": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "classLoaderName": {
+                          "type": "string"
+                        },
+                        "moduleName": {
+                          "type": "string"
+                        },
+                        "moduleVersion": {
+                          "type": "string"
+                        },
+                        "methodName": {
+                          "type": "string"
+                        },
+                        "fileName": {
+                          "type": "string"
+                        },
+                        "lineNumber": {
+                          "type": "integer",
+                          "format": "int32"
+                        },
+                        "nativeMethod": {
+                          "type": "boolean"
+                        },
+                        "className": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "localizedMessage": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "localizedMessage": {
+              "type": "string"
+            }
+          }
+        },
+        "OrderShortDTO": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "comment": {
+              "type": "string"
+            }
+          }
+        },
+        "PasswordDTO": {
+          "type": "object",
+          "properties": {
+            "password": {
+              "type": "string"
+            }
+          }
+        },
+        "EmailDTO": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string"
+            }
+          }
+        },
+        "EmailAlreadyExistsException": {
+          "type": "object",
+          "properties": {
+            "cause": {
+              "type": "object",
+              "properties": {
+                "stackTrace": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "classLoaderName": {
+                        "type": "string"
+                      },
+                      "moduleName": {
+                        "type": "string"
+                      },
+                      "moduleVersion": {
+                        "type": "string"
+                      },
+                      "methodName": {
+                        "type": "string"
+                      },
+                      "fileName": {
+                        "type": "string"
+                      },
+                      "lineNumber": {
+                        "type": "integer",
+                        "format": "int32"
+                      },
+                      "nativeMethod": {
+                        "type": "boolean"
+                      },
+                      "className": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "suppressed": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "stackTrace": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "classLoaderName": {
+                              "type": "string"
+                            },
+                            "moduleName": {
+                              "type": "string"
+                            },
+                            "moduleVersion": {
+                              "type": "string"
+                            },
+                            "methodName": {
+                              "type": "string"
+                            },
+                            "fileName": {
+                              "type": "string"
+                            },
+                            "lineNumber": {
+                              "type": "integer",
+                              "format": "int32"
+                            },
+                            "nativeMethod": {
+                              "type": "boolean"
+                            },
+                            "className": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "localizedMessage": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "localizedMessage": {
+                  "type": "string"
+                }
+              }
+            },
+            "stackTrace": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "classLoaderName": {
+                    "type": "string"
+                  },
+                  "moduleName": {
+                    "type": "string"
+                  },
+                  "moduleVersion": {
+                    "type": "string"
+                  },
+                  "methodName": {
+                    "type": "string"
+                  },
+                  "fileName": {
+                    "type": "string"
+                  },
+                  "lineNumber": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "nativeMethod": {
+                    "type": "boolean"
+                  },
+                  "className": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "100 CONTINUE",
+                "101 SWITCHING_PROTOCOLS",
+                "102 PROCESSING",
+                "103 EARLY_HINTS",
+                "103 CHECKPOINT",
+                "200 OK",
+                "201 CREATED",
+                "202 ACCEPTED",
+                "203 NON_AUTHORITATIVE_INFORMATION",
+                "204 NO_CONTENT",
+                "205 RESET_CONTENT",
+                "206 PARTIAL_CONTENT",
+                "207 MULTI_STATUS",
+                "208 ALREADY_REPORTED",
+                "226 IM_USED",
+                "300 MULTIPLE_CHOICES",
+                "301 MOVED_PERMANENTLY",
+                "302 FOUND",
+                "302 MOVED_TEMPORARILY",
+                "303 SEE_OTHER",
+                "304 NOT_MODIFIED",
+                "305 USE_PROXY",
+                "307 TEMPORARY_REDIRECT",
+                "308 PERMANENT_REDIRECT",
+                "400 BAD_REQUEST",
+                "401 UNAUTHORIZED",
+                "402 PAYMENT_REQUIRED",
+                "403 FORBIDDEN",
+                "404 NOT_FOUND",
+                "405 METHOD_NOT_ALLOWED",
+                "406 NOT_ACCEPTABLE",
+                "407 PROXY_AUTHENTICATION_REQUIRED",
+                "408 REQUEST_TIMEOUT",
+                "409 CONFLICT",
+                "410 GONE",
+                "411 LENGTH_REQUIRED",
+                "412 PRECONDITION_FAILED",
+                "413 PAYLOAD_TOO_LARGE",
+                "413 REQUEST_ENTITY_TOO_LARGE",
+                "414 URI_TOO_LONG",
+                "414 REQUEST_URI_TOO_LONG",
+                "415 UNSUPPORTED_MEDIA_TYPE",
+                "416 REQUESTED_RANGE_NOT_SATISFIABLE",
+                "417 EXPECTATION_FAILED",
+                "418 I_AM_A_TEAPOT",
+                "419 INSUFFICIENT_SPACE_ON_RESOURCE",
+                "420 METHOD_FAILURE",
+                "421 DESTINATION_LOCKED",
+                "422 UNPROCESSABLE_ENTITY",
+                "423 LOCKED",
+                "424 FAILED_DEPENDENCY",
+                "425 TOO_EARLY",
+                "426 UPGRADE_REQUIRED",
+                "428 PRECONDITION_REQUIRED",
+                "429 TOO_MANY_REQUESTS",
+                "431 REQUEST_HEADER_FIELDS_TOO_LARGE",
+                "451 UNAVAILABLE_FOR_LEGAL_REASONS",
+                "500 INTERNAL_SERVER_ERROR",
+                "501 NOT_IMPLEMENTED",
+                "502 BAD_GATEWAY",
+                "503 SERVICE_UNAVAILABLE",
+                "504 GATEWAY_TIMEOUT",
+                "505 HTTP_VERSION_NOT_SUPPORTED",
+                "506 VARIANT_ALSO_NEGOTIATES",
+                "507 INSUFFICIENT_STORAGE",
+                "508 LOOP_DETECTED",
+                "509 BANDWIDTH_LIMIT_EXCEEDED",
+                "510 NOT_EXTENDED",
+                "511 NETWORK_AUTHENTICATION_REQUIRED"
+              ]
+            },
+            "message": {
+              "type": "string"
+            },
+            "suppressed": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "stackTrace": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "classLoaderName": {
+                          "type": "string"
+                        },
+                        "moduleName": {
+                          "type": "string"
+                        },
+                        "moduleVersion": {
+                          "type": "string"
+                        },
+                        "methodName": {
+                          "type": "string"
+                        },
+                        "fileName": {
+                          "type": "string"
+                        },
+                        "lineNumber": {
+                          "type": "integer",
+                          "format": "int32"
+                        },
+                        "nativeMethod": {
+                          "type": "boolean"
+                        },
+                        "className": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "localizedMessage": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "localizedMessage": {
+              "type": "string"
+            }
+          }
+        },
+        "CardDTO": {
+          "type": "object",
+          "properties": {
+            "cardId": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "type": {
+              "type": "string"
+            },
+            "number": {
+              "type": "string"
+            },
+            "date": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "cvv": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "isDefault": {
+              "type": "boolean"
+            }
+          }
+        },
+        "ArtChangeDTO": {
+          "type": "object",
+          "properties": {
+            "artId": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "name": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            },
+            "deletePhotoUrls": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "changeMainPhoto": {
+              "type": "boolean"
+            },
+            "isPrivate": {
+              "type": "boolean"
+            },
+            "price": {
+              "type": "number",
+              "format": "double"
+            },
+            "description": {
+              "type": "string"
+            },
+            "size": {
+              "type": "string"
+            },
+            "frame": {
+              "type": "boolean"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "materials": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "BadActionException": {
+          "type": "object",
+          "properties": {
+            "cause": {
+              "type": "object",
+              "properties": {
+                "stackTrace": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "classLoaderName": {
+                        "type": "string"
+                      },
+                      "moduleName": {
+                        "type": "string"
+                      },
+                      "moduleVersion": {
+                        "type": "string"
+                      },
+                      "methodName": {
+                        "type": "string"
+                      },
+                      "fileName": {
+                        "type": "string"
+                      },
+                      "lineNumber": {
+                        "type": "integer",
+                        "format": "int32"
+                      },
+                      "nativeMethod": {
+                        "type": "boolean"
+                      },
+                      "className": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "suppressed": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "stackTrace": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "classLoaderName": {
+                              "type": "string"
+                            },
+                            "moduleName": {
+                              "type": "string"
+                            },
+                            "moduleVersion": {
+                              "type": "string"
+                            },
+                            "methodName": {
+                              "type": "string"
+                            },
+                            "fileName": {
+                              "type": "string"
+                            },
+                            "lineNumber": {
+                              "type": "integer",
+                              "format": "int32"
+                            },
+                            "nativeMethod": {
+                              "type": "boolean"
+                            },
+                            "className": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "localizedMessage": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "localizedMessage": {
+                  "type": "string"
+                }
+              }
+            },
+            "stackTrace": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "classLoaderName": {
+                    "type": "string"
+                  },
+                  "moduleName": {
+                    "type": "string"
+                  },
+                  "moduleVersion": {
+                    "type": "string"
+                  },
+                  "methodName": {
+                    "type": "string"
+                  },
+                  "fileName": {
+                    "type": "string"
+                  },
+                  "lineNumber": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "nativeMethod": {
+                    "type": "boolean"
+                  },
+                  "className": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "100 CONTINUE",
+                "101 SWITCHING_PROTOCOLS",
+                "102 PROCESSING",
+                "103 EARLY_HINTS",
+                "103 CHECKPOINT",
+                "200 OK",
+                "201 CREATED",
+                "202 ACCEPTED",
+                "203 NON_AUTHORITATIVE_INFORMATION",
+                "204 NO_CONTENT",
+                "205 RESET_CONTENT",
+                "206 PARTIAL_CONTENT",
+                "207 MULTI_STATUS",
+                "208 ALREADY_REPORTED",
+                "226 IM_USED",
+                "300 MULTIPLE_CHOICES",
+                "301 MOVED_PERMANENTLY",
+                "302 FOUND",
+                "302 MOVED_TEMPORARILY",
+                "303 SEE_OTHER",
+                "304 NOT_MODIFIED",
+                "305 USE_PROXY",
+                "307 TEMPORARY_REDIRECT",
+                "308 PERMANENT_REDIRECT",
+                "400 BAD_REQUEST",
+                "401 UNAUTHORIZED",
+                "402 PAYMENT_REQUIRED",
+                "403 FORBIDDEN",
+                "404 NOT_FOUND",
+                "405 METHOD_NOT_ALLOWED",
+                "406 NOT_ACCEPTABLE",
+                "407 PROXY_AUTHENTICATION_REQUIRED",
+                "408 REQUEST_TIMEOUT",
+                "409 CONFLICT",
+                "410 GONE",
+                "411 LENGTH_REQUIRED",
+                "412 PRECONDITION_FAILED",
+                "413 PAYLOAD_TOO_LARGE",
+                "413 REQUEST_ENTITY_TOO_LARGE",
+                "414 URI_TOO_LONG",
+                "414 REQUEST_URI_TOO_LONG",
+                "415 UNSUPPORTED_MEDIA_TYPE",
+                "416 REQUESTED_RANGE_NOT_SATISFIABLE",
+                "417 EXPECTATION_FAILED",
+                "418 I_AM_A_TEAPOT",
+                "419 INSUFFICIENT_SPACE_ON_RESOURCE",
+                "420 METHOD_FAILURE",
+                "421 DESTINATION_LOCKED",
+                "422 UNPROCESSABLE_ENTITY",
+                "423 LOCKED",
+                "424 FAILED_DEPENDENCY",
+                "425 TOO_EARLY",
+                "426 UPGRADE_REQUIRED",
+                "428 PRECONDITION_REQUIRED",
+                "429 TOO_MANY_REQUESTS",
+                "431 REQUEST_HEADER_FIELDS_TOO_LARGE",
+                "451 UNAVAILABLE_FOR_LEGAL_REASONS",
+                "500 INTERNAL_SERVER_ERROR",
+                "501 NOT_IMPLEMENTED",
+                "502 BAD_GATEWAY",
+                "503 SERVICE_UNAVAILABLE",
+                "504 GATEWAY_TIMEOUT",
+                "505 HTTP_VERSION_NOT_SUPPORTED",
+                "506 VARIANT_ALSO_NEGOTIATES",
+                "507 INSUFFICIENT_STORAGE",
+                "508 LOOP_DETECTED",
+                "509 BANDWIDTH_LIMIT_EXCEEDED",
+                "510 NOT_EXTENDED",
+                "511 NETWORK_AUTHENTICATION_REQUIRED"
+              ]
+            },
+            "message": {
+              "type": "string"
+            },
+            "suppressed": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "stackTrace": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "classLoaderName": {
+                          "type": "string"
+                        },
+                        "moduleName": {
+                          "type": "string"
+                        },
+                        "moduleVersion": {
+                          "type": "string"
+                        },
+                        "methodName": {
+                          "type": "string"
+                        },
+                        "fileName": {
+                          "type": "string"
+                        },
+                        "lineNumber": {
+                          "type": "integer",
+                          "format": "int32"
+                        },
+                        "nativeMethod": {
+                          "type": "boolean"
+                        },
+                        "className": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "localizedMessage": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "localizedMessage": {
+              "type": "string"
+            }
+          }
+        },
+        "AddressDTO": {
+          "type": "object",
+          "properties": {
+            "addressId": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "name": {
+              "type": "string"
+            },
+            "country": {
+              "type": "string"
+            },
+            "region": {
+              "type": "string"
+            },
+            "city": {
+              "type": "string"
+            },
+            "index": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "location": {
+              "type": "string"
+            },
+            "isDefault": {
+              "type": "boolean"
+            }
+          }
+        },
+        "UUIDRequestDTO": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "SubscribeDTO": {
+          "type": "object",
+          "properties": {
+            "artistId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "cardId": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        },
+        "PriceDTO": {
+          "type": "object",
+          "properties": {
+            "artistId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "price": {
+              "type": "number",
+              "format": "double"
+            }
+          }
+        },
+        "PostCreateDTO": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "text": {
+              "type": "string"
+            }
+          }
+        },
+        "IntIdRequestDTO": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        },
+        "CustomerRegistrationDTO": {
+          "type": "object",
+          "properties": {
+            "customerName": {
+              "type": "string"
+            },
+            "birthDate": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "gender": {
+              "type": "string"
+            }
+          }
+        },
+        "UserAlreadyExistsException": {
+          "type": "object",
+          "properties": {
+            "cause": {
+              "type": "object",
+              "properties": {
+                "stackTrace": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "classLoaderName": {
+                        "type": "string"
+                      },
+                      "moduleName": {
+                        "type": "string"
+                      },
+                      "moduleVersion": {
+                        "type": "string"
+                      },
+                      "methodName": {
+                        "type": "string"
+                      },
+                      "fileName": {
+                        "type": "string"
+                      },
+                      "lineNumber": {
+                        "type": "integer",
+                        "format": "int32"
+                      },
+                      "nativeMethod": {
+                        "type": "boolean"
+                      },
+                      "className": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "suppressed": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "stackTrace": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "classLoaderName": {
+                              "type": "string"
+                            },
+                            "moduleName": {
+                              "type": "string"
+                            },
+                            "moduleVersion": {
+                              "type": "string"
+                            },
+                            "methodName": {
+                              "type": "string"
+                            },
+                            "fileName": {
+                              "type": "string"
+                            },
+                            "lineNumber": {
+                              "type": "integer",
+                              "format": "int32"
+                            },
+                            "nativeMethod": {
+                              "type": "boolean"
+                            },
+                            "className": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "localizedMessage": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "localizedMessage": {
+                  "type": "string"
+                }
+              }
+            },
+            "stackTrace": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "classLoaderName": {
+                    "type": "string"
+                  },
+                  "moduleName": {
+                    "type": "string"
+                  },
+                  "moduleVersion": {
+                    "type": "string"
+                  },
+                  "methodName": {
+                    "type": "string"
+                  },
+                  "fileName": {
+                    "type": "string"
+                  },
+                  "lineNumber": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "nativeMethod": {
+                    "type": "boolean"
+                  },
+                  "className": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "100 CONTINUE",
+                "101 SWITCHING_PROTOCOLS",
+                "102 PROCESSING",
+                "103 EARLY_HINTS",
+                "103 CHECKPOINT",
+                "200 OK",
+                "201 CREATED",
+                "202 ACCEPTED",
+                "203 NON_AUTHORITATIVE_INFORMATION",
+                "204 NO_CONTENT",
+                "205 RESET_CONTENT",
+                "206 PARTIAL_CONTENT",
+                "207 MULTI_STATUS",
+                "208 ALREADY_REPORTED",
+                "226 IM_USED",
+                "300 MULTIPLE_CHOICES",
+                "301 MOVED_PERMANENTLY",
+                "302 FOUND",
+                "302 MOVED_TEMPORARILY",
+                "303 SEE_OTHER",
+                "304 NOT_MODIFIED",
+                "305 USE_PROXY",
+                "307 TEMPORARY_REDIRECT",
+                "308 PERMANENT_REDIRECT",
+                "400 BAD_REQUEST",
+                "401 UNAUTHORIZED",
+                "402 PAYMENT_REQUIRED",
+                "403 FORBIDDEN",
+                "404 NOT_FOUND",
+                "405 METHOD_NOT_ALLOWED",
+                "406 NOT_ACCEPTABLE",
+                "407 PROXY_AUTHENTICATION_REQUIRED",
+                "408 REQUEST_TIMEOUT",
+                "409 CONFLICT",
+                "410 GONE",
+                "411 LENGTH_REQUIRED",
+                "412 PRECONDITION_FAILED",
+                "413 PAYLOAD_TOO_LARGE",
+                "413 REQUEST_ENTITY_TOO_LARGE",
+                "414 URI_TOO_LONG",
+                "414 REQUEST_URI_TOO_LONG",
+                "415 UNSUPPORTED_MEDIA_TYPE",
+                "416 REQUESTED_RANGE_NOT_SATISFIABLE",
+                "417 EXPECTATION_FAILED",
+                "418 I_AM_A_TEAPOT",
+                "419 INSUFFICIENT_SPACE_ON_RESOURCE",
+                "420 METHOD_FAILURE",
+                "421 DESTINATION_LOCKED",
+                "422 UNPROCESSABLE_ENTITY",
+                "423 LOCKED",
+                "424 FAILED_DEPENDENCY",
+                "425 TOO_EARLY",
+                "426 UPGRADE_REQUIRED",
+                "428 PRECONDITION_REQUIRED",
+                "429 TOO_MANY_REQUESTS",
+                "431 REQUEST_HEADER_FIELDS_TOO_LARGE",
+                "451 UNAVAILABLE_FOR_LEGAL_REASONS",
+                "500 INTERNAL_SERVER_ERROR",
+                "501 NOT_IMPLEMENTED",
+                "502 BAD_GATEWAY",
+                "503 SERVICE_UNAVAILABLE",
+                "504 GATEWAY_TIMEOUT",
+                "505 HTTP_VERSION_NOT_SUPPORTED",
+                "506 VARIANT_ALSO_NEGOTIATES",
+                "507 INSUFFICIENT_STORAGE",
+                "508 LOOP_DETECTED",
+                "509 BANDWIDTH_LIMIT_EXCEEDED",
+                "510 NOT_EXTENDED",
+                "511 NETWORK_AUTHENTICATION_REQUIRED"
+              ]
+            },
+            "message": {
+              "type": "string"
+            },
+            "suppressed": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "stackTrace": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "classLoaderName": {
+                          "type": "string"
+                        },
+                        "moduleName": {
+                          "type": "string"
+                        },
+                        "moduleVersion": {
+                          "type": "string"
+                        },
+                        "methodName": {
+                          "type": "string"
+                        },
+                        "fileName": {
+                          "type": "string"
+                        },
+                        "lineNumber": {
+                          "type": "integer",
+                          "format": "int32"
+                        },
+                        "nativeMethod": {
+                          "type": "boolean"
+                        },
+                        "className": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "localizedMessage": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "localizedMessage": {
+              "type": "string"
+            }
+          }
+        },
+        "PurchaseDTO": {
+          "type": "object",
+          "properties": {
+            "arts": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "boolean"
+              }
+            },
+            "cardId": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "addressId": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        },
+        "CardNewDTO": {
+          "type": "object",
+          "properties": {
+            "number": {
+              "type": "string"
+            },
+            "date": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "cvv": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "isDefault": {
+              "type": "boolean"
+            }
+          }
+        },
+        "ArtistRegistrationDTO": {
+          "type": "object",
+          "properties": {
+            "artistName": {
+              "type": "string"
+            }
+          }
+        },
+        "ArtCreateDTO": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            },
+            "isPrivate": {
+              "type": "boolean"
+            },
+            "price": {
+              "type": "number",
+              "format": "double"
+            },
+            "description": {
+              "type": "string"
+            },
+            "size": {
+              "type": "string"
+            },
+            "frame": {
+              "type": "boolean"
+            },
+            "createDate": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "materials": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "AddressNewDTO": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "country": {
+              "type": "string"
+            },
+            "region": {
+              "type": "string"
+            },
+            "city": {
+              "type": "string"
+            },
+            "index": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "location": {
+              "type": "string"
+            },
+            "isDefault": {
+              "type": "boolean"
+            }
+          }
+        },
+        "CommonArtDTO": {
+          "type": "object",
+          "properties": {
+            "artId": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "name": {
+              "type": "string"
+            },
+            "photoUrl": {
+              "type": "string"
+            },
+            "price": {
+              "type": "number",
+              "format": "double"
+            },
+            "isPrivate": {
+              "type": "boolean"
+            },
+            "artistId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artistName": {
+              "type": "string"
+            },
+            "avatarUrl": {
+              "type": "string"
+            },
+            "customerId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "customerName": {
+              "type": "string"
+            }
+          }
+        },
+        "CustomerShortDTO": {
+          "type": "object",
+          "properties": {
+            "customerId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "customerName": {
+              "type": "string"
+            },
+            "avatarUrl": {
+              "type": "string"
+            }
+          }
+        },
+        "ArtistShortDTO": {
+          "type": "object",
+          "properties": {
+            "artistId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artistName": {
+              "type": "string"
+            },
+            "avatarUrl": {
+              "type": "string"
+            },
+            "viewsCount": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        },
+        "PrivateSubscriptionDTO": {
+          "type": "object",
+          "properties": {
+            "artistId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "avatarUrl": {
+              "type": "string"
+            },
+            "artistName": {
+              "type": "string"
+            },
+            "price": {
+              "type": "number",
+              "format": "double"
+            },
+            "payDate": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "PostDTO": {
+          "type": "object",
+          "properties": {
+            "postId": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "title": {
+              "type": "string"
+            },
+            "text": {
+              "type": "string"
+            },
+            "photoUrls": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "date": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "OrderDTO": {
+          "type": "object",
+          "properties": {
+            "orderId": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "name": {
+              "type": "string"
+            },
+            "country": {
+              "type": "string"
+            },
+            "region": {
+              "type": "string"
+            },
+            "city": {
+              "type": "string"
+            },
+            "index": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "location": {
+              "type": "string"
+            },
+            "cardType": {
+              "type": "string"
+            },
+            "number": {
+              "type": "string"
+            },
+            "artistName": {
+              "type": "string"
+            },
+            "customerName": {
+              "type": "string"
+            },
+            "artUrl": {
+              "type": "string"
+            },
+            "artName": {
+              "type": "string"
+            },
+            "price": {
+              "type": "number",
+              "format": "double"
+            },
+            "status": {
+              "type": "string"
+            },
+            "artistComment": {
+              "type": "string"
+            }
+          }
+        },
+        "CustomerFullDTO": {
+          "type": "object",
+          "properties": {
+            "customerName": {
+              "type": "string"
+            },
+            "birthDate": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "gender": {
+              "type": "string"
+            },
+            "avatarUrl": {
+              "type": "string"
+            },
+            "coverUrl": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "artistId": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "ArtShortDTO": {
+          "type": "object",
+          "properties": {
+            "artId": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "name": {
+              "type": "string"
+            },
+            "photoUrl": {
+              "type": "string"
+            },
+            "price": {
+              "type": "number",
+              "format": "double"
+            },
+            "artistId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artistName": {
+              "type": "string"
+            }
+          }
+        },
+        "ArtistFullDTO": {
+          "type": "object",
+          "properties": {
+            "artistName": {
+              "type": "string"
+            },
+            "avatarUrl": {
+              "type": "string"
+            },
+            "coverUrl": {
+              "type": "string"
+            },
+            "customerId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": {
+              "type": "string"
+            },
+            "countSoldArts": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "salesAmount": {
+              "type": "number",
+              "format": "double"
+            },
+            "countSubscribers": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "isPublicSubscribe": {
+              "type": "boolean"
+            },
+            "isPrivateSubscribe": {
+              "type": "boolean"
+            }
+          }
+        },
+        "CustomerArtDTO": {
+          "type": "object",
+          "properties": {
+            "artId": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "artistName": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "photoUrl": {
+              "type": "string"
+            },
+            "price": {
+              "type": "number",
+              "format": "double"
+            },
+            "isPrivate": {
+              "type": "boolean"
+            }
+          }
+        },
+        "ArtistArtDTO": {
+          "type": "object",
+          "properties": {
+            "artId": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "name": {
+              "type": "string"
+            },
+            "photoUrl": {
+              "type": "string"
+            },
+            "price": {
+              "type": "number",
+              "format": "double"
+            },
+            "isPrivate": {
+              "type": "boolean"
+            },
+            "available": {
+              "type": "boolean"
+            },
+            "customerId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "customerName": {
+              "type": "string"
+            },
+            "avatarUrl": {
+              "type": "string"
+            }
+          }
+        },
+        "ArtFullDTO": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            },
+            "photoUrls": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "price": {
+              "type": "number",
+              "format": "double"
+            },
+            "isPrivate": {
+              "type": "boolean"
+            },
+            "artistId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artistName": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string"
+            },
+            "customerId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "customerName": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "size": {
+              "type": "string"
+            },
+            "createDate": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "materials": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "frame": {
+              "type": "boolean"
+            },
+            "publishDate": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        }
+      }
+    }
+  }

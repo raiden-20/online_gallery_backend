@@ -3,11 +3,9 @@ package ru.vsu.cs.sheina.online_gallery_backend.dto.field;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
-import java.util.UUID;
-
 @Data
 @RequiredArgsConstructor
-public class DeleteDTO {
+public class IntIdRequestDTO {
 
-    UUID id;
+    Integer id;
 }

@@ -9,7 +9,5 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PasswordDTO {
 
-    UUID id;
-
     String password;
 }

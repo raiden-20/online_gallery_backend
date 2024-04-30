@@ -22,7 +22,7 @@ public class FileService {
         minioService.deleteFile(fileName);
     }
 
-    public String saveFile(MultipartFile file, String id) {
+    public String saveFile(MultipartFile file) {
         if (!file.isEmpty() && file.getSize() > FILE_MAX_SIZE) {
             throw new FileTooBigException();
         }

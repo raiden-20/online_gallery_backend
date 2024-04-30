@@ -28,8 +28,16 @@ public class SecurityConfig {
                 .and()
                 .authorizeHttpRequests()
 //                    .requestMatchers("/change/**").hasRole(Role.USER.name())
-                    .requestMatchers("/customers", "/artists", "search/**", "/artist/{id}", "/customer/{id}").permitAll()
-                    .anyRequest().authenticated();
+                    .requestMatchers("/customers", "/artists", "/search/**", "/customer/{id}",
+                            "/art/artId={artId}&currentId={currentId}", "/art/artist/artistId={artistId}&currentId={currentId}",
+                            "/artist/artistId={artistId}&currentId={currentId}",
+                            "/art/customer/{customerId}","/paintings", "/photos", "/sculptures").permitAll()
+                .and()
+                .authorizeHttpRequests()
+                .requestMatchers("swagger-ui/**", "swagger-ui**", "/v3/api-docs/**", "/v3/api-docs**")
+                .permitAll()
+                .anyRequest()
+                .authenticated();
 
         http
                 .oauth2ResourceServer()

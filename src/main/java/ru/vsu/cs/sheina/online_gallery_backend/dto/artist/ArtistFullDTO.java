@@ -1,4 +1,4 @@
-package ru.vsu.cs.sheina.online_gallery_backend.dto;
+package ru.vsu.cs.sheina.online_gallery_backend.dto.artist;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -18,4 +18,14 @@ public class ArtistFullDTO {
     UUID customerId;
 
     String description;
+
+    Integer countSoldArts;
+
+    Double salesAmount;
+
+    Integer countSubscribers;
+
+    Boolean isPublicSubscribe;
+
+    Boolean isPrivateSubscribe;
 }
