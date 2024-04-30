@@ -238,7 +238,7 @@ public class ArtService {
         UUID artistId = customerEntity.getArtistId();
         ArtEntity artEntity = artRepository.findById(intIdRequestDTO.getId()).orElseThrow(BadCredentialsException::new);
 
-        if (artEntity.getArtistId() != artistId) {
+        if (!artistId.equals(artEntity.getArtistId())) {
             throw new ForbiddenActionException();
         }
 

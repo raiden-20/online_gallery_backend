@@ -104,7 +104,7 @@ public class PostService {
 
         PostEntity postEntity = postRepository.findById(postChangeDTO.getPostId()).orElseThrow(BadCredentialsException::new);
 
-        if (postEntity.getArtistId() != artistId) {
+        if (!postEntity.getArtistId().equals(artistId)) {
             throw new ForbiddenActionException();
         }
 
