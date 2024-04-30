@@ -215,9 +215,9 @@ public class ArtService {
                     artPhotoRepository.save(mainPhotoEntity);
                 }
                 artPhotoEntity.setDefaultPhoto(true);
+            } else {
+                artPhotoEntity.setDefaultPhoto(false);
             }
-
-            artPhotoEntity.setDefaultPhoto(false);
             artPhotoRepository.save(artPhotoEntity);
         }
 
