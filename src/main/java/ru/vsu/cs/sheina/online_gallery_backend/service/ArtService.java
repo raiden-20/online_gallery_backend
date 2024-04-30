@@ -289,11 +289,9 @@ public class ArtService {
                 dto.setIsPrivate(true);
                 if (!currentId.equals("null")) {
                     UUID customerId = UUID.fromString(currentId);
-                    if (customerPrivateSubscriptionRepository.existsByCustomerIdAndPrivateSubscriptionId(customerId, artPrivSub.get().getSubscriptionId())) {
-                        dto.setAvailable(true);
-                    } else {
-                        dto.setAvailable(false);
-                    }
+                    CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
+                    dto.setAvailable(customerPrivateSubscriptionRepository.existsByCustomerIdAndPrivateSubscriptionId(customerId, artPrivSub.get().getSubscriptionId()) ||
+                            customerEntity.getArtistId().equals(artistId));
                 } else {
                     dto.setAvailable(false);
                 }
