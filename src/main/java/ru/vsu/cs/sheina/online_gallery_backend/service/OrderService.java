@@ -88,7 +88,7 @@ public class OrderService {
 
         OrderEntity orderEntity = orderRepository.findById(orderId).orElseThrow(BadCredentialsException::new);
 
-        if (!orderEntity.getArtistId().equals(artistId) || !orderEntity.getCustomerId().equals(customerId)) {
+        if (!orderEntity.getArtistId().equals(artistId) && !orderEntity.getCustomerId().equals(customerId)) {
             throw new ForbiddenActionException();
         }
 
