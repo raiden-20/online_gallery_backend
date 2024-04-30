@@ -35,6 +35,7 @@ public class ArtService {
     private final PrivateSubscriptionRepository privateSubscriptionRepository;
     private final ArtPrivateSubscriptionRepository artPrivateSubscriptionRepository;
     private final CustomerPrivateSubscriptionRepository customerPrivateSubscriptionRepository;
+    private final OrderRepository orderRepository;
 
     public void movePrivatePaintings(Integer subscriptionId) {
         artPrivateSubscriptionRepository.deleteAllBySubscriptionId(subscriptionId);
@@ -244,6 +245,8 @@ public class ArtService {
             throw new ForbiddenActionException();
         }
 
+        cartRepository.deleteAllByArtId(artEntity.getId());
+        orderRepository.deleteAllByArtId(artEntity.getId());
         artPrivateSubscriptionRepository.deleteAllByArtId(artEntity.getId());
 
         artPhotoRepository.findAllByArtId(artEntity.getId()).stream()
