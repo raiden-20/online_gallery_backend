@@ -115,8 +115,10 @@ public class ArtService {
             artFullDTO.setIsPrivate(false);
         } else if (!currentId.equals("null") && artPrivateSubscriptionRepository.existsByArtId(artId)){
             UUID customerId = UUID.fromString(currentId);
+            CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
             PrivateSubscriptionEntity privateSubscriptionEntity = privateSubscriptionRepository.findByArtistId(artEntity.getArtistId()).get();
-            if (!customerPrivateSubscriptionRepository.existsByCustomerIdAndPrivateSubscriptionId(customerId, privateSubscriptionEntity.getId())) {
+            if (!customerPrivateSubscriptionRepository.existsByCustomerIdAndPrivateSubscriptionId(customerId, privateSubscriptionEntity.getId()) &&
+                    !customerEntity.getArtistId().equals(artEntity.getArtistId())) {
                 throw new ForbiddenActionException();
             }
             artFullDTO.setIsPrivate(true);
@@ -274,7 +276,7 @@ public class ArtService {
             }
 
             if (artEntity.getOwnerId() != null) {
-                CustomerEntity customerEntity = customerRepository.findById(artEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
+                CustomerEntity customerEntity = customerRepository.findById(artEntity.getOwnerId()).orElseThrow(UserNotFoundException::new);
                 dto.setCustomerId(customerEntity.getId());
                 dto.setCustomerName(customerEntity.getCustomerName());
                 dto.setAvatarUrl(customerEntity.getAvatarUrl());
