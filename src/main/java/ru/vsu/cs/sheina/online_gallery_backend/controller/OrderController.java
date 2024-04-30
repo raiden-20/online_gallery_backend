@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.order.OrderDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.order.OrderShortDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadActionException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentialsException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.ForbiddenActionException;
 import ru.vsu.cs.sheina.online_gallery_backend.service.OrderService;
@@ -72,7 +73,7 @@ public class OrderController {
             content = @Content(schema = @Schema(implementation = ForbiddenActionException.class)))
     @ApiResponse(responseCode = "409",
             description = "Статус заказа не соответствует действию",
-            content = @Content(schema = @Schema(implementation = ForbiddenActionException.class)))
+            content = @Content(schema = @Schema(implementation = BadActionException.class)))
     public ResponseEntity<?> receive(@RequestBody IntIdRequestDTO intIdDTO,
                                      @RequestHeader("Authorization") String token) {
         orderService.receive(intIdDTO, token);
