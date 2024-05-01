@@ -31,7 +31,7 @@ CREATE TABLE art(
      id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
      name VARCHAR(200),
      type VARCHAR(15),
-     price REAL,
+     price BIGINT,
      artist_id UUID REFERENCES artist(id),
      owner_id UUID REFERENCES customer(id),
      sold BOOLEAN,
@@ -61,7 +61,7 @@ CREATE TABLE public_subscription(
 CREATE TABLE private_subscription(
     id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
     artist_id UUID REFERENCES artist(id),
-    price REAL,
+    price INT,
     create_date TIMESTAMP
 );
 
