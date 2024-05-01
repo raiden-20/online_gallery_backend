@@ -17,4 +17,7 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Integer> {
 
     @Transactional
     void deleteAllByArtId(Integer artId);
+
+    @Transactional
+    void deleteAllByCustomerId(UUID customerId);
 }

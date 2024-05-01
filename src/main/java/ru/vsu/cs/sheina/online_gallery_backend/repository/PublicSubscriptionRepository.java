@@ -19,5 +19,11 @@ public interface PublicSubscriptionRepository extends JpaRepository<PublicSubscr
     @Transactional
     void deleteById(Integer id);
 
+    @Transactional
+    void deleteAllByCustomerId(UUID customerId);
+
+    @Transactional
+    void deleteAllByArtistId(UUID artistId);
+
     Boolean existsByArtistIdAndCustomerId(UUID artistId, UUID customerId);
 }

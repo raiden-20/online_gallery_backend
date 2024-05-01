@@ -21,6 +21,11 @@ public class ArtistService {
 
     private final ArtistRepository artistRepository;
     private final CustomerRepository customerRepository;
+    private final ArtPrivateSubscriptionRepository artPrivateSubscriptionRepository;
+    private final PostRepository postRepository;
+    private final PostPhotoRepository postPhotoRepository;
+    private final OrderRepository orderRepository;
+    private final CartRepository cartRepository;
     private final ArtRepository artRepository;
     private final ArtPhotoRepository artPhotoRepository;
     private final PublicSubscriptionRepository publicSubscriptionRepository;
@@ -173,6 +178,31 @@ public class ArtistService {
 
     public void deleteAccount(UUID artistId) {
         ArtistEntity artistEntity = artistRepository.findById(artistId).orElseThrow(UserNotFoundException::new);
+        List<ArtEntity> artEntities = artRepository.findAllByArtistId(artistId);
+        for (ArtEntity art: artEntities) {
+            cartRepository.deleteAllByArtId(art.getId());
+            orderRepository.deleteAllByArtId(art.getId());
+            artPrivateSubscriptionRepository.deleteAllByArtId(art.getId());
+
+            artPhotoRepository.findAllByArtId(art.getId()).stream()
+                    .map(ArtPhotoEntity::getPhotoUrl)
+                    .forEach(fileService::deleteFile);
+
+            artPhotoRepository.deleteAllByArtId(art.getId());
+            artRepository.deleteById(art.getId());
+        }
+
+        publicSubscriptionRepository.deleteAllByArtistId(artistId);
+        postRepository.findAllByArtistId(artistId)
+                .forEach(ent -> postPhotoRepository.deleteAllByPostId(ent.getId()));
+        postRepository.deleteAllByArtistId(artistId);
+
+        if (privateSubscriptionRepository.existsByArtistId(artistId)) {
+            PrivateSubscriptionEntity privSubEntity = privateSubscriptionRepository.findByArtistId(artistId).get();
+            customerPrivateSubscriptionRepository.deleteAllByPrivateSubscriptionId(privSubEntity.getId());
+            artPrivateSubscriptionRepository.deleteAllBySubscriptionId(privSubEntity.getId());
+        }
+
         artistRepository.delete(artistEntity);
     }
 }

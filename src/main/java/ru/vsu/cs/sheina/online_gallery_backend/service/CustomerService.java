@@ -6,12 +6,14 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.customer.CustomerFullDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.customer.CustomerRegistrationDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.customer.CustomerShortDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.entity.ArtEntity;
+import ru.vsu.cs.sheina.online_gallery_backend.entity.ArtistEntity;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.CustomerEntity;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentialsException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.ForbiddenActionException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserAlreadyExistsException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
-import ru.vsu.cs.sheina.online_gallery_backend.repository.CustomerRepository;
+import ru.vsu.cs.sheina.online_gallery_backend.repository.*;
 import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
 
 import java.sql.Timestamp;
@@ -27,6 +29,12 @@ import java.util.UUID;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final AddressRepository addressRepository;
+    private final CustomerPrivateSubscriptionRepository customerPrivateSubscriptionRepository;
+    private final PublicSubscriptionRepository publicSubscriptionRepository;
+    private final CardRepository cardRepository;
+    private final CartRepository cartRepository;
+    private final OrderRepository orderRepository;
     private final FileService fileService;
     private final ArtistService artistService;
     private final JWTParser jwtParser;
@@ -133,14 +141,29 @@ public class CustomerService {
     }
 
     public void deleteAccount(String token) {
-        UUID userId = jwtParser.getIdFromAccessToken(token);
+        UUID customerId = jwtParser.getIdFromAccessToken(token);
 
-        CustomerEntity customerEntity = customerRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-
-        customerRepository.delete(customerEntity);
+        CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
 
         if (customerEntity.getArtistId() != null) {
             artistService.deleteAccount(customerEntity.getArtistId());
         }
+
+        orderRepository.deleteAllByCustomerId(customerId);
+        cardRepository.deleteAllByCustomerId(customerId);
+        addressRepository.deleteAllByCustomerId(customerId);
+        cartRepository.deleteAllByCustomerId(customerId);
+        customerPrivateSubscriptionRepository.deleteAllByCustomerId(customerId);
+        publicSubscriptionRepository.deleteAllByCustomerId(customerId);
+
+        if (!customerEntity.getAvatarUrl().isEmpty()) {
+            fileService.deleteFile(customerEntity.getAvatarUrl());
+        }
+
+        if (!customerEntity.getCoverUrl().isEmpty()) {
+            fileService.deleteFile(customerEntity.getCoverUrl());
+        }
+
+        customerRepository.delete(customerEntity);
     }
 }
