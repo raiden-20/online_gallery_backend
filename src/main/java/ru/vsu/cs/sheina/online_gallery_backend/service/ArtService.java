@@ -94,13 +94,14 @@ public class ArtService {
 
     public ArtFullDTO getArt(Integer artId, String currentId) {
         ArtEntity artEntity = artRepository.findById(artId).orElseThrow(BadCredentialsException::new);
+        ArtistEntity artistEntity = artistRepository.findById(artEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
 
         ArtFullDTO artFullDTO = new ArtFullDTO();
         artFullDTO.setName(artEntity.getName());
         artFullDTO.setType(artEntity.getType());
         artFullDTO.setPrice(artEntity.getPrice());
         artFullDTO.setArtistId(artEntity.getArtistId());
-        artFullDTO.setArtistName(artEntity.getName());
+        artFullDTO.setArtistName(artistEntity.getArtistName());
         artFullDTO.setDescription(artEntity.getDescription());
         artFullDTO.setSize(artEntity.getSize());
         artFullDTO.setCreateDate(artEntity.getCreateDate());
