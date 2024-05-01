@@ -38,7 +38,7 @@ CREATE TABLE art(
      description VARCHAR(500),
      size VARCHAR(20),
      create_date TIMESTAMP,
-     tags VARCHAR(30) ARRAY[22],
+     tags VARCHAR(30) ARRAY[24],
      materials VARCHAR(20) ARRAY[30],
      frame BOOLEAN,
      publish_date TIMESTAMP,
@@ -64,7 +64,6 @@ CREATE TABLE private_subscription(
     price INT,
     create_date TIMESTAMP
 );
-
 
 CREATE TABLE art_private_subscription(
     id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
