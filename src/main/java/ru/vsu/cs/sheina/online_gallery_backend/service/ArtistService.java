@@ -201,8 +201,7 @@ public class ArtistService {
             PrivateSubscriptionEntity privSubEntity = privateSubscriptionRepository.findByArtistId(artistId).get();
             customerPrivateSubscriptionRepository.deleteAllByPrivateSubscriptionId(privSubEntity.getId());
             artPrivateSubscriptionRepository.deleteAllBySubscriptionId(privSubEntity.getId());
+            privateSubscriptionRepository.deleteById(privSubEntity.getId());
         }
-
-        artistRepository.delete(artistEntity);
     }
 }

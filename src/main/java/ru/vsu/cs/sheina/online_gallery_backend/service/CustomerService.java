@@ -29,6 +29,7 @@ import java.util.UUID;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final ArtistRepository artistRepository;
     private final AddressRepository addressRepository;
     private final CustomerPrivateSubscriptionRepository customerPrivateSubscriptionRepository;
     private final PublicSubscriptionRepository publicSubscriptionRepository;
@@ -164,6 +165,8 @@ public class CustomerService {
             fileService.deleteFile(customerEntity.getCoverUrl());
         }
 
+        UUID artistId = customerEntity.getArtistId();
         customerRepository.delete(customerEntity);
+        artistRepository.deleteById(artistId);
     }
 }
