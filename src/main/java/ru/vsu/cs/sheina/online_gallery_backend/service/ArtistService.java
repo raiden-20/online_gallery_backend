@@ -153,11 +153,13 @@ public class ArtistService {
             Map<Integer, String> arts = new HashMap<>();
             List<ArtEntity> artEntities = artRepository.findAllByArtistId(dto.getArtistId());
             for (ArtEntity artEntity: artEntities) {
-                Optional<ArtPhotoEntity> defaultPhoto = artPhotoRepository.findByArtIdAndAndDefaultPhoto(artEntity.getId(), true);
-                if (defaultPhoto.isPresent()){
-                    arts.put(artEntity.getId(), defaultPhoto.get().getPhotoUrl());
-                } else {
-                    arts.put(artEntity.getId(), "");
+                if (!artPrivateSubscriptionRepository.existsByArtId(artEntity.getId())) {
+                    Optional<ArtPhotoEntity> defaultPhoto = artPhotoRepository.findByArtIdAndAndDefaultPhoto(artEntity.getId(), true);
+                    if (defaultPhoto.isPresent()) {
+                        arts.put(artEntity.getId(), defaultPhoto.get().getPhotoUrl());
+                    } else {
+                        arts.put(artEntity.getId(), "");
+                    }
                 }
                 if (arts.size() >= 5) {
                     break;
