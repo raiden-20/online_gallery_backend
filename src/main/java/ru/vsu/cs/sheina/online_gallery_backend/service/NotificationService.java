@@ -5,6 +5,7 @@ import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.FluxSink;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.notification.NotificationDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.notification.NotificationShortDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.notification.NotificationType;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.*;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
@@ -48,12 +49,13 @@ public class NotificationService {
         notificationRepository.save(notificationEntity);
         String data = customerEntity.getCustomerName() + " " + notificationEntity.getText() + " №" + getOrderNum(orderEntity.getId());
 
+        NotificationShortDTO shortDTO = new NotificationShortDTO(customerEntity.getAvatarUrl(), data);
+
         if (subscriptions.containsKey(orderEntity.getCustomerId())) {
             ServerSentEvent<Object> event = ServerSentEvent.builder()
                     .id(String.valueOf(notificationEntity.getId()))
                     .event("ORDER")
-                    .comment(customerEntity.getAvatarUrl())
-                    .data(data)
+                    .data(shortDTO)
                     .build();
             subscriptions.get(orderEntity.getArtistId()).next(event);
         }
@@ -70,13 +72,13 @@ public class NotificationService {
 
         notificationRepository.save(notificationEntity);
         String data = artistEntity.getArtistName() + " " + notificationEntity.getText() + " №" + getOrderNum(orderEntity.getId());
+        NotificationShortDTO shortDTO = new NotificationShortDTO(artistEntity.getAvatarUrl(), data);
 
         if (subscriptions.containsKey(orderEntity.getCustomerId())) {
             ServerSentEvent<Object> event = ServerSentEvent.builder()
                     .id(String.valueOf(notificationEntity.getId()))
                     .event("ORDER")
-                    .comment(artistEntity.getAvatarUrl())
-                    .data(data)
+                    .data(shortDTO)
                     .build();
             subscriptions.get(orderEntity.getCustomerId()).next(event);
         }
@@ -93,13 +95,13 @@ public class NotificationService {
 
         notificationRepository.save(notificationEntity);
         String data = artistEntity.getArtistName() + " " + notificationEntity.getText() + " №" + getOrderNum(orderEntity.getId());
+        NotificationShortDTO shortDTO = new NotificationShortDTO(artistEntity.getAvatarUrl(), data);
 
         if (subscriptions.containsKey(orderEntity.getCustomerId())) {
             ServerSentEvent<Object> event = ServerSentEvent.builder()
                     .id(String.valueOf(notificationEntity.getId()))
                     .event("ORDER")
-                    .comment(artistEntity.getAvatarUrl())
-                    .data(data)
+                    .data(shortDTO)
                     .build();
             subscriptions.get(orderEntity.getCustomerId()).next(event);
         }
@@ -115,13 +117,13 @@ public class NotificationService {
 
         notificationRepository.save(notificationEntity);
         String data = customerEntity.getCustomerName() + " " + notificationEntity.getText() + " " + artEntity.getName();
+        NotificationShortDTO shortDTO = new NotificationShortDTO(customerEntity.getAvatarUrl(), data);
 
         if (subscriptions.containsKey(orderEntity.getArtistId())) {
             ServerSentEvent<Object> event = ServerSentEvent.builder()
                     .id(String.valueOf(notificationEntity.getId()))
                     .event("ORDER")
-                    .comment(customerEntity.getAvatarUrl())
-                    .data(data)
+                    .data(shortDTO)
                     .build();
             subscriptions.get(orderEntity.getArtistId()).next(event);
         }
@@ -141,13 +143,13 @@ public class NotificationService {
 
             notificationRepository.save(notificationEntity);
             String data = artistEntity.getArtistName() + " " + notificationEntity.getText();
+            NotificationShortDTO shortDTO = new NotificationShortDTO(artistEntity.getAvatarUrl(), data);
 
             if (subscriptions.containsKey(subscriptionEntity.getCustomerId())) {
                 ServerSentEvent<Object> event = ServerSentEvent.builder()
                         .id(String.valueOf(notificationEntity.getId()))
                         .event("PRIVATE_DELETED")
-                        .comment(artistEntity.getAvatarUrl())
-                        .data(data)
+                        .data(shortDTO)
                         .build();
                 subscriptions.get(subscriptionEntity.getCustomerId()).next(event);
             }
@@ -168,13 +170,13 @@ public class NotificationService {
 
             notificationRepository.save(notificationEntity);
             String data = artistEntity.getArtistName() + " " + notificationEntity.getText() + " " + postEntity.getTitle();
+            NotificationShortDTO shortDTO = new NotificationShortDTO(artistEntity.getAvatarUrl(), data);
 
             if (subscriptions.containsKey(subscriptionEntity.getCustomerId())) {
                 ServerSentEvent<Object> event = ServerSentEvent.builder()
                         .id(String.valueOf(notificationEntity.getId()))
                         .event("POST")
-                        .comment(artistEntity.getAvatarUrl())
-                        .data(data)
+                        .data(shortDTO)
                         .build();
                 subscriptions.get(subscriptionEntity.getCustomerId()).next(event);
             }
@@ -194,13 +196,13 @@ public class NotificationService {
 
             notificationRepository.save(notificationEntity);
             String data = artistEntity.getArtistName() + " " + notificationEntity.getText() + " " + artEntity.getName();
+            NotificationShortDTO shortDTO = new NotificationShortDTO(artistEntity.getAvatarUrl(), data);
 
             if (subscriptions.containsKey(subscriptionEntity.getCustomerId())) {
                 ServerSentEvent<Object> event = ServerSentEvent.builder()
                         .id(String.valueOf(notificationEntity.getId()))
                         .event("ART")
-                        .comment(artistEntity.getAvatarUrl())
-                        .data(data)
+                        .data(shortDTO)
                         .build();
                 subscriptions.get(subscriptionEntity.getCustomerId()).next(event);
             }
@@ -221,13 +223,13 @@ public class NotificationService {
 
             notificationRepository.save(notificationEntity);
             String data = artistEntity.getArtistName() + " " + notificationEntity.getText() + " " + artEntity.getName();
+            NotificationShortDTO shortDTO = new NotificationShortDTO(artistEntity.getAvatarUrl(), data);
 
             if (subscriptions.containsKey(subscriptionEntity.getCustomerId())) {
                 ServerSentEvent<Object> event = ServerSentEvent.builder()
                         .id(String.valueOf(notificationEntity.getId()))
                         .event("ART")
-                        .comment(artistEntity.getAvatarUrl())
-                        .data(data)
+                        .data(shortDTO)
                         .build();
                 subscriptions.get(subscriptionEntity.getCustomerId()).next(event);
             }
