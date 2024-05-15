@@ -36,6 +36,7 @@ public class ArtService {
     private final ArtPrivateSubscriptionRepository artPrivateSubscriptionRepository;
     private final CustomerPrivateSubscriptionRepository customerPrivateSubscriptionRepository;
     private final OrderRepository orderRepository;
+    private final NotificationService notificationService;
 
     public void movePrivatePaintings(Integer subscriptionId) {
         artPrivateSubscriptionRepository.deleteAllBySubscriptionId(subscriptionId);
@@ -46,9 +47,7 @@ public class ArtService {
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         UUID artistId = customerEntity.getArtistId();
 
-        if (!artistRepository.existsById(artistId)) {
-            throw new UserNotFoundException();
-        }
+        ArtistEntity artistEntity = artistRepository.findById(artistId).orElseThrow(UserNotFoundException::new);
 
         if (!artCreateDTO.getType().equals("PAINTING") && !artCreateDTO.getType().equals("PHOTO") && !artCreateDTO.getType().equals("SCULPTURE")) {
             throw new BadCredentialsException();
@@ -89,6 +88,13 @@ public class ArtService {
             artPhotoEntity.setPhotoUrl(fileService.saveFile(photos.get(i)));
             artPhotoEntity.setDefaultPhoto(i == 0);
             artPhotoRepository.save(artPhotoEntity);
+        }
+
+        if (artCreateDTO.getIsPrivate()) {
+            PrivateSubscriptionEntity privateSubscription = privateSubscriptionRepository.findByArtistId(artistId).get();
+            notificationService.sendNewPrivateArtNotification(artEntity, artistEntity, privateSubscription);
+        } else {
+            notificationService.sendNewPublicArtNotification(artEntity, artistEntity);
         }
     }
 

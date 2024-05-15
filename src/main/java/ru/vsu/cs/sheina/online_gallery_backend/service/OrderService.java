@@ -30,6 +30,7 @@ public class OrderService {
     private final ArtistRepository artistRepository;
     private final CardRepository cardRepository;
     private final AddressRepository addressRepository;
+    private final NotificationService notificationService;
     
     public Integer createOrder(Integer artId, UUID customerId, Integer cardId, Integer addressId, Boolean anonymous) {
         ArtEntity artEntity = artRepository.findById(artId).orElseThrow(BadCredentialsException::new);
@@ -110,31 +111,37 @@ public class OrderService {
 
         orderEntity.setStatus("FINISHED");
         orderRepository.save(orderEntity);
+
+        CustomerEntity customerEntity = customerRepository.findById(orderEntity.getCustomerId()).orElseThrow(UserNotFoundException::new);
+
+        notificationService.sendArtReceivedNotification(orderEntity, customerEntity);
     }
 
     public void send(OrderShortDTO orderShortDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
-        UUID artistId = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new).getArtistId();
+        ArtistEntity artistEntity = artistRepository.findById(customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new).getArtistId()).orElseThrow(UserNotFoundException::new);
 
         OrderEntity orderEntity = orderRepository.findById(orderShortDTO.getId()).orElseThrow(BadCredentialsException::new);
 
-        if (!orderEntity.getArtistId().equals(artistId)) {
+        if (!orderEntity.getArtistId().equals(artistEntity.getId())) {
             throw new ForbiddenActionException();
         }
 
         orderEntity.setArtistComment(orderShortDTO.getComment());
         orderEntity.setStatus("PROGRESS");
 
+        notificationService.sendArtSendNotification(orderEntity, artistEntity);
+
         orderRepository.save(orderEntity);
     }
 
     public void edit(OrderShortDTO orderShortDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
-        UUID artistId = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new).getArtistId();
+        ArtistEntity artistEntity = artistRepository.findById(customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new).getArtistId()).orElseThrow(UserNotFoundException::new);
 
         OrderEntity orderEntity = orderRepository.findById(orderShortDTO.getId()).orElseThrow(BadCredentialsException::new);
 
-        if (!orderEntity.getArtistId().equals(artistId)) {
+        if (!orderEntity.getArtistId().equals(artistEntity.getId())) {
             throw new ForbiddenActionException();
         }
 
@@ -143,6 +150,7 @@ public class OrderService {
         }
         orderEntity.setArtistComment(orderShortDTO.getComment());
         orderRepository.save(orderEntity);
+        notificationService.sendArtChangeCommentNotification(orderEntity, artistEntity);
     }
 
     private OrderDTO getOrderDTObyId(Integer orderId) {

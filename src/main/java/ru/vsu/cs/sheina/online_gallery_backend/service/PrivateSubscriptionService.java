@@ -28,6 +28,7 @@ public class PrivateSubscriptionService {
     private final CustomerRepository customerRepository;
     private final ArtistRepository artistRepository;
     private final JWTParser jwtParser;
+    private final NotificationService notificationService;
 
     private final Integer DAYS_BETWEEN_PAYMENT = 30;
 
@@ -153,11 +154,14 @@ public class PrivateSubscriptionService {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         UUID artistId = customerEntity.getArtistId();
-        PrivateSubscriptionEntity entity = privateSubscriptionRepository.findByArtistId(artistId).orElseThrow(BadCredentialsException::new);
+        ArtistEntity artistEntity = artistRepository.findById(artistId).orElseThrow(UserNotFoundException::new);
+        PrivateSubscriptionEntity subscriptionEntity = privateSubscriptionRepository.findByArtistId(artistId).orElseThrow(BadCredentialsException::new);
 
-        customerPrivateSubscriptionRepository.deleteAllByPrivateSubscriptionId(entity.getId());
-        artService.movePrivatePaintings(entity.getId());
-        privateSubscriptionRepository.deleteById(entity.getId());
+        notificationService.sendPrivateDeletedNotification(artistEntity, subscriptionEntity);
+
+        customerPrivateSubscriptionRepository.deleteAllByPrivateSubscriptionId(subscriptionEntity.getId());
+        artService.movePrivatePaintings(subscriptionEntity.getId());
+        privateSubscriptionRepository.deleteById(subscriptionEntity.getId());
     }
 
     public List<CustomerShortDTO> searchCustomerUsers(String input, String token) {

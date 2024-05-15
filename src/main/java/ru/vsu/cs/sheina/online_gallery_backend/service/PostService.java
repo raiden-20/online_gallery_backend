@@ -7,10 +7,7 @@ import ru.vsu.cs.sheina.online_gallery_backend.dto.post.PostChangeDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.post.PostCreateDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.post.PostDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
-import ru.vsu.cs.sheina.online_gallery_backend.entity.CustomerEntity;
-import ru.vsu.cs.sheina.online_gallery_backend.entity.PostEntity;
-import ru.vsu.cs.sheina.online_gallery_backend.entity.PostPhotoEntity;
-import ru.vsu.cs.sheina.online_gallery_backend.entity.PrivateSubscriptionEntity;
+import ru.vsu.cs.sheina.online_gallery_backend.entity.*;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentialsException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.ForbiddenActionException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
@@ -33,6 +30,7 @@ public class PostService {
     private final PrivateSubscriptionRepository privateSubscriptionRepository;
     private final ArtistRepository artistRepository;
     private final FileService fileService;
+    private final NotificationService notificationService;
     private final JWTParser jwtParser;
 
     public List<PostDTO> getPosts(UUID artistId, String token) {
@@ -95,6 +93,11 @@ public class PostService {
 
             postPhotoRepository.save(postPhotoEntity);
         }
+
+        ArtistEntity artistEntity = artistRepository.findById(artistId).orElseThrow(UserNotFoundException::new);
+        PrivateSubscriptionEntity privateSubscriptionEntity = privateSubscriptionRepository.findByArtistId(artistId).orElseThrow(BadCredentialsException::new);
+
+        notificationService.sendNewPrivatePostNotification(postEntity, artistEntity, privateSubscriptionEntity);
     }
 
     public void changePost(List<MultipartFile> photos, PostChangeDTO postChangeDTO, String token) {
