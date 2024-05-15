@@ -345,7 +345,7 @@ public class NotificationService {
                     dto.setAvatarUrl("");
                 }
                 break;
-            case "artSend" :
+            case "artSold" :
             case "artReceived" :
                 dto.setType(NotificationType.ORDER);
                 dto.setIsSystem(false);
@@ -357,6 +357,7 @@ public class NotificationService {
                 }
                 break;
             case "artChangeComment" :
+            case "artSend" :
                 dto.setType(NotificationType.ORDER);
                 dto.setIsSystem(false);
                 artistEntity = artistRepository.findById(entity.getSenderId());
@@ -386,7 +387,6 @@ public class NotificationService {
                 dto.setIsSystem(true);
                 dto.setAvatarUrl("");
                 break;
-            case "artSold" :
         }
     }
 }
