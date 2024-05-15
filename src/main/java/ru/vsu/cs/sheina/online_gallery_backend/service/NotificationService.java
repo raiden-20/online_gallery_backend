@@ -40,16 +40,15 @@ public class NotificationService {
     public void sendArtReceivedNotification(OrderEntity orderEntity, CustomerEntity customerEntity) {
         NotificationEntity notificationEntity = new NotificationEntity();
         notificationEntity.setType("artReceived");
-        notificationEntity.setText("обновил(-а) статус заказа");
+        notificationEntity.setText(customerEntity.getCustomerName() + " обновил(-а) статус заказа №" + getOrderNum(orderEntity.getId()));
         notificationEntity.setReceiverId(orderEntity.getArtistId());
         notificationEntity.setSenderId(orderEntity.getCustomerId());
         notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
         notificationEntity.setSubjectId(orderEntity.getId());
 
         notificationRepository.save(notificationEntity);
-        String data = customerEntity.getCustomerName() + " " + notificationEntity.getText() + " №" + getOrderNum(orderEntity.getId());
 
-        NotificationShortDTO shortDTO = new NotificationShortDTO(customerEntity.getAvatarUrl(), data);
+        NotificationShortDTO shortDTO = new NotificationShortDTO(customerEntity.getAvatarUrl(), notificationEntity.getText());
 
         if (subscriptions.containsKey(orderEntity.getCustomerId())) {
             ServerSentEvent<Object> event = ServerSentEvent.builder()
@@ -64,15 +63,14 @@ public class NotificationService {
     public void sendArtChangeCommentNotification(OrderEntity orderEntity, ArtistEntity artistEntity) {
         NotificationEntity notificationEntity = new NotificationEntity();
         notificationEntity.setType("artChangeComment");
-        notificationEntity.setText("обновил(-а) статус заказа");
+        notificationEntity.setText(artistEntity.getArtistName() + " обновил(-а) статус заказа №" + getOrderNum(orderEntity.getId()));
         notificationEntity.setReceiverId(orderEntity.getCustomerId());
         notificationEntity.setSenderId(orderEntity.getArtistId());
         notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
         notificationEntity.setSubjectId(orderEntity.getId());
 
         notificationRepository.save(notificationEntity);
-        String data = artistEntity.getArtistName() + " " + notificationEntity.getText() + " №" + getOrderNum(orderEntity.getId());
-        NotificationShortDTO shortDTO = new NotificationShortDTO(artistEntity.getAvatarUrl(), data);
+        NotificationShortDTO shortDTO = new NotificationShortDTO(artistEntity.getAvatarUrl(), notificationEntity.getText());
 
         if (subscriptions.containsKey(orderEntity.getCustomerId())) {
             ServerSentEvent<Object> event = ServerSentEvent.builder()
@@ -87,15 +85,14 @@ public class NotificationService {
     public void sendArtSendNotification(OrderEntity orderEntity, ArtistEntity artistEntity) {
         NotificationEntity notificationEntity = new NotificationEntity();
         notificationEntity.setType("artSend");
-        notificationEntity.setText("обновил(-а) статус заказа");
+        notificationEntity.setText(artistEntity.getArtistName() + " обновил(-а) статус заказа №" + getOrderNum(orderEntity.getId()));
         notificationEntity.setReceiverId(orderEntity.getCustomerId());
         notificationEntity.setSenderId(orderEntity.getArtistId());
         notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
         notificationEntity.setSubjectId(orderEntity.getId());
 
         notificationRepository.save(notificationEntity);
-        String data = artistEntity.getArtistName() + " " + notificationEntity.getText() + " №" + getOrderNum(orderEntity.getId());
-        NotificationShortDTO shortDTO = new NotificationShortDTO(artistEntity.getAvatarUrl(), data);
+        NotificationShortDTO shortDTO = new NotificationShortDTO(artistEntity.getAvatarUrl(), notificationEntity.getText());
 
         if (subscriptions.containsKey(orderEntity.getCustomerId())) {
             ServerSentEvent<Object> event = ServerSentEvent.builder()
@@ -109,15 +106,14 @@ public class NotificationService {
     public void sendArtSoldNotification(OrderEntity orderEntity, CustomerEntity customerEntity, ArtEntity artEntity) {
         NotificationEntity notificationEntity = new NotificationEntity();
         notificationEntity.setType("artSold");
-        notificationEntity.setText("купил(-а) Вашу работу:");
+        notificationEntity.setText(customerEntity.getCustomerName() + " купил(-а) Вашу работу: " + artEntity.getName());
         notificationEntity.setReceiverId(orderEntity.getArtistId());
         notificationEntity.setSenderId(orderEntity.getCustomerId());
         notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
         notificationEntity.setSubjectId(orderEntity.getId());
 
         notificationRepository.save(notificationEntity);
-        String data = customerEntity.getCustomerName() + " " + notificationEntity.getText() + " " + artEntity.getName();
-        NotificationShortDTO shortDTO = new NotificationShortDTO(customerEntity.getAvatarUrl(), data);
+        NotificationShortDTO shortDTO = new NotificationShortDTO(customerEntity.getAvatarUrl(), notificationEntity.getText());
 
         if (subscriptions.containsKey(orderEntity.getArtistId())) {
             ServerSentEvent<Object> event = ServerSentEvent.builder()
@@ -135,15 +131,14 @@ public class NotificationService {
         for (CustomerPrivateSubscriptionEntity subscriptionEntity: subscriptionEntities) {
             NotificationEntity notificationEntity = new NotificationEntity();
             notificationEntity.setType("privateDeleted");
-            notificationEntity.setText("отключил(-а) ежемесячную поддержку. Деньги за неиспользуемый период вернутся в течение 7 дней.");
+            notificationEntity.setText(artistEntity.getArtistName() + " отключил(-а) ежемесячную поддержку. Деньги за неиспользуемый период вернутся в течение 7 дней.");
             notificationEntity.setReceiverId(subscriptionEntity.getCustomerId());
             notificationEntity.setSenderId(artistEntity.getId());
             notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
             notificationEntity.setSubjectId(null);
 
             notificationRepository.save(notificationEntity);
-            String data = artistEntity.getArtistName() + " " + notificationEntity.getText();
-            NotificationShortDTO shortDTO = new NotificationShortDTO(artistEntity.getAvatarUrl(), data);
+            NotificationShortDTO shortDTO = new NotificationShortDTO(artistEntity.getAvatarUrl(), notificationEntity.getText());
 
             if (subscriptions.containsKey(subscriptionEntity.getCustomerId())) {
                 ServerSentEvent<Object> event = ServerSentEvent.builder()
@@ -162,15 +157,14 @@ public class NotificationService {
         for (CustomerPrivateSubscriptionEntity subscriptionEntity: subscriptionEntities) {
             NotificationEntity notificationEntity = new NotificationEntity();
             notificationEntity.setType("newPrivatePost");
-            notificationEntity.setText("выложил(-а) новый пост:");
+            notificationEntity.setText(artistEntity.getArtistName() + " выложил(-а) новый пост: " + postEntity.getTitle());
             notificationEntity.setReceiverId(subscriptionEntity.getCustomerId());
             notificationEntity.setSenderId(artistEntity.getId());
             notificationEntity.setCreateDate(postEntity.getCreatedAt());
             notificationEntity.setSubjectId(postEntity.getId());
 
             notificationRepository.save(notificationEntity);
-            String data = artistEntity.getArtistName() + " " + notificationEntity.getText() + " " + postEntity.getTitle();
-            NotificationShortDTO shortDTO = new NotificationShortDTO(artistEntity.getAvatarUrl(), data);
+            NotificationShortDTO shortDTO = new NotificationShortDTO(artistEntity.getAvatarUrl(), notificationEntity.getText());
 
             if (subscriptions.containsKey(subscriptionEntity.getCustomerId())) {
                 ServerSentEvent<Object> event = ServerSentEvent.builder()
@@ -188,15 +182,14 @@ public class NotificationService {
         for (PublicSubscriptionEntity subscriptionEntity: publicSubscriptionEntities) {
             NotificationEntity notificationEntity = new NotificationEntity();
             notificationEntity.setType("newPublicArt");
-            notificationEntity.setText("выставил(-а) новую работу:");
+            notificationEntity.setText(artistEntity.getArtistName() + " выставил(-а) новую работу: "+ artEntity.getName());
             notificationEntity.setReceiverId(subscriptionEntity.getCustomerId());
             notificationEntity.setSenderId(artistEntity.getId());
             notificationEntity.setCreateDate(artEntity.getPublishDate());
             notificationEntity.setSubjectId(artEntity.getId());
 
             notificationRepository.save(notificationEntity);
-            String data = artistEntity.getArtistName() + " " + notificationEntity.getText() + " " + artEntity.getName();
-            NotificationShortDTO shortDTO = new NotificationShortDTO(artistEntity.getAvatarUrl(), data);
+            NotificationShortDTO shortDTO = new NotificationShortDTO(artistEntity.getAvatarUrl(), notificationEntity.getText());
 
             if (subscriptions.containsKey(subscriptionEntity.getCustomerId())) {
                 ServerSentEvent<Object> event = ServerSentEvent.builder()
@@ -215,15 +208,14 @@ public class NotificationService {
         for (CustomerPrivateSubscriptionEntity subscriptionEntity: subscriptionEntities) {
             NotificationEntity notificationEntity = new NotificationEntity();
             notificationEntity.setType("newPrivateArt");
-            notificationEntity.setText("выставил(-а) новую работу:");
+            notificationEntity.setText(artistEntity.getArtistName() + " выставил(-а) новую работу: " + artEntity.getName());
             notificationEntity.setReceiverId(subscriptionEntity.getCustomerId());
             notificationEntity.setSenderId(artistEntity.getId());
             notificationEntity.setCreateDate(artEntity.getPublishDate());
             notificationEntity.setSubjectId(artEntity.getId());
 
             notificationRepository.save(notificationEntity);
-            String data = artistEntity.getArtistName() + " " + notificationEntity.getText() + " " + artEntity.getName();
-            NotificationShortDTO shortDTO = new NotificationShortDTO(artistEntity.getAvatarUrl(), data);
+            NotificationShortDTO shortDTO = new NotificationShortDTO(artistEntity.getAvatarUrl(), notificationEntity.getText());
 
             if (subscriptions.containsKey(subscriptionEntity.getCustomerId())) {
                 ServerSentEvent<Object> event = ServerSentEvent.builder()
