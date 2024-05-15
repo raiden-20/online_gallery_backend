@@ -18,7 +18,7 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @GetMapping(value = "/sse/{id}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent> openSseStream(@RequestPart UUID id) {
+    public Flux<ServerSentEvent> openSseStream(@PathVariable UUID id) {
 
         return Flux.create(fluxSink -> {
             fluxSink.onCancel(
@@ -29,8 +29,6 @@ public class NotificationController {
             );
 
             notificationService.addUserToSubscriptions(id, fluxSink);
-            ServerSentEvent<String> event = ServerSentEvent.builder("hi").build();
-            fluxSink.next(event);
         });
     }
 

@@ -31,11 +31,14 @@ public class SecurityConfig {
                     .requestMatchers("/customers", "/artists", "/search/**", "/customer/{id}",
                             "/art/artId={artId}&currentId={currentId}", "/art/artist/artistId={artistId}&currentId={currentId}",
                             "/artist/artistId={artistId}&currentId={currentId}",
-                            "/art/customer/{customerId}","/paintings", "/photos", "/sculptures",
-                            "/notification/sse/**").permitAll()
+                            "/art/customer/{customerId}","/paintings", "/photos", "/sculptures").permitAll()
                 .and()
                 .authorizeHttpRequests()
                 .requestMatchers("swagger-ui/**", "swagger-ui**", "/v3/api-docs/**", "/v3/api-docs**")
+                .permitAll()
+                .and()
+                .authorizeHttpRequests()
+                .requestMatchers("/notification/sse/{id}")
                 .permitAll()
                 .anyRequest()
                 .authenticated();
