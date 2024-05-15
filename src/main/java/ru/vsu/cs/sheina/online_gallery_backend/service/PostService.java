@@ -29,6 +29,7 @@ public class PostService {
     private final CustomerPrivateSubscriptionRepository customerPrivateSubscriptionRepository;
     private final PrivateSubscriptionRepository privateSubscriptionRepository;
     private final ArtistRepository artistRepository;
+    private final NotificationRepository notificationRepository;
     private final FileService fileService;
     private final NotificationService notificationService;
     private final JWTParser jwtParser;
@@ -142,6 +143,7 @@ public class PostService {
             throw new ForbiddenActionException();
         }
 
+        notificationRepository.deleteAllBySubjectId(postEntity.getId());
         postPhotoRepository.deleteAllByPostId(postEntity.getId());
         postRepository.deleteById(postEntity.getId());
     }

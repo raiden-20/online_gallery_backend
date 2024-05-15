@@ -33,6 +33,7 @@ public class CustomerService {
     private final AddressRepository addressRepository;
     private final CustomerPrivateSubscriptionRepository customerPrivateSubscriptionRepository;
     private final PublicSubscriptionRepository publicSubscriptionRepository;
+    private final NotificationRepository notificationRepository;
     private final CardRepository cardRepository;
     private final CartRepository cartRepository;
     private final OrderRepository orderRepository;
@@ -145,6 +146,9 @@ public class CustomerService {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
 
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
+
+        notificationRepository.deleteAllBySenderId(customerId);
+        notificationRepository.deleteAllByReceiverId(customerId);
 
         if (customerEntity.getArtistId() != null) {
             artistService.deleteAccount(customerEntity.getArtistId());

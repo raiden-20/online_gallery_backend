@@ -33,6 +33,7 @@ public class ArtistService {
     private final PrivateSubscriptionRepository privateSubscriptionRepository;
     private final FileService fileService;
     private final JWTParser jwtParser;
+    private final NotificationRepository notificationRepository;
 
     public ArtistFullDTO getArtistData(UUID artistId, String currentId) {
         ArtistEntity artistEntity = artistRepository.findById(artistId).orElseThrow(UserNotFoundException::new);
@@ -180,6 +181,10 @@ public class ArtistService {
 
     public void deleteAccount(UUID artistId) {
         ArtistEntity artistEntity = artistRepository.findById(artistId).orElseThrow(UserNotFoundException::new);
+
+        notificationRepository.deleteAllByReceiverId(artistId);
+        notificationRepository.deleteAllBySenderId(artistId);
+
         List<ArtEntity> artEntities = artRepository.findAllByArtistId(artistId);
         for (ArtEntity art: artEntities) {
             cartRepository.deleteAllByArtId(art.getId());
