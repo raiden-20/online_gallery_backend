@@ -134,6 +134,16 @@ CREATE TABLE order_(
     address_id INT REFERENCES address(id)
 );
 
+CREATE TABLE notification(
+    id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
+    receiver_id UUID,
+    sender_id UUID,
+    type VARCHAR(30),
+    text VARCHAR(200),
+    subject_id INT,
+    create_date TIMESTAMP
+);
+
 INSERT INTO customer (id, customer_name, gender, birth_date, avatar_url, description)
 VALUES (
     '00000000-0000-0000-0000-000000000000', 'anonymous', 'MAN', '2024-04-28', ' ', 'anonymous'
