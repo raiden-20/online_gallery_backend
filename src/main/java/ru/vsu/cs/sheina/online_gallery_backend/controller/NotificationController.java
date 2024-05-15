@@ -6,12 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
 import ru.vsu.cs.sheina.online_gallery_backend.service.NotificationService;
-import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -21,7 +17,7 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
-    @GetMapping(path = "/notification/sse/{id}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/sse/{id}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent> openSseStream(@RequestPart UUID id) {
 
         return Flux.create(fluxSink -> {
@@ -33,8 +29,8 @@ public class NotificationController {
             );
 
             notificationService.addUserToSubscriptions(id, fluxSink);
-//            ServerSentEvent<String> event = ServerSentEvent.builder().build();
-//            fluxSink.next(event);
+            ServerSentEvent<String> event = ServerSentEvent.builder("hi").build();
+            fluxSink.next(event);
         });
     }
 

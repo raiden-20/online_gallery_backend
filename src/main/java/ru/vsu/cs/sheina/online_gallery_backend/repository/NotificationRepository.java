@@ -9,4 +9,10 @@ import java.util.UUID;
 public interface NotificationRepository extends JpaRepository<NotificationEntity, Integer> {
 
     List<NotificationEntity> findAllByReceiverId(UUID receiverId);
+
+    void deleteAllBySubjectId(Integer id);
+
+    void deleteAllBySenderId(UUID senderId);
+
+    void deleteAllByReceiverId(UUID receiverId);
 }
