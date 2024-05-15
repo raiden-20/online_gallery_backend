@@ -78,7 +78,7 @@ public class NotificationService {
                     .comment(artistEntity.getAvatarUrl())
                     .data(data)
                     .build();
-            subscriptions.get(orderEntity.getArtistId()).next(event);
+            subscriptions.get(orderEntity.getCustomerId()).next(event);
         }
     }
 
@@ -101,7 +101,7 @@ public class NotificationService {
                     .comment(artistEntity.getAvatarUrl())
                     .data(data)
                     .build();
-            subscriptions.get(orderEntity.getArtistId()).next(event);
+            subscriptions.get(orderEntity.getCustomerId()).next(event);
         }
     }
     public void sendArtSoldNotification(OrderEntity orderEntity, CustomerEntity customerEntity, ArtEntity artEntity) {

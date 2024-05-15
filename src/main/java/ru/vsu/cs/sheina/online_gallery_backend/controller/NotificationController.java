@@ -25,7 +25,6 @@ public class NotificationController {
                     () -> {
                         notificationService.deleteUserFromSubscriptions(id);
                     }
-
             );
 
             notificationService.addUserToSubscriptions(id, fluxSink);
