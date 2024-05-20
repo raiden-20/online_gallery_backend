@@ -25,6 +25,7 @@ import java.util.UUID;
 @RestController
 @Tag(name = "Художник")
 @RequiredArgsConstructor
+@RequestMapping("/api")
 public class ArtistController {
 
     private final ArtistService artistService;

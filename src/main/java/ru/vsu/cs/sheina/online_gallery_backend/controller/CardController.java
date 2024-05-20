@@ -21,6 +21,7 @@ import java.util.List;
 @RestController
 @Tag(name = "Банковская карта")
 @RequiredArgsConstructor
+@RequestMapping("/api")
 public class CardController {
 
     private final CardService cardService;

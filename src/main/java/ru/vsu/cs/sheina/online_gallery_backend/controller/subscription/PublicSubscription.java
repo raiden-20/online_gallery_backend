@@ -21,7 +21,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Подписка")
-@RequestMapping("/public")
+@RequestMapping("/api/public")
 public class PublicSubscription {
 
     private final PublicSubscriptionService publicSubscriptionService;

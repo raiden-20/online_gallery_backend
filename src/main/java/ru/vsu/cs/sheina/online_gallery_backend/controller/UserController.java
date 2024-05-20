@@ -18,6 +18,7 @@ import ru.vsu.cs.sheina.online_gallery_backend.service.KeycloakService;
 @RestController
 @Tag(name = "Пользователь")
 @RequiredArgsConstructor
+@RequestMapping("/api")
 public class UserController {
 
     private final KeycloakService keycloakService;

@@ -23,6 +23,7 @@ import java.util.UUID;
 @RestController
 @Tag(name = "Покупатель")
 @RequiredArgsConstructor
+@RequestMapping("/api")
 public class CustomerController {
 
     private final CustomerService customerService;

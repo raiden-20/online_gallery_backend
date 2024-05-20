@@ -24,7 +24,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Платная подписка")
-@RequestMapping("/private")
+@RequestMapping("/api/private")
 public class PrivateSubscription {
 
     private final PrivateSubscriptionService privateSubscriptionService;
