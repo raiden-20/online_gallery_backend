@@ -31,14 +31,14 @@ CREATE TABLE art(
      id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
      name VARCHAR(200),
      type VARCHAR(15),
-     price REAL,
+     price BIGINT,
      artist_id UUID REFERENCES artist(id),
      owner_id UUID REFERENCES customer(id),
      sold BOOLEAN,
      description VARCHAR(500),
      size VARCHAR(20),
      create_date TIMESTAMP,
-     tags VARCHAR(30) ARRAY[22],
+     tags VARCHAR(30) ARRAY[24],
      materials VARCHAR(20) ARRAY[30],
      frame BOOLEAN,
      publish_date TIMESTAMP,
@@ -61,10 +61,9 @@ CREATE TABLE public_subscription(
 CREATE TABLE private_subscription(
     id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
     artist_id UUID REFERENCES artist(id),
-    price REAL,
+    price INT,
     create_date TIMESTAMP
 );
-
 
 CREATE TABLE art_private_subscription(
     id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
@@ -133,6 +132,16 @@ CREATE TABLE order_(
     artist_comment VARCHAR(300),
     card_id INT REFERENCES card(id),
     address_id INT REFERENCES address(id)
+);
+
+CREATE TABLE notification(
+    id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
+    receiver_id UUID,
+    sender_id UUID,
+    type VARCHAR(30),
+    text VARCHAR(200),
+    subject_id INT,
+    create_date TIMESTAMP
 );
 
 INSERT INTO customer (id, customer_name, gender, birth_date, avatar_url, description)

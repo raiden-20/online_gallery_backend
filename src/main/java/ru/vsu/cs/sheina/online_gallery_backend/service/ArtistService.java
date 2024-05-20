@@ -3,6 +3,7 @@ package ru.vsu.cs.sheina.online_gallery_backend.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.artist.ArtistArtDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.artist.ArtistFullDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.artist.ArtistRegistrationDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.artist.ArtistShortDTO;
@@ -12,9 +13,7 @@ import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.*;
 import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -22,12 +21,19 @@ public class ArtistService {
 
     private final ArtistRepository artistRepository;
     private final CustomerRepository customerRepository;
+    private final ArtPrivateSubscriptionRepository artPrivateSubscriptionRepository;
+    private final PostRepository postRepository;
+    private final PostPhotoRepository postPhotoRepository;
+    private final OrderRepository orderRepository;
+    private final CartRepository cartRepository;
     private final ArtRepository artRepository;
+    private final ArtPhotoRepository artPhotoRepository;
     private final PublicSubscriptionRepository publicSubscriptionRepository;
     private final CustomerPrivateSubscriptionRepository customerPrivateSubscriptionRepository;
     private final PrivateSubscriptionRepository privateSubscriptionRepository;
     private final FileService fileService;
     private final JWTParser jwtParser;
+    private final NotificationRepository notificationRepository;
 
     public ArtistFullDTO getArtistData(UUID artistId, String currentId) {
         ArtistEntity artistEntity = artistRepository.findById(artistId).orElseThrow(UserNotFoundException::new);
@@ -140,10 +146,30 @@ public class ArtistService {
         return artistEntity.getId();
     }
 
-    public List<ArtistShortDTO> getArtists() {
-        return artistRepository.findAll().stream()
-                .map(art -> new ArtistShortDTO(art.getId(), art.getArtistName(), art.getAvatarUrl(), art.getViews()))
+    public List<ArtistArtDTO> getArtists() {
+        List<ArtistArtDTO> dtos = artistRepository.findAll().stream()
+                .map(art -> new ArtistArtDTO(art.getId(), art.getArtistName(), art.getAvatarUrl(), art.getViews(), null))
                 .toList();
+        for (ArtistArtDTO dto: dtos) {
+            Map<Integer, String> arts = new HashMap<>();
+            List<ArtEntity> artEntities = artRepository.findAllByArtistId(dto.getArtistId());
+            for (ArtEntity artEntity: artEntities) {
+                if (!artPrivateSubscriptionRepository.existsByArtId(artEntity.getId())) {
+                    Optional<ArtPhotoEntity> defaultPhoto = artPhotoRepository.findByArtIdAndAndDefaultPhoto(artEntity.getId(), true);
+                    if (defaultPhoto.isPresent()) {
+                        arts.put(artEntity.getId(), defaultPhoto.get().getPhotoUrl());
+                    } else {
+                        arts.put(artEntity.getId(), "");
+                    }
+                }
+                if (arts.size() >= 5) {
+                    break;
+                }
+            }
+            dto.setArts(arts);
+        }
+
+        return dtos;
     }
 
     public List<ArtistShortDTO> searchArtist(String input) {
@@ -155,6 +181,34 @@ public class ArtistService {
 
     public void deleteAccount(UUID artistId) {
         ArtistEntity artistEntity = artistRepository.findById(artistId).orElseThrow(UserNotFoundException::new);
-        artistRepository.delete(artistEntity);
+
+        notificationRepository.deleteAllByReceiverId(artistId);
+        notificationRepository.deleteAllBySenderId(artistId);
+
+        List<ArtEntity> artEntities = artRepository.findAllByArtistId(artistId);
+        for (ArtEntity art: artEntities) {
+            cartRepository.deleteAllByArtId(art.getId());
+            orderRepository.deleteAllByArtId(art.getId());
+            artPrivateSubscriptionRepository.deleteAllByArtId(art.getId());
+
+            artPhotoRepository.findAllByArtId(art.getId()).stream()
+                    .map(ArtPhotoEntity::getPhotoUrl)
+                    .forEach(fileService::deleteFile);
+
+            artPhotoRepository.deleteAllByArtId(art.getId());
+            artRepository.deleteById(art.getId());
+        }
+
+        publicSubscriptionRepository.deleteAllByArtistId(artistId);
+        postRepository.findAllByArtistId(artistId)
+                .forEach(ent -> postPhotoRepository.deleteAllByPostId(ent.getId()));
+        postRepository.deleteAllByArtistId(artistId);
+
+        if (privateSubscriptionRepository.existsByArtistId(artistId)) {
+            PrivateSubscriptionEntity privSubEntity = privateSubscriptionRepository.findByArtistId(artistId).get();
+            customerPrivateSubscriptionRepository.deleteAllByPrivateSubscriptionId(privSubEntity.getId());
+            artPrivateSubscriptionRepository.deleteAllBySubscriptionId(privSubEntity.getId());
+            privateSubscriptionRepository.deleteById(privSubEntity.getId());
+        }
     }
 }

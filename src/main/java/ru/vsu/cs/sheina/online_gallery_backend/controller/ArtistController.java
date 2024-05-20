@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.artist.ArtistArtDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.artist.ArtistFullDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.artist.ArtistRegistrationDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.artist.ArtistShortDTO;
@@ -79,9 +80,9 @@ public class ArtistController {
     @Operation(summary = "Получить всех художников")
     @ApiResponse(responseCode = "200",
             description = "Отправлен список художников",
-            content = @Content(schema = @Schema(implementation = ArtistShortDTO.class)))
+            content = @Content(schema = @Schema(implementation = ArtistArtDTO.class)))
     public ResponseEntity<?> getArtists() {
-        List<ArtistShortDTO> artistList = artistService.getArtists();
+        List<ArtistArtDTO> artistList = artistService.getArtists();
         return ResponseEntity.ok(artistList);
     }
 

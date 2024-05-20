@@ -36,6 +36,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests()
                 .requestMatchers("swagger-ui/**", "swagger-ui**", "/v3/api-docs/**", "/v3/api-docs**")
                 .permitAll()
+                .and()
+                .authorizeHttpRequests()
+                .requestMatchers("/notification/sse/{id}")
+                .permitAll()
                 .anyRequest()
                 .authenticated();
 
