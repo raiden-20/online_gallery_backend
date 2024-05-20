@@ -22,6 +22,7 @@ import java.util.UUID;
 @RestController
 @Tag(name = "Заказы")
 @RequiredArgsConstructor
+@RequestMapping("/api")
 public class OrderController {
 
     private final OrderService orderService;
