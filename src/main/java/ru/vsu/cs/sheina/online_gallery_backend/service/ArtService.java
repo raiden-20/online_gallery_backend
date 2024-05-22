@@ -196,6 +196,7 @@ public class ArtService {
         }
 
         artEntity.setName(artChangeDTO.getName());
+        artEntity.setCreateDate(artChangeDTO.getCreateDate());
         artEntity.setType(artChangeDTO.getType());
         artEntity.setPrice(artChangeDTO.getPrice());
         artEntity.setDescription(artChangeDTO.getDescription());

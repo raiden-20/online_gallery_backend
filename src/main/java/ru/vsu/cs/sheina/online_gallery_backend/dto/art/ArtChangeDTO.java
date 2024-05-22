@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.util.List;
 
 @Data
@@ -27,6 +28,8 @@ public class ArtChangeDTO {
     String description;
 
     String size;
+
+    Timestamp createDate;
 
     Boolean frame;
 
