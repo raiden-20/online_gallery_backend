@@ -3,6 +3,7 @@ package ru.vsu.cs.sheina.online_gallery_backend.dto.art;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -16,7 +17,7 @@ public class ArtCreateDTO {
 
     Boolean isPrivate;
 
-    Double price;
+   BigInteger price;
 
     String description;
 

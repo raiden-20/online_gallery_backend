@@ -13,6 +13,7 @@ import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.*;
 import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
 
+import java.math.BigInteger;
 import java.util.*;
 
 @Service
@@ -66,12 +67,12 @@ public class ArtistService {
         List<ArtEntity> arts = artRepository.findAllByArtistId(artistId);
 
         int countSoldArts = 0;
-        Double salesAmount = 0.0;
+        BigInteger salesAmount = BigInteger.ZERO;
 
         for (ArtEntity art: arts) {
             if (art.getSold()) {
                 countSoldArts++;
-                salesAmount += art.getPrice();
+                salesAmount = salesAmount.add(art.getPrice());
             }
         }
 
