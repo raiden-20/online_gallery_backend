@@ -144,6 +144,53 @@ CREATE TABLE notification(
     create_date TIMESTAMP
 );
 
+CREATE TABLE auction(
+    id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
+    name VARCHAR(200),
+    type VARCHAR(15),
+    start_price BIGINT,
+    current_price BIGINT,
+    rate BIGINT,
+    artist_id UUID REFERENCES artist(id),
+    owner_id UUID REFERENCES customer(id),
+    status VARCHAR(15),
+    description VARCHAR(500),
+    size VARCHAR(20),
+    create_date TIMESTAMP,
+    tags VARCHAR(30) ARRAY[24],
+    materials VARCHAR(20) ARRAY[30],
+    frame BOOLEAN,
+    publish_date TIMESTAMP,
+    views INT,
+    start_date TIMESTAMP,
+    end_date TIMESTAMP
+);
+
+CREATE TABLE auction_photo(
+    id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
+    auction_id INT REFERENCES auction(id),
+    photo_url VARCHAR(500),
+    default_photo BOOLEAN
+);
+
+CREATE TABLE max_rate(
+    id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
+    auction_id INT REFERENCES auction(id),
+    customer_id UUID REFERENCES customer(id),
+    is_anonymous BOOLEAN,
+    rate BIGINT,
+    create_date TIMESTAMP
+);
+
+CREATE TABLE rate(
+    id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
+    auction_id INT REFERENCES auction(id),
+    customer_id UUID REFERENCES customer(id),
+    is_anonymous BOOLEAN,
+    rate BIGINT,
+    create_date TIMESTAMP
+);
+
 INSERT INTO customer (id, customer_name, gender, birth_date, avatar_url, description)
 VALUES (
     '00000000-0000-0000-0000-000000000000', 'anonymous', 'MAN', '2024-04-28', ' ', 'anonymous'
