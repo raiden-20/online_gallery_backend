@@ -127,7 +127,7 @@ CREATE TABLE order_(
     id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
     customer_id UUID REFERENCES customer(id),
     artist_id UUID REFERENCES artist(id),
-    subject_id INT),
+    subject_id INT,
     status VARCHAR(10),
     artist_comment VARCHAR(300),
     card_id INT REFERENCES card(id),
