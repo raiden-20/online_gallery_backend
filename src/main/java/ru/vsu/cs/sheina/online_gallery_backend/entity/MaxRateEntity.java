@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -22,7 +23,7 @@ public class MaxRateEntity {
     Integer auctionId;
 
     @Column(name = "customer_id")
-    Integer customerId;
+    UUID customerId;
 
     @Column(name = "is_anonymous")
     Boolean isAnonymous;

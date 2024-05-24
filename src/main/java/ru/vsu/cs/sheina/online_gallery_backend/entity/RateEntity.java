@@ -3,9 +3,11 @@ package ru.vsu.cs.sheina.online_gallery_backend.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -22,7 +24,7 @@ public class RateEntity {
     Integer auctionId;
 
     @Column(name = "customer_id")
-    Integer customerId;
+    UUID customerId;
 
     @Column(name = "is_anonymous")
     Boolean isAnonymous;
@@ -32,4 +34,5 @@ public class RateEntity {
 
     @Column(name = "create_date")
     Timestamp createDate;
+
 }
