@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 import java.math.BigInteger;
+import java.sql.Timestamp;
 
 @Data
 @RequiredArgsConstructor
@@ -40,4 +41,6 @@ public class OrderDTO {
     String status;
 
     String artistComment;
+
+    Timestamp createDate;
 }

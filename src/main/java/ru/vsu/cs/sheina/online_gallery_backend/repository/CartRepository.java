@@ -10,12 +10,12 @@ import java.util.UUID;
 
 public interface CartRepository extends JpaRepository<CartEntity, Integer> {
 
-    Boolean existsByCustomerIdAndArtId(UUID customerId, Integer artId);
+    Boolean existsByCustomerIdAndSubjectId(UUID customerId, Integer subjectId);
 
-    Optional<CartEntity> findByCustomerIdAndArtId(UUID customerId, Integer artId);
+    Optional<CartEntity> findByCustomerIdAndSubjectId(UUID customerId, Integer subjectId);
 
     @Transactional
-    void deleteAllByArtId(Integer artId);
+    void deleteAllBySubjectId(Integer subjectId);
 
     @Transactional
     void deleteAllByCustomerId(UUID customerId);

@@ -36,24 +36,24 @@ public class CartService {
             throw new BadCredentialsException();
         }
 
-        if (cartRepository.existsByCustomerIdAndArtId(customerId, intIdRequestDTO.getId())) {
+        if (cartRepository.existsByCustomerIdAndSubjectId(customerId, intIdRequestDTO.getId())) {
             throw new BadActionException("Art has already been added to the cart");
         }
 
         CartEntity cartEntity = new CartEntity();
         cartEntity.setCustomerId(customerId);
-        cartEntity.setArtId(intIdRequestDTO.getId());
+        cartEntity.setSubjectId(intIdRequestDTO.getId());
         cartRepository.save(cartEntity);
     }
 
     public void deleteArtFromCart(IntIdRequestDTO intIdRequestDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
 
-        if (!cartRepository.existsByCustomerIdAndArtId(customerId, intIdRequestDTO.getId())) {
+        if (!cartRepository.existsByCustomerIdAndSubjectId(customerId, intIdRequestDTO.getId())) {
             throw new BadActionException("You can't do this action");
         }
 
-        CartEntity cartEntity = cartRepository.findByCustomerIdAndArtId(customerId, intIdRequestDTO.getId()).get();
+        CartEntity cartEntity = cartRepository.findByCustomerIdAndSubjectId(customerId, intIdRequestDTO.getId()).get();
 
         cartRepository.delete(cartEntity);
     }
@@ -62,7 +62,7 @@ public class CartService {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
 
         List<Integer> artIds = cartRepository.findAllByCustomerId(customerId).stream()
-                .map(CartEntity::getArtId)
+                .map(CartEntity::getSubjectId)
                 .toList();
         List<ArtShortDTO> dtos = new ArrayList<>();
 
@@ -97,7 +97,7 @@ public class CartService {
         for (Integer artId: purchaseDTO.getArts().keySet()) {
             Integer orderId = orderService.createOrder(artId, customerId, purchaseDTO.getCardId(), purchaseDTO.getAddressId(), purchaseDTO.getArts().get(artId));
             orderIds.add(orderId);
-            cartRepository.deleteAllByArtId(artId);
+            cartRepository.deleteAllBySubjectId(artId);
 
             OrderEntity orderEntity = orderRepository.findById(orderId).get();
             CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);

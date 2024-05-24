@@ -3,6 +3,7 @@ package ru.vsu.cs.sheina.online_gallery_backend.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.order.ChangeOrderDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.order.OrderDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.order.OrderShortDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.*;
@@ -13,6 +14,7 @@ import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.*;
 import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +25,7 @@ import java.util.UUID;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final AuctionRepository auctionRepository;
     private final ArtPhotoRepository artPhotoRepository;
     private final CustomerRepository customerRepository;
     private final JWTParser jwtParser;
@@ -31,19 +34,56 @@ public class OrderService {
     private final CardRepository cardRepository;
     private final AddressRepository addressRepository;
     private final NotificationService notificationService;
-    
+
+    public Integer createAuctionOrder(Integer auctionId, UUID artistId, UUID customerId) {
+        OrderEntity orderEntity = new OrderEntity();
+        orderEntity.setCustomerId(customerId);
+        orderEntity.setArtistId(artistId);
+        orderEntity.setSubjectId(auctionId);
+        orderEntity.setStatus("AWAIT");
+        orderEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
+
+        orderRepository.save(orderEntity);
+        return orderEntity.getId();
+    }
+
+    public void changeOrder(ChangeOrderDTO changeOrderDTO, String token) {
+        UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        OrderEntity orderEntity = orderRepository.findById(changeOrderDTO.getOrderId()).orElseThrow(BadCredentialsException::new);
+        CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
+        AuctionEntity auctionEntity = auctionRepository.findById(orderEntity.getSubjectId()).orElseThrow(BadCredentialsException::new);
+
+
+        if (!orderEntity.getCustomerId().equals(customerId)) {
+            throw new ForbiddenActionException();
+        }
+
+        if (!orderEntity.getStatus().equals("AWAIT")) {
+            throw new BadActionException("You can't change this order");
+        }
+
+        orderEntity.setStatus("CREATED");
+        orderEntity.setArtistComment("");
+        orderEntity.setCardId(changeOrderDTO.getCardId());
+        orderEntity.setAddressId(changeOrderDTO.getAddressId());
+
+        orderRepository.save(orderEntity);
+    }
+
     public Integer createOrder(Integer artId, UUID customerId, Integer cardId, Integer addressId, Boolean anonymous) {
         ArtEntity artEntity = artRepository.findById(artId).orElseThrow(BadCredentialsException::new);
 
         OrderEntity orderEntity = new OrderEntity();
 
         orderEntity.setCustomerId(customerId);
-        orderEntity.setArtId(artId);
+        orderEntity.setSubjectId(artId);
         orderEntity.setArtistId(artEntity.getArtistId());
         orderEntity.setStatus("CREATED");
         orderEntity.setArtistComment("");
         orderEntity.setCardId(cardId);
         orderEntity.setAddressId(addressId);
+        orderEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
 
         orderRepository.save(orderEntity);
 
@@ -158,11 +198,12 @@ public class OrderService {
 
         CustomerEntity customerEntity = customerRepository.findById(orderEntity.getCustomerId()).orElseThrow(UserNotFoundException::new);
         ArtistEntity artistEntity = artistRepository.findById(orderEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
-        ArtEntity artEntity = artRepository.findById(orderEntity.getArtId()).orElseThrow(BadCredentialsException::new);
+        ArtEntity artEntity = artRepository.findById(orderEntity.getSubjectId()).orElseThrow(BadCredentialsException::new);
         Optional<ArtPhotoEntity> artPhotoOpt = artPhotoRepository.findByArtIdAndAndDefaultPhoto(artEntity.getId(), true);
 
         OrderDTO orderDTO = new OrderDTO();
         orderDTO.setOrderId(orderId);
+        orderDTO.setCreateDate(orderEntity.getCreateDate());
 
         if (orderEntity.getAddressId() != null) {
             AddressEntity addressEntity = addressRepository.findById(orderEntity.getAddressId()).orElseThrow(BadCredentialsException::new);
