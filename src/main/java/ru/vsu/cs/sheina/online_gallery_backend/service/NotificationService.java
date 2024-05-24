@@ -228,6 +228,127 @@ public class NotificationService {
         }
     }
 
+    public void sendNewPublicAuctionNotification(ArtistEntity artistEntity, AuctionEntity auctionEntity) {
+        List<PublicSubscriptionEntity> publicSubscriptionEntities = publicSubscriptionRepository.findAllByArtistId(artistEntity.getId());
+
+        for (PublicSubscriptionEntity subscriptionEntity: publicSubscriptionEntities) {
+            NotificationEntity notificationEntity = new NotificationEntity();
+            notificationEntity.setType("newPublicAuction");
+            notificationEntity.setText(artistEntity.getArtistName() + " анонсировал(-а) аукцион: "+ auctionEntity.getName());
+            notificationEntity.setReceiverId(subscriptionEntity.getCustomerId());
+            notificationEntity.setSenderId(artistEntity.getId());
+            notificationEntity.setCreateDate(auctionEntity.getPublishDate());
+            notificationEntity.setSubjectId(auctionEntity.getId());
+
+            notificationRepository.save(notificationEntity);
+            NotificationShortDTO shortDTO = new NotificationShortDTO(artistEntity.getAvatarUrl(), notificationEntity.getText());
+
+            if (subscriptions.containsKey(subscriptionEntity.getCustomerId())) {
+                ServerSentEvent<Object> event = ServerSentEvent.builder()
+                        .id(String.valueOf(notificationEntity.getId()))
+                        .event("AUCTION")
+                        .data(shortDTO)
+                        .build();
+                subscriptions.get(subscriptionEntity.getCustomerId()).next(event);
+            }
+        }
+    }
+
+    public void sendAuctionFailedNotification(UUID customerId, ArtistEntity artistEntity) {
+        CustomerEntity customerEntity = customerRepository.findById(customerId).get();
+
+        NotificationEntity notificationEntity = new NotificationEntity();
+        notificationEntity.setType("auctionFailed");
+        notificationEntity.setText(customerEntity.getCustomerName() + " не оплатил(-а) лот имя_аукциона. Ваш аукцион был удален. Вы можете провести его повторно, оформив новый аукцион.");
+        notificationEntity.setReceiverId(artistEntity.getId());
+        notificationEntity.setSenderId(null);
+        notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
+        notificationEntity.setSubjectId(null);
+
+        notificationRepository.save(notificationEntity);
+        NotificationShortDTO shortDTO = new NotificationShortDTO("", notificationEntity.getText());
+
+        if (subscriptions.containsKey(artistEntity.getId())) {
+            ServerSentEvent<Object> event = ServerSentEvent.builder()
+                    .id(String.valueOf(notificationEntity.getId()))
+                    .event("ORDER")
+                    .data(shortDTO)
+                    .build();
+            subscriptions.get(artistEntity.getId()).next(event);
+        }
+    }
+
+    public void sendStartPublicAuctionNotification(AuctionEntity auctionEntity) {
+        ArtistEntity artistEntity = artistRepository.findById(auctionEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
+        List<PublicSubscriptionEntity> publicSubscriptionEntities = publicSubscriptionRepository.findAllByArtistId(auctionEntity.getArtistId());
+
+        for (PublicSubscriptionEntity subscriptionEntity: publicSubscriptionEntities) {
+            NotificationEntity notificationEntity = new NotificationEntity();
+            notificationEntity.setType("startPublicAution");
+            notificationEntity.setText(artistEntity.getArtistName() + " начал(-а) аукцион: "+ auctionEntity.getName());
+            notificationEntity.setReceiverId(subscriptionEntity.getCustomerId());
+            notificationEntity.setSenderId(artistEntity.getId());
+            notificationEntity.setCreateDate(auctionEntity.getPublishDate());
+            notificationEntity.setSubjectId(auctionEntity.getId());
+
+            notificationRepository.save(notificationEntity);
+            NotificationShortDTO shortDTO = new NotificationShortDTO(artistEntity.getAvatarUrl(), notificationEntity.getText());
+
+            if (subscriptions.containsKey(subscriptionEntity.getCustomerId())) {
+                ServerSentEvent<Object> event = ServerSentEvent.builder()
+                        .id(String.valueOf(notificationEntity.getId()))
+                        .event("AUCTION")
+                        .data(shortDTO)
+                        .build();
+                subscriptions.get(subscriptionEntity.getCustomerId()).next(event);
+            }
+        }
+    }
+
+    public void sendAuctionWinningNotification(Integer orderId, CustomerEntity customerEntity, AuctionEntity auctionEntity, ArtistEntity artistEntity) {
+        NotificationEntity notificationEntity = new NotificationEntity();
+        notificationEntity.setType("auctionWinning");
+        notificationEntity.setText("Вы выиграли аукцион " + auctionEntity.getName() + ". Лот необходимо оплатить в течение суток в заказе №" + getOrderNum(orderId));
+        notificationEntity.setReceiverId(customerEntity.getId());
+        notificationEntity.setSenderId(artistEntity.getId());
+        notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
+        notificationEntity.setSubjectId(orderId);
+
+        notificationRepository.save(notificationEntity);
+        NotificationShortDTO shortDTO = new NotificationShortDTO(artistEntity.getAvatarUrl(), notificationEntity.getText());
+
+        if (subscriptions.containsKey(customerEntity.getId())) {
+            ServerSentEvent<Object> event = ServerSentEvent.builder()
+                    .id(String.valueOf(notificationEntity.getId()))
+                    .event("ORDER")
+                    .data(shortDTO)
+                    .build();
+            subscriptions.get(customerEntity.getId()).next(event);
+        }
+    }
+
+    public void sendMaxRateBlockNotification(AuctionEntity auctionEntity, ArtistEntity artistEntity, UUID customerId) {
+        NotificationEntity notificationEntity = new NotificationEntity();
+        notificationEntity.setType("maxRateBlock");
+        notificationEntity.setText("Ваша максимальная ставка лота №" + auctionEntity.getId() + " было сбита.");
+        notificationEntity.setReceiverId(customerId);
+        notificationEntity.setSenderId(auctionEntity.getArtistId());
+        notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
+        notificationEntity.setSubjectId(auctionEntity.getId());
+
+        notificationRepository.save(notificationEntity);
+        NotificationShortDTO shortDTO = new NotificationShortDTO(artistEntity.getAvatarUrl(), notificationEntity.getText());
+
+        if (subscriptions.containsKey(customerId)) {
+            ServerSentEvent<Object> event = ServerSentEvent.builder()
+                    .id(String.valueOf(notificationEntity.getId()))
+                    .event("AUCTION")
+                    .data(shortDTO)
+                    .build();
+            subscriptions.get(customerId).next(event);
+        }
+    }
+
     public List<NotificationDTO> getArtistNotification(String token) {
         UUID receiverId = jwtParser.getIdFromAccessToken(token);
         CustomerEntity customerEntity = customerRepository.findById(receiverId).orElseThrow(UserNotFoundException::new);
@@ -316,7 +437,7 @@ public class NotificationService {
                 break;
             case "startPublicAuction" :
             case "newPublicAuction" :
-            case "maximumBetBlock" :
+            case "maxRateBlock" :
             case "auctionWinning" :
                 dto.setType(NotificationType.AUCTION);
                 dto.setIsSystem(false);
