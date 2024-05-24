@@ -20,6 +20,8 @@ public class AuctionFullDTO {
 
     String type;
 
+    BigInteger currentMaxRate;
+
     BigInteger lastPrice;
 
     UUID artistId;
