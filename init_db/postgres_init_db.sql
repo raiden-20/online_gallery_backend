@@ -89,7 +89,7 @@ CREATE TABLE post_photo(
 CREATE TABLE cart(
     id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
     customer_id UUID REFERENCES customer(id),
-    art_id INT REFERENCES art(id)
+    subject_id INT
 );
 
 CREATE TABLE card(
@@ -127,11 +127,12 @@ CREATE TABLE order_(
     id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
     customer_id UUID REFERENCES customer(id),
     artist_id UUID REFERENCES artist(id),
-    art_id INT REFERENCES art(id),
+    subject_id INT),
     status VARCHAR(10),
     artist_comment VARCHAR(300),
     card_id INT REFERENCES card(id),
-    address_id INT REFERENCES address(id)
+    address_id INT REFERENCES address(id),
+    create_date TIMESTAMP
 );
 
 CREATE TABLE notification(
