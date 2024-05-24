@@ -147,7 +147,7 @@ public class ArtService {
             artFullDTO.setStatus("AVAILABLE");
         } else if (!currentId.equals("null") && artEntity.getOwnerId() == null) {
             UUID customerId = UUID.fromString(currentId);
-            if (cartRepository.existsByCustomerIdAndArtId(customerId, artId)) {
+            if (cartRepository.existsByCustomerIdAndSubjectId(customerId, artId)) {
                 artFullDTO.setStatus("CART");
             } else {
                 artFullDTO.setStatus("AVAILABLE");
@@ -253,8 +253,8 @@ public class ArtService {
         }
 
         notificationRepository.deleteAllBySubjectId(artEntity.getId());
-        cartRepository.deleteAllByArtId(artEntity.getId());
-        orderRepository.deleteAllByArtId(artEntity.getId());
+        cartRepository.deleteAllBySubjectId(artEntity.getId());
+        orderRepository.deleteAllBySubjectId(artEntity.getId());
         artPrivateSubscriptionRepository.deleteAllByArtId(artEntity.getId());
 
         artPhotoRepository.findAllByArtId(artEntity.getId()).stream()
