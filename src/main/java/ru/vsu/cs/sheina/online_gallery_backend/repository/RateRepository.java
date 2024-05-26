@@ -13,4 +13,6 @@ public interface RateRepository extends JpaRepository<RateEntity, Integer> {
     Integer countByAuctionId(Integer auctionId);
 
     Optional<RateEntity> findByRate(BigInteger rate);
+
+    Boolean existsByAuctionId(Integer auctionId);
 }
