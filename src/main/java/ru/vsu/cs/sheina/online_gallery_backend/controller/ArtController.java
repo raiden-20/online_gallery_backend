@@ -44,8 +44,8 @@ public class ArtController {
     public ResponseEntity<?> createArt(@RequestPart("ArtCreateDTO") ArtCreateDTO artCreateDTO,
                                        @RequestPart(value = "photos") List<MultipartFile> photos,
                                        @RequestHeader("Authorization") String token) {
-        artService.createArt(artCreateDTO, photos, token);
-        return ResponseEntity.ok("Art created successfully");
+        Integer artId = artService.createArt(artCreateDTO, photos, token);
+        return ResponseEntity.ok(artId);
     }
 
     @GetMapping("/art/artId={artId}&currentId={currentId}")

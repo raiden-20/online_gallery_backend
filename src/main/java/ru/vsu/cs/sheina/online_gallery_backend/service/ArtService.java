@@ -41,7 +41,7 @@ public class ArtService {
         artPrivateSubscriptionRepository.deleteAllBySubscriptionId(subscriptionId);
     }
 
-    public void createArt(ArtCreateDTO artCreateDTO, List<MultipartFile> photos, String token) {
+    public Integer createArt(ArtCreateDTO artCreateDTO, List<MultipartFile> photos, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         UUID artistId = customerEntity.getArtistId();
@@ -95,6 +95,8 @@ public class ArtService {
         } else {
             notificationService.sendNewPublicArtNotification(artEntity, artistEntity);
         }
+
+        return artEntity.getId();
     }
 
     public ArtFullDTO getArt(Integer artId, String currentId) {
