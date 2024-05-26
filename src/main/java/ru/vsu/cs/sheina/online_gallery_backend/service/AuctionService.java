@@ -312,6 +312,58 @@ public class AuctionService {
         return dtos;
     }
 
+    public List<AuctionShortDTO> searchAuctions(String input) {
+        List<AuctionEntity> auctionEntities = auctionRepository.findAll().stream()
+                .filter(ent -> ent.getName().toUpperCase().contains(input.toUpperCase()))
+                .toList();
+
+        List<AuctionShortDTO> dtos = new ArrayList<>();
+
+        for (AuctionEntity auctionEntity: auctionEntities) {
+            AuctionShortDTO dto = new AuctionShortDTO();
+            ArtistEntity artistEntity = artistRepository.findById(auctionEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
+
+            dto.setAuctionId(auctionEntity.getId());
+            dto.setName(auctionEntity.getName());
+            dto.setType(auctionEntity.getType());
+            dto.setLastPrice(auctionEntity.getCurrentPrice());
+            dto.setArtistId(auctionEntity.getArtistId());
+            dto.setArtistName(artistEntity.getArtistName());
+            dto.setStatus(auctionEntity.getStatus());
+            dto.setViewCount(auctionEntity.getViews());
+            dto.setDescription(auctionEntity.getDescription());
+            dto.setSize(auctionEntity.getSize());
+            dto.setFrame(auctionEntity.getFrame());
+            dto.setCreateDate(auctionEntity.getCreateDate());
+            dto.setTags(auctionEntity.getTags());
+            dto.setMaterials(auctionEntity.getMaterials());
+            dto.setStartDate(auctionEntity.getStartDate());
+            dto.setEndDate(auctionEntity.getEndDate());
+            dto.setRateCount(rateRepository.countByAuctionId(auctionEntity.getId()));
+
+            if (auctionEntity.getOwnerId() != null) {
+                CustomerEntity customerEntity = customerRepository.findById(auctionEntity.getOwnerId()).orElseThrow(UserNotFoundException::new);
+                dto.setCustomerId(auctionEntity.getOwnerId());
+                dto.setCustomerName(customerEntity.getCustomerName());
+                dto.setCustomerUrl(customerEntity.getAvatarUrl());
+            } else {
+                dto.setCustomerUrl(null);
+                dto.setCustomerName(null);
+                dto.setCustomerId(null);
+            }
+
+            Optional<AuctionPhotoEntity> auctionPhotoEntity = auctionPhotoRepository.findByAuctionIdAndDefaultPhoto(auctionEntity.getId(), true);
+            if (auctionPhotoEntity.isPresent()) {
+                dto.setPhotoUrl(auctionPhotoEntity.get().getPhotoUrl());
+            } else {
+                dto.setPhotoUrl("");
+            }
+            dtos.add(dto);
+        }
+
+        return dtos;
+    }
+
     public List<AuctionShortDTO> getAllAuctions() {
         List<AuctionEntity> auctionEntities = auctionRepository.findAll();
         List<AuctionShortDTO> dtos = new ArrayList<>();
@@ -459,21 +511,26 @@ public class AuctionService {
     }
 
     public void finishAuction(AuctionEntity auctionEntity) {
-        RateEntity rateEntity = rateRepository.findByRate(auctionEntity.getCurrentPrice()).get();
-        CustomerEntity customerEntity = customerRepository.findById(rateEntity.getCustomerId()).orElseThrow(UserNotFoundException::new);
-        ArtistEntity artistEntity = artistRepository.findById(auctionEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
+        if (rateRepository.existsByAuctionId(auctionEntity.getId())) {
+            RateEntity rateEntity = rateRepository.findByRate(auctionEntity.getCurrentPrice()).get();
+            CustomerEntity customerEntity = customerRepository.findById(rateEntity.getCustomerId()).orElseThrow(UserNotFoundException::new);
+            ArtistEntity artistEntity = artistRepository.findById(auctionEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
 
-        auctionEntity.setStatus("SOLD");
-        if (rateEntity.getIsAnonymous()) {
-            auctionEntity.setOwnerId(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+            auctionEntity.setStatus("SOLD");
+            if (rateEntity.getIsAnonymous()) {
+                auctionEntity.setOwnerId(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+            } else {
+                auctionEntity.setOwnerId(customerEntity.getId());
+            }
+
+            auctionRepository.save(auctionEntity);
+
+            Integer orderId = orderService.createAuctionOrder(auctionEntity.getId(), auctionEntity.getArtistId(), customerEntity.getId());
+            notificationService.sendAuctionWinningNotification(orderId, customerEntity, auctionEntity, artistEntity);
         } else {
-            auctionEntity.setOwnerId(customerEntity.getId());
+            auctionPhotoRepository.deleteAllByAuctionId(auctionEntity.getId());
+            auctionRepository.delete(auctionEntity);
         }
-
-        auctionRepository.save(auctionEntity);
-
-        Integer orderId = orderService.createAuctionOrder(auctionEntity.getId(), auctionEntity.getArtistId(), customerEntity.getId());
-        notificationService.sendAuctionWinningNotification(orderId, customerEntity, auctionEntity, artistEntity);
     }
 
     private void createCustomerRate(Integer auctionId, UUID customerId, Boolean isAnonymous, BigInteger rate) {
@@ -486,7 +543,7 @@ public class AuctionService {
 
         rateRepository.save(rateEntity);
 
-
+        //TODO ссе
     }
 
     public void deleteUserFromSubscriptions(UUID id) {

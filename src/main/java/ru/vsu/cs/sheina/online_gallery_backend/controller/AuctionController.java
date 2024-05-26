@@ -91,4 +91,10 @@ public class AuctionController {
             auctionService.addUserToSubscriptions(id, fluxSink);
         });
     }
+
+    @GetMapping("/search/auction/object={input}")
+    public ResponseEntity<?> searchAuctions(@PathVariable String input){
+        List<AuctionShortDTO> auctions = auctionService.searchAuctions(input);
+        return ResponseEntity.ok(auctions);
+    }
 }
