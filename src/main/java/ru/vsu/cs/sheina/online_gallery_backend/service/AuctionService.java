@@ -1,10 +1,12 @@
 package ru.vsu.cs.sheina.online_gallery_backend.service;
 
+import io.swagger.models.auth.In;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.FluxSink;
+import ru.vsu.cs.sheina.online_gallery_backend.configuration.AuctionSSE;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.auction.*;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.*;
@@ -39,7 +41,7 @@ public class AuctionService {
     private final ArtistRepository artistRepository;
     private final JWTParser jwtParser;
 
-    Map<UUID, FluxSink<ServerSentEvent>> subscriptions = new HashMap<>();
+    Map<AuctionSSE<UUID, Integer>, FluxSink<ServerSentEvent>> subscriptions = new HashMap<>();
 
     public Integer createAuction(AuctionCreateDTO auctionCreateDTO, List<MultipartFile> photos, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
@@ -543,15 +545,27 @@ public class AuctionService {
 
         rateRepository.save(rateEntity);
 
-        //TODO ссе
+        for(AuctionSSE<UUID, Integer> sse: subscriptions.keySet()) {
+            if (sse.getAuctionId().equals(auctionId)) {
+                CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
+                RateDTO rateDTO = new RateDTO(customerId, customerEntity.getCustomerName(), customerEntity.getAvatarUrl(), rate);
+                ServerSentEvent<Object> event = ServerSentEvent.builder()
+                        .id(String.valueOf(rateEntity.getId()))
+                        .event("AUCTION")
+                        .data(rateDTO)
+                        .build();
+            }
+        }
     }
 
-    public void deleteUserFromSubscriptions(UUID id) {
-        subscriptions.remove(id);
+    public void deleteUserFromSubscriptions(UUID userId, Integer auctionId) {
+        AuctionSSE<UUID, Integer> oldSubscription = new AuctionSSE<>(userId, auctionId);
+        subscriptions.remove(oldSubscription);
     }
 
-    public void addUserToSubscriptions(UUID id, FluxSink<ServerSentEvent> fluxSink) {
-        subscriptions.put(id, fluxSink);
+    public void addUserToSubscriptions(UUID userId, Integer auctionId, FluxSink<ServerSentEvent> fluxSink) {
+        AuctionSSE<UUID, Integer> newSubscription = new AuctionSSE<>(userId, auctionId);
+        subscriptions.put(newSubscription, fluxSink);
     }
 
     private BigInteger getRateFromPrice(BigInteger price) {

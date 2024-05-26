@@ -79,16 +79,16 @@ public class AuctionController {
         return ResponseEntity.ok("Rate created successfully");
     }
 
-    @GetMapping(value = "/auction/rates/{id}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent> openSseStream(@PathVariable UUID id) {
+    @GetMapping(value = "/auction/rates/userId={userId}&auctionId={auctionId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent> openSseStream(@PathVariable UUID userId, Integer auctionId) {
 
         return Flux.create(fluxSink -> {
             fluxSink.onCancel(
                     () -> {
-                        auctionService.deleteUserFromSubscriptions(id);
+                        auctionService.deleteUserFromSubscriptions(userId, auctionId);
                     }
             );
-            auctionService.addUserToSubscriptions(id, fluxSink);
+            auctionService.addUserToSubscriptions(userId, auctionId, fluxSink);
         });
     }
 
