@@ -29,32 +29,38 @@ public class ScheduledTasks {
     private final AuctionService auctionService;
     private final ArtistRepository artistRepository;
 
-    @Scheduled(fixedRate = 2000)
+
+    @Scheduled(fixedRate = 10000)
+    private void doScheduledTasks() {
+        changeAuctions();
+        checkOrders();
+    }
+
     private void changeAuctions() {
         List<AuctionEntity> auctions = auctionRepository.findAll();
         Timestamp time = new Timestamp(System.currentTimeMillis());
 
         for (AuctionEntity auctionEntity: auctions) {
-            if (auctionEntity.getStartDate().after(time)) {
+            if (auctionEntity.getStartDate().before(time)) {
                 auctionEntity.setStatus("AVAILABLE");
                 auctionRepository.save(auctionEntity);
 
                 notificationService.sendStartPublicAuctionNotification(auctionEntity);
             }
 
-            if (auctionEntity.getEndDate().after(time)) {
+            if (auctionEntity.getEndDate().before(time)) {
                 auctionService.finishAuction(auctionEntity);
             }
         }
     }
 
-    @Scheduled(fixedRate = 5000)
+
     private void checkOrders() {
         List<OrderEntity> orderEntities = orderRepository.findAll();
         Timestamp time = new Timestamp(System.currentTimeMillis());
 
         for (OrderEntity orderEntity: orderEntities) {
-            if (orderEntity.getStatus().equals("AWAIT") && orderEntity.getCreateDate().after(time)) {
+            if (orderEntity.getStatus().equals("AWAIT") && orderEntity.getCreateDate().before(time)) {
                 ArtistEntity artistEntity = artistRepository.findById(orderEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
                 orderRepository.deleteAllBySubjectId(orderEntity.getSubjectId());
 
