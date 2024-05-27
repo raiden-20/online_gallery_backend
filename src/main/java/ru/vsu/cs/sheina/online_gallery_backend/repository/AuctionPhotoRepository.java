@@ -9,6 +9,7 @@ import java.util.Optional;
 
 public interface AuctionPhotoRepository extends JpaRepository<AuctionPhotoEntity, Integer> {
 
+    @Transactional
     void deleteAllByAuctionIdAndPhotoUrl(Integer auctionId, String url);
 
     List<AuctionPhotoEntity> findAllByAuctionId(Integer auctionId);
