@@ -34,13 +34,13 @@ public class ScheduledTasks {
 
     @Scheduled(fixedRate = 10000)
     private void doScheduledTasks() {
-        changeAuctions();
-        checkOrders();
+        Timestamp time = new Timestamp(System.currentTimeMillis() + 3 * 60 * 60 * 1000);
+        changeAuctions(time);
+        checkOrders(time);
     }
 
-    private void changeAuctions() {
+    private void changeAuctions(Timestamp time) {
         List<AuctionEntity> auctions = auctionRepository.findAll();
-        Timestamp time = new Timestamp(System.currentTimeMillis());
 
         for (AuctionEntity auctionEntity: auctions) {
             if (auctionEntity.getStartDate().before(time)) {
@@ -57,9 +57,8 @@ public class ScheduledTasks {
     }
 
 
-    private void checkOrders() {
+    private void checkOrders(Timestamp time) {
         List<OrderEntity> orderEntities = orderRepository.findAll();
-        Timestamp time = new Timestamp(System.currentTimeMillis());
 
         for (OrderEntity orderEntity: orderEntities) {
             if (orderEntity.getStatus().equals("AWAIT") && orderEntity.getCreateDate().before(time)) {

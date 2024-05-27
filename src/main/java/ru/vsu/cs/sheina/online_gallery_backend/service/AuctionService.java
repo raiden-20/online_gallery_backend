@@ -69,7 +69,7 @@ public class AuctionService {
         auctionEntity.setTags(auctionCreateDTO.getTags());
         auctionEntity.setMaterials(auctionCreateDTO.getMaterials());
         auctionEntity.setFrame(auctionCreateDTO.getFrame());
-        auctionEntity.setPublishDate(new Timestamp(System.currentTimeMillis()));
+        auctionEntity.setPublishDate(new Timestamp(System.currentTimeMillis() * 3 * 60 * 60 * 1000));
         auctionEntity.setViews(0);
 
         if (auctionCreateDTO.getStartDate().compareTo(auctionCreateDTO.getEndDate()) >= 0) {

@@ -64,7 +64,7 @@ public class ArtService {
         artEntity.setOwnerId(null);
         artEntity.setSold(false);
         artEntity.setArtistId(artistId);
-        artEntity.setPublishDate(new Timestamp(System.currentTimeMillis()));
+        artEntity.setPublishDate(new Timestamp(System.currentTimeMillis() * 3 * 60 * 60 * 1000));
         artEntity.setCreateDate(artCreateDTO.getCreateDate());
         artEntity.setViews(0);
         artRepository.save(artEntity);
