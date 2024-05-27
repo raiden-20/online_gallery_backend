@@ -15,4 +15,7 @@ public interface MaxRateRepository extends JpaRepository<MaxRateEntity, Integer>
 
     @Transactional
     void deleteById(Integer id);
+
+    @Transactional
+    void deleteAllByAuctionId(Integer auctionId);
 }

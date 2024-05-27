@@ -1,6 +1,7 @@
 package ru.vsu.cs.sheina.online_gallery_backend.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.RateEntity;
 
 import java.math.BigInteger;
@@ -15,4 +16,7 @@ public interface RateRepository extends JpaRepository<RateEntity, Integer> {
     Optional<RateEntity> findByRate(BigInteger rate);
 
     Boolean existsByAuctionId(Integer auctionId);
+
+    @Transactional
+    void deleteAllByAuctionId(Integer auctionId);
 }

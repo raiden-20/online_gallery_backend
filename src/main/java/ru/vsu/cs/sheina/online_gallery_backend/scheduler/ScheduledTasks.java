@@ -23,6 +23,8 @@ public class ScheduledTasks {
     private final AuctionRepository auctionRepository;
     private final NotificationRepository notificationRepository;
     private final FileService fileService;
+    private final MaxRateRepository maxRateRepository;
+    private final RateRepository rateRepository;
     private final AuctionPhotoRepository auctionPhotoRepository;
     private final OrderRepository orderRepository;
     private final NotificationService notificationService;
@@ -72,6 +74,8 @@ public class ScheduledTasks {
                         .forEach(fileService::deleteFile);
 
                 auctionPhotoRepository.deleteAllByAuctionId(orderEntity.getSubjectId());
+                maxRateRepository.deleteAllByAuctionId(orderEntity.getSubjectId());
+                rateRepository.deleteAllByAuctionId(orderEntity.getSubjectId());
                 auctionRepository.deleteById(orderEntity.getSubjectId());
 
                 //TODO блок пользователя
