@@ -43,7 +43,7 @@ public class NotificationService {
         notificationEntity.setText(customerEntity.getCustomerName() + " обновил(-а) статус заказа №" + getOrderNum(orderEntity.getId()));
         notificationEntity.setReceiverId(orderEntity.getArtistId());
         notificationEntity.setSenderId(orderEntity.getCustomerId());
-        notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis() + 3 * 60 * 60 * 1000));
+        notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
         notificationEntity.setSubjectId(orderEntity.getId());
 
         notificationRepository.save(notificationEntity);
@@ -66,7 +66,7 @@ public class NotificationService {
         notificationEntity.setText(artistEntity.getArtistName() + " обновил(-а) статус заказа №" + getOrderNum(orderEntity.getId()));
         notificationEntity.setReceiverId(orderEntity.getCustomerId());
         notificationEntity.setSenderId(orderEntity.getArtistId());
-        notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis() + 3 * 60 * 60 * 1000));
+        notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
         notificationEntity.setSubjectId(orderEntity.getId());
 
         notificationRepository.save(notificationEntity);
@@ -88,7 +88,7 @@ public class NotificationService {
         notificationEntity.setText(artistEntity.getArtistName() + " обновил(-а) статус заказа №" + getOrderNum(orderEntity.getId()));
         notificationEntity.setReceiverId(orderEntity.getCustomerId());
         notificationEntity.setSenderId(orderEntity.getArtistId());
-        notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis() + 3 * 60 * 60 * 1000));
+        notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
         notificationEntity.setSubjectId(orderEntity.getId());
 
         notificationRepository.save(notificationEntity);
@@ -109,7 +109,7 @@ public class NotificationService {
         notificationEntity.setText(customerEntity.getCustomerName() + " купил(-а) Вашу работу: " + artEntity.getName());
         notificationEntity.setReceiverId(orderEntity.getArtistId());
         notificationEntity.setSenderId(orderEntity.getCustomerId());
-        notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis() + 3 * 60 * 60 * 1000));
+        notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
         notificationEntity.setSubjectId(orderEntity.getId());
 
         notificationRepository.save(notificationEntity);
@@ -134,7 +134,7 @@ public class NotificationService {
             notificationEntity.setText(artistEntity.getArtistName() + " отключил(-а) ежемесячную поддержку. Деньги за неиспользуемый период вернутся в течение 7 дней.");
             notificationEntity.setReceiverId(subscriptionEntity.getCustomerId());
             notificationEntity.setSenderId(artistEntity.getId());
-            notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis() + 3 * 60 * 60 * 1000));
+            notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
             notificationEntity.setSubjectId(null);
 
             notificationRepository.save(notificationEntity);
@@ -262,7 +262,7 @@ public class NotificationService {
         notificationEntity.setText(customerEntity.getCustomerName() + " не оплатил(-а) лот имя_аукциона. Ваш аукцион был удален. Вы можете провести его повторно, оформив новый аукцион.");
         notificationEntity.setReceiverId(artistEntity.getId());
         notificationEntity.setSenderId(null);
-        notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis() + 3 * 60 * 60 * 1000));
+        notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
         notificationEntity.setSubjectId(null);
 
         notificationRepository.save(notificationEntity);
@@ -311,7 +311,7 @@ public class NotificationService {
         notificationEntity.setText("Вы выиграли аукцион " + auctionEntity.getName() + ". Лот необходимо оплатить в течение суток в заказе №" + getOrderNum(orderId));
         notificationEntity.setReceiverId(customerEntity.getId());
         notificationEntity.setSenderId(artistEntity.getId());
-        notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis() + 3 * 60 * 60 * 1000));
+        notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
         notificationEntity.setSubjectId(orderId);
 
         notificationRepository.save(notificationEntity);
@@ -333,7 +333,7 @@ public class NotificationService {
         notificationEntity.setText("Ваша максимальная ставка лота №" + auctionEntity.getId() + " было сбита.");
         notificationEntity.setReceiverId(customerId);
         notificationEntity.setSenderId(auctionEntity.getArtistId());
-        notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis() + 3 * 60 * 60 * 1000));
+        notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
         notificationEntity.setSubjectId(auctionEntity.getId());
 
         notificationRepository.save(notificationEntity);

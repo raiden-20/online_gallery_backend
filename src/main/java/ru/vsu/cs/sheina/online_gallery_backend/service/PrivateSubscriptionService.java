@@ -54,7 +54,7 @@ public class PrivateSubscriptionService {
         cusPrivSubEntity.setPrivateSubscriptionId(subscription.getId());
         cusPrivSubEntity.setCustomerId(customerId);
         cusPrivSubEntity.setCardId(subscribeDTO.getCardId());
-        cusPrivSubEntity.setCreateDate(new Timestamp(System.currentTimeMillis() + 3 * 60 * 60 * 1000));
+        cusPrivSubEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
 
         Calendar cal = Calendar.getInstance();
         cal.setTime(cusPrivSubEntity.getCreateDate());
@@ -96,7 +96,7 @@ public class PrivateSubscriptionService {
             PrivateSubscriptionEntity privateSubscriptionEntity = privateSubscriptionRepository.findById(entity.getPrivateSubscriptionId()).orElseThrow(BadCredentialsException::new);
             ArtistEntity artistEntity = artistRepository.findById(privateSubscriptionEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
 
-            if (entity.getPaymentDate().before(new Timestamp(System.currentTimeMillis() + 3 * 60 * 60 * 1000))) {
+            if (entity.getPaymentDate().before(new Timestamp(System.currentTimeMillis()))) {
                 entity.setPaymentDate(changePaymentDate(entity));
                 customerPrivateSubscriptionRepository.save(entity);
             }
@@ -126,7 +126,7 @@ public class PrivateSubscriptionService {
         PrivateSubscriptionEntity entity = new PrivateSubscriptionEntity();
         entity.setArtistId(priceDTO.getArtistId());
         entity.setPrice(priceDTO.getPrice());
-        entity.setCreateDate(new Timestamp(System.currentTimeMillis() + 3 * 60 * 60 * 1000));
+        entity.setCreateDate(new Timestamp(System.currentTimeMillis()));
 
         privateSubscriptionRepository.save(entity);
     }
@@ -193,7 +193,7 @@ public class PrivateSubscriptionService {
             ArtistEntity artistEntity = artistRepository.findById(privateSubscriptionEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
 
             if (artistEntity.getArtistName().toUpperCase().contains(input.toUpperCase())) {
-                if (entity.getPaymentDate().before(new Timestamp(System.currentTimeMillis() + 3 * 60 * 60 * 1000))) {
+                if (entity.getPaymentDate().before(new Timestamp(System.currentTimeMillis()))) {
                     changePaymentDate(entity);
                 }
 
@@ -211,7 +211,7 @@ public class PrivateSubscriptionService {
     }
 
     private Timestamp changePaymentDate(CustomerPrivateSubscriptionEntity entity) {
-        Timestamp currentDate = new Timestamp(System.currentTimeMillis() + 3 * 60 * 60 * 1000);
+        Timestamp currentDate = new Timestamp(System.currentTimeMillis());
         Timestamp paymentDate = entity.getPaymentDate();
         Calendar cal = Calendar.getInstance();
         cal.setTime(entity.getCreateDate());

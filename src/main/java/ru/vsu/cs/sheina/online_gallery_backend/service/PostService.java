@@ -82,7 +82,7 @@ public class PostService {
         postEntity.setArtistId(artistId);
         postEntity.setTitle(postCreateDTO.getTitle());
         postEntity.setBody(postCreateDTO.getText());
-        postEntity.setCreatedAt(new Timestamp(System.currentTimeMillis() + 3 * 60 * 60 * 1000));
+        postEntity.setCreatedAt(new Timestamp(System.currentTimeMillis()));
         postRepository.save(postEntity);
 
         for (int i = 0; i < photos.size(); i++) {

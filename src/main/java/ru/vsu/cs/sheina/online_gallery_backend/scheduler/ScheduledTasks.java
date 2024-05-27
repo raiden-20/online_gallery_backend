@@ -34,7 +34,7 @@ public class ScheduledTasks {
 
     @Scheduled(fixedRate = 10000)
     private void doScheduledTasks() {
-        Timestamp time = new Timestamp(System.currentTimeMillis() + 3 * 60 * 60 * 1000);
+        Timestamp time = new Timestamp(System.currentTimeMillis());
         changeAuctions(time);
         checkOrders(time);
     }

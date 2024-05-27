@@ -41,7 +41,7 @@ public class OrderService {
         orderEntity.setArtistId(artistId);
         orderEntity.setSubjectId(auctionId);
         orderEntity.setStatus("AWAIT");
-        orderEntity.setCreateDate(new Timestamp(System.currentTimeMillis() + 3 * 60 * 60 * 1000));
+        orderEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
 
         orderRepository.save(orderEntity);
         return orderEntity.getId();
@@ -83,7 +83,7 @@ public class OrderService {
         orderEntity.setArtistComment("");
         orderEntity.setCardId(cardId);
         orderEntity.setAddressId(addressId);
-        orderEntity.setCreateDate(new Timestamp(System.currentTimeMillis() + 3 * 60 * 60 * 1000));
+        orderEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
 
         orderRepository.save(orderEntity);
 
