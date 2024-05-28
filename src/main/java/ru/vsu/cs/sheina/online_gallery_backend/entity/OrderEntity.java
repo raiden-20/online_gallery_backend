@@ -30,6 +30,9 @@ public class OrderEntity {
     @Column(name = "status")
     String status;
 
+    @Column(name = "type")
+    String type;
+
     @Column(name = "artist_comment")
     String artistComment;
 

@@ -100,7 +100,7 @@ public class AddressService {
         if (!addressEntity.getCustomerId().equals(customerId)) {
             throw new ForbiddenActionException();
         }
-        for(OrderEntity order: orderRepository.findAllByCardId(addressEntity.getId())) {
+        for(OrderEntity order: orderRepository.findAllByAddressId(addressEntity.getId())) {
             if (!order.getStatus().equals("FINISHED")){
                 throw new BadActionException("Address is used in active orders");
             }

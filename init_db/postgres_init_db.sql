@@ -129,6 +129,7 @@ CREATE TABLE order_(
     artist_id UUID REFERENCES artist(id),
     subject_id INT,
     status VARCHAR(10),
+    type VARCHAR(10),
     artist_comment VARCHAR(300),
     card_id INT REFERENCES card(id),
     address_id INT REFERENCES address(id),

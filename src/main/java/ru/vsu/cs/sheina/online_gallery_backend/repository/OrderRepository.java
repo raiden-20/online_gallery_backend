@@ -13,6 +13,8 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Integer> {
 
     List<OrderEntity> findAllByCardId(Integer cardId);
 
+    List<OrderEntity> findAllByAddressId(Integer addressId);
+
     List<OrderEntity> findAllByArtistId(UUID artistId);
 
     @Transactional

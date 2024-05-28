@@ -28,6 +28,7 @@ public class OrderService {
     private final AuctionRepository auctionRepository;
     private final ArtPhotoRepository artPhotoRepository;
     private final CustomerRepository customerRepository;
+    private final AuctionPhotoRepository auctionPhotoRepository;
     private final JWTParser jwtParser;
     private final ArtRepository artRepository;
     private final ArtistRepository artistRepository;
@@ -41,6 +42,7 @@ public class OrderService {
         orderEntity.setArtistId(artistId);
         orderEntity.setSubjectId(auctionId);
         orderEntity.setStatus("AWAIT");
+        orderEntity.setType("AUCTION");
         orderEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
 
         orderRepository.save(orderEntity);
@@ -54,12 +56,11 @@ public class OrderService {
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         AuctionEntity auctionEntity = auctionRepository.findById(orderEntity.getSubjectId()).orElseThrow(BadCredentialsException::new);
 
-
         if (!orderEntity.getCustomerId().equals(customerId)) {
             throw new ForbiddenActionException();
         }
 
-        if (!orderEntity.getStatus().equals("AWAIT")) {
+        if (!orderEntity.getStatus().equals("WAIT")) {
             throw new BadActionException("You can't change this order");
         }
 
@@ -81,6 +82,7 @@ public class OrderService {
         orderEntity.setArtistId(artEntity.getArtistId());
         orderEntity.setStatus("CREATED");
         orderEntity.setArtistComment("");
+        orderEntity.setType("ART");
         orderEntity.setCardId(cardId);
         orderEntity.setAddressId(addressId);
         orderEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
@@ -198,8 +200,6 @@ public class OrderService {
 
         CustomerEntity customerEntity = customerRepository.findById(orderEntity.getCustomerId()).orElseThrow(UserNotFoundException::new);
         ArtistEntity artistEntity = artistRepository.findById(orderEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
-        ArtEntity artEntity = artRepository.findById(orderEntity.getSubjectId()).orElseThrow(BadCredentialsException::new);
-        Optional<ArtPhotoEntity> artPhotoOpt = artPhotoRepository.findByArtIdAndAndDefaultPhoto(artEntity.getId(), true);
 
         OrderDTO orderDTO = new OrderDTO();
         orderDTO.setOrderId(orderId);
@@ -221,18 +221,35 @@ public class OrderService {
             orderDTO.setNumber(cardEntity.getNumber());
         }
 
+        if (orderEntity.getType().equals("ART")) {
+            ArtEntity artEntity = artRepository.findById(orderEntity.getSubjectId()).orElseThrow(BadCredentialsException::new);
+            Optional<ArtPhotoEntity> artPhotoOpt = artPhotoRepository.findByArtIdAndAndDefaultPhoto(artEntity.getId(), true);
+            orderDTO.setArtName(artEntity.getName());
+            orderDTO.setPrice(artEntity.getPrice());
+
+            if (artPhotoOpt.isPresent()) {
+                orderDTO.setArtUrl(artPhotoOpt.get().getPhotoUrl());
+            } else {
+                orderDTO.setArtUrl("");
+            }
+        } else {
+            AuctionEntity auctionEntity = auctionRepository.findById(orderEntity.getSubjectId()).orElseThrow(BadCredentialsException::new);
+            Optional<AuctionPhotoEntity> auctionPhotoOpt = auctionPhotoRepository.findByAuctionIdAndDefaultPhoto(auctionEntity.getId(), true);
+            orderDTO.setArtName(auctionEntity.getName());
+            orderDTO.setPrice(auctionEntity.getCurrentPrice());
+
+            if (auctionPhotoOpt.isPresent()) {
+                orderDTO.setArtUrl(auctionPhotoOpt.get().getPhotoUrl());
+            } else {
+                orderDTO.setArtUrl("");
+            }
+        }
+
         orderDTO.setArtistName(artistEntity.getArtistName());
         orderDTO.setCustomerName(customerEntity.getCustomerName());
-        orderDTO.setArtName(artEntity.getName());
-        orderDTO.setPrice(artEntity.getPrice());
+
         orderDTO.setStatus(orderEntity.getStatus());
         orderDTO.setArtistComment(orderEntity.getArtistComment());
-
-        if (artPhotoOpt.isPresent()) {
-            orderDTO.setArtUrl(artPhotoOpt.get().getPhotoUrl());
-        } else {
-            orderDTO.setArtUrl("");
-        }
 
         return orderDTO;
     }
