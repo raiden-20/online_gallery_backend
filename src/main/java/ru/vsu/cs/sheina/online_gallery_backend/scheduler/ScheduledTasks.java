@@ -43,14 +43,14 @@ public class ScheduledTasks {
         List<AuctionEntity> auctions = auctionRepository.findAll();
 
         for (AuctionEntity auctionEntity: auctions) {
-            if (auctionEntity.getStartDate().before(time)) {
+            if (auctionEntity.getStartDate().before(time) && auctionEntity.getStatus().equals("WAIT")) {
                 auctionEntity.setStatus("AVAILABLE");
                 auctionRepository.save(auctionEntity);
 
                 notificationService.sendStartPublicAuctionNotification(auctionEntity);
             }
 
-            if (auctionEntity.getEndDate().before(time) && !auctionEntity.getStatus().equals("SOLD")) {
+            if (auctionEntity.getEndDate().before(time) && auctionEntity.getStatus().equals("AVAILABLE")) {
                 auctionService.finishAuction(auctionEntity);
             }
         }
