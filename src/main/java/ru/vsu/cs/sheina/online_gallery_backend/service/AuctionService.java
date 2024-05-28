@@ -509,6 +509,10 @@ public class AuctionService {
                 auctionEntity.setCurrentPrice(rate);
                 auctionRepository.save(auctionEntity);
             }
+        } else {
+            createCustomerRate(auctionEntity.getId(), customerId, rateCreateDTO.getIsAnonymous(), rate);
+            auctionEntity.setCurrentPrice(rate);
+            auctionRepository.save(auctionEntity);
         }
     }
 
@@ -554,6 +558,7 @@ public class AuctionService {
                         .event("AUCTION")
                         .data(rateDTO)
                         .build();
+                subscriptions.get(sse).next(event);
             }
         }
     }
