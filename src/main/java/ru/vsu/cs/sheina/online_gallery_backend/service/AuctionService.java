@@ -424,8 +424,6 @@ public class AuctionService {
 
         if (comparison <= 0) {
             throw new BadActionException("Rate is less than current price");
-        } else if (maxRateCreateDTO.getMaxRate().remainder(auctionEntity.getRate()).compareTo(BigInteger.ZERO) != 0) {
-            throw new BadCredentialsException();
         }
 
         BigInteger newRate;
