@@ -50,7 +50,7 @@ public class ScheduledTasks {
                 notificationService.sendStartPublicAuctionNotification(auctionEntity);
             }
 
-            if (auctionEntity.getEndDate().before(time)) {
+            if (auctionEntity.getEndDate().before(time) && !auctionEntity.getStatus().equals("SOLD")) {
                 auctionService.finishAuction(auctionEntity);
             }
         }
@@ -61,7 +61,8 @@ public class ScheduledTasks {
         List<OrderEntity> orderEntities = orderRepository.findAll();
 
         for (OrderEntity orderEntity: orderEntities) {
-            if (orderEntity.getStatus().equals("AWAIT") && orderEntity.getCreateDate().before(time)) {
+            Timestamp endOrderDate = new Timestamp(orderEntity.getCreateDate().getTime() + 24 * 60 * 60 * 1000);
+            if (orderEntity.getStatus().equals("AWAIT") && endOrderDate.before(time)) {
                 ArtistEntity artistEntity = artistRepository.findById(orderEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
                 orderRepository.deleteAllBySubjectId(orderEntity.getSubjectId());
 
