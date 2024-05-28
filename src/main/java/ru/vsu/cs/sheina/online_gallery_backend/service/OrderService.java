@@ -60,7 +60,7 @@ public class OrderService {
             throw new ForbiddenActionException();
         }
 
-        if (!orderEntity.getStatus().equals("WAIT")) {
+        if (!orderEntity.getStatus().equals("AWAIT")) {
             throw new BadActionException("You can't change this order");
         }
 
