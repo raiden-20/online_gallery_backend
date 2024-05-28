@@ -17,7 +17,7 @@ public class ArtCreateDTO {
 
     Boolean isPrivate;
 
-   BigInteger price;
+    BigInteger price;
 
     String description;
 

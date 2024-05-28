@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.order.ChangeOrderDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.order.OrderDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.order.OrderShortDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadActionException;
@@ -59,6 +60,13 @@ public class OrderController {
                                           @RequestHeader("Authorization") String token) {
         OrderDTO order = orderService.getOrder(orderId, token);
         return ResponseEntity.ok(order);
+    }
+
+    @PutMapping("/order/change")
+    public ResponseEntity<?> changeOrder(@RequestBody ChangeOrderDTO changeOrderDTO,
+                                         @RequestHeader("Authorization") String token) {
+        orderService.changeOrder(changeOrderDTO, token);
+        return ResponseEntity.ok("Order changed successfully");
     }
 
     @PostMapping("/order/receive")

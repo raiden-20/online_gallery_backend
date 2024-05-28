@@ -41,7 +41,7 @@ public class ArtService {
         artPrivateSubscriptionRepository.deleteAllBySubscriptionId(subscriptionId);
     }
 
-    public void createArt(ArtCreateDTO artCreateDTO, List<MultipartFile> photos, String token) {
+    public Integer createArt(ArtCreateDTO artCreateDTO, List<MultipartFile> photos, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         UUID artistId = customerEntity.getArtistId();
@@ -95,6 +95,8 @@ public class ArtService {
         } else {
             notificationService.sendNewPublicArtNotification(artEntity, artistEntity);
         }
+
+        return artEntity.getId();
     }
 
     public ArtFullDTO getArt(Integer artId, String currentId) {
@@ -147,7 +149,7 @@ public class ArtService {
             artFullDTO.setStatus("AVAILABLE");
         } else if (!currentId.equals("null") && artEntity.getOwnerId() == null) {
             UUID customerId = UUID.fromString(currentId);
-            if (cartRepository.existsByCustomerIdAndArtId(customerId, artId)) {
+            if (cartRepository.existsByCustomerIdAndSubjectId(customerId, artId)) {
                 artFullDTO.setStatus("CART");
             } else {
                 artFullDTO.setStatus("AVAILABLE");
@@ -196,6 +198,7 @@ public class ArtService {
         }
 
         artEntity.setName(artChangeDTO.getName());
+        artEntity.setCreateDate(artChangeDTO.getCreateDate());
         artEntity.setType(artChangeDTO.getType());
         artEntity.setPrice(artChangeDTO.getPrice());
         artEntity.setDescription(artChangeDTO.getDescription());
@@ -252,8 +255,8 @@ public class ArtService {
         }
 
         notificationRepository.deleteAllBySubjectId(artEntity.getId());
-        cartRepository.deleteAllByArtId(artEntity.getId());
-        orderRepository.deleteAllByArtId(artEntity.getId());
+        cartRepository.deleteAllBySubjectId(artEntity.getId());
+        orderRepository.deleteAllBySubjectId(artEntity.getId());
         artPrivateSubscriptionRepository.deleteAllByArtId(artEntity.getId());
 
         artPhotoRepository.findAllByArtId(artEntity.getId()).stream()

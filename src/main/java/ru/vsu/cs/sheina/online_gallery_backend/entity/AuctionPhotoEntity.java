@@ -4,22 +4,23 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.UUID;
-
 @Entity
 @Getter
 @Setter
-@Table(name = "cart")
-public class CartEntity {
+@Table(name = "auction_photo")
+public class AuctionPhotoEntity {
 
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
-    @Column(name = "customer_id")
-    UUID customerId;
+    @Column(name = "auction_id")
+    Integer auctionId;
 
-    @Column(name = "subject_id")
-    Integer subjectId;
+    @Column(name = "photo_url")
+    String photoUrl;
+
+    @Column(name = "default_photo")
+    Boolean defaultPhoto;
 }

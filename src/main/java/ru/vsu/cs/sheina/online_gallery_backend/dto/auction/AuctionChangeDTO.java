@@ -1,4 +1,4 @@
-package ru.vsu.cs.sheina.online_gallery_backend.dto.art;
+package ru.vsu.cs.sheina.online_gallery_backend.dto.auction;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -9,9 +9,9 @@ import java.util.List;
 
 @Data
 @RequiredArgsConstructor
-public class ArtChangeDTO {
+public class AuctionChangeDTO {
 
-    Integer artId;
+    Integer auctionId;
 
     String name;
 
@@ -21,19 +21,21 @@ public class ArtChangeDTO {
 
     Boolean changeMainPhoto;
 
-    Boolean isPrivate;
+    BigInteger startPrice;;
 
-    BigInteger price;
+    Timestamp createDate;
 
     String description;
 
     String size;
-
-    Timestamp createDate;
 
     Boolean frame;
 
     List<String> tags;
 
     List<String> materials;
+
+    Timestamp startDate;
+
+    Timestamp endDate;
 }

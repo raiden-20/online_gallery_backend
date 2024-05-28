@@ -188,8 +188,8 @@ public class ArtistService {
 
         List<ArtEntity> artEntities = artRepository.findAllByArtistId(artistId);
         for (ArtEntity art: artEntities) {
-            cartRepository.deleteAllByArtId(art.getId());
-            orderRepository.deleteAllByArtId(art.getId());
+            cartRepository.deleteAllBySubjectId(art.getId());
+            orderRepository.deleteAllBySubjectId(art.getId());
             artPrivateSubscriptionRepository.deleteAllByArtId(art.getId());
 
             artPhotoRepository.findAllByArtId(art.getId()).stream()

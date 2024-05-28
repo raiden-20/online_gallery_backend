@@ -13,10 +13,12 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Integer> {
 
     List<OrderEntity> findAllByCardId(Integer cardId);
 
+    List<OrderEntity> findAllByAddressId(Integer addressId);
+
     List<OrderEntity> findAllByArtistId(UUID artistId);
 
     @Transactional
-    void deleteAllByArtId(Integer artId);
+    void deleteAllBySubjectId(Integer subjectId);
 
     @Transactional
     void deleteAllByCustomerId(UUID customerId);

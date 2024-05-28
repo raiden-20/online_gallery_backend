@@ -31,14 +31,16 @@ public class SecurityConfig {
                     .requestMatchers("/api/customers", "/api/artists", "/api/search/**", "/api/customer/{id}",
                             "/api/art/artId={artId}&currentId={currentId}", "/api/art/artist/artistId={artistId}&currentId={currentId}",
                             "/api/artist/artistId={artistId}&currentId={currentId}",
-                            "/api/art/customer/{customerId}","/api/paintings", "/api/photos", "/api/sculptures").permitAll()
+                            "/api/art/customer/{customerId}","/api/paintings", "/api/photos", "/api/sculptures",
+                            "/api/auction/auctionId={auctionId}&currentId={currentId}",
+                            "/api/auction/artist/{artistId}", "/api/auctions").permitAll()
                 .and()
                 .authorizeHttpRequests()
                 .requestMatchers("swagger-ui/**", "swagger-ui**", "/v3/api-docs/**", "/v3/api-docs**")
                 .permitAll()
                 .and()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/notification/sse/{id}")
+                .requestMatchers("/api/notification/sse/{id}", "/api/auction/rates/userId={userId}&auctionId={auctionId}")
                 .permitAll()
                 .anyRequest()
                 .authenticated();
