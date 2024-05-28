@@ -80,7 +80,7 @@ public class AuctionController {
     }
 
     @GetMapping(value = "/auction/rates/userId={userId}&auctionId={auctionId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent> openSseStream(@PathVariable UUID userId, Integer auctionId) {
+    public Flux<ServerSentEvent> openSseStream(@PathVariable UUID userId, @PathVariable Integer auctionId) {
 
         return Flux.create(fluxSink -> {
             fluxSink.onCancel(
