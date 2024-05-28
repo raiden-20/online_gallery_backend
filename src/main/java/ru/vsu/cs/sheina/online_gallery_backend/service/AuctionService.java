@@ -443,7 +443,7 @@ public class AuctionService {
                 createCustomerRate(auctionEntity.getId(), customerId, maxRateCreateDTO.getIsAnonymous(), newRate);
                 notificationService.sendMaxRateBlockNotification(auctionEntity, artistEntity, secondMaxRateEntity.getCustomerId());
 
-                maxRateRepository.deleteById(secondMaxRateEntity.getAuctionId());
+                maxRateRepository.deleteById(secondMaxRateEntity.getId());
 
                 MaxRateEntity maxRateEntity = new MaxRateEntity();
                 maxRateEntity.setRate(maxRateCreateDTO.getMaxRate());
