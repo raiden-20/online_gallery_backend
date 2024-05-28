@@ -40,7 +40,7 @@ public class SecurityConfig {
                 .permitAll()
                 .and()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/notification/sse/{id}, /api/auction/rates/userId={userId}&auctionId={auctionId}")
+                .requestMatchers("/api/notification/sse/{id}", "/api/auction/rates/userId={userId}&auctionId={auctionId}")
                 .permitAll()
                 .anyRequest()
                 .authenticated();
