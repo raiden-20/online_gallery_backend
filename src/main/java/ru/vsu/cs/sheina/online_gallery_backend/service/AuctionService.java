@@ -432,14 +432,19 @@ public class AuctionService {
         if (maxRateOptional.isPresent()) {
             MaxRateEntity secondMaxRateEntity = maxRateOptional.get();
             comparison = maxRateCreateDTO.getMaxRate().compareTo(secondMaxRateEntity.getRate());
-            if (comparison <= 0) {
+            if (comparison < 0) {
                 newRate = maxRateCreateDTO.getMaxRate().add(auctionEntity.getRate());
                 createCustomerRate(auctionEntity.getId(), customerId, maxRateCreateDTO.getIsAnonymous(), maxRateCreateDTO.getMaxRate());
                 createCustomerRate(auctionEntity.getId(), secondMaxRateEntity.getCustomerId(), secondMaxRateEntity.getIsAnonymous(), newRate);
                 notificationService.sendMaxRateBlockNotification(auctionEntity, artistEntity, customerId);
+            } else if (comparison == 0) {
+                newRate = secondMaxRateEntity.getRate();
+                createCustomerRate(auctionEntity.getId(), customerId, maxRateCreateDTO.getIsAnonymous(), maxRateCreateDTO.getMaxRate());
+                createCustomerRate(auctionEntity.getId(), secondMaxRateEntity.getCustomerId(), secondMaxRateEntity.getIsAnonymous(), newRate);
+                notificationService.sendMaxRateBlockNotification(auctionEntity, artistEntity, customerId);
             } else {
-                newRate = maxRateCreateDTO.getMaxRate().add(auctionEntity.getRate());
-                createCustomerRate(auctionEntity.getId(), secondMaxRateEntity.getCustomerId(), secondMaxRateEntity.getIsAnonymous(), maxRateCreateDTO.getMaxRate());
+                newRate = secondMaxRateEntity.getRate().add(auctionEntity.getRate());
+                createCustomerRate(auctionEntity.getId(), secondMaxRateEntity.getCustomerId(), secondMaxRateEntity.getIsAnonymous(), secondMaxRateEntity.getRate());
                 createCustomerRate(auctionEntity.getId(), customerId, maxRateCreateDTO.getIsAnonymous(), newRate);
                 notificationService.sendMaxRateBlockNotification(auctionEntity, artistEntity, secondMaxRateEntity.getCustomerId());
 
