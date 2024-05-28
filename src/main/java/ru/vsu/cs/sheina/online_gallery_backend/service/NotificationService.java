@@ -330,7 +330,7 @@ public class NotificationService {
     public void sendMaxRateBlockNotification(AuctionEntity auctionEntity, ArtistEntity artistEntity, UUID customerId) {
         NotificationEntity notificationEntity = new NotificationEntity();
         notificationEntity.setType("maxRateBlock");
-        notificationEntity.setText("Ваша максимальная ставка лота №" + auctionEntity.getId() + " было сбита.");
+        notificationEntity.setText("Ваша максимальная ставка лота №" + auctionEntity.getId() + " была сбита.");
         notificationEntity.setReceiverId(customerId);
         notificationEntity.setSenderId(auctionEntity.getArtistId());
         notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
