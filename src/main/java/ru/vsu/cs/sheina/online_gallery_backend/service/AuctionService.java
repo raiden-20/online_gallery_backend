@@ -555,7 +555,13 @@ public class AuctionService {
         for(AuctionSSE<UUID, Integer> sse: subscriptions.keySet()) {
             if (sse.getAuctionId().equals(auctionId)) {
                 CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
-                RateDTO rateDTO = new RateDTO(customerId, customerEntity.getCustomerName(), customerEntity.getAvatarUrl(), rate);
+                RateDTO rateDTO;
+                if (isAnonymous) {
+                    rateDTO = new RateDTO(UUID.fromString("00000000-0000-0000-0000-000000000000"), "anonymous", "anonymous", rate);
+                } else {
+                    rateDTO = new RateDTO(customerId, customerEntity.getCustomerName(), customerEntity.getAvatarUrl(), rate);
+                }
+
                 ServerSentEvent<Object> event = ServerSentEvent.builder()
                         .id(String.valueOf(rateEntity.getId()))
                         .event("AUCTION")
