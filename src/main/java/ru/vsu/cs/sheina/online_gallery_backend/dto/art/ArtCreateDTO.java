@@ -17,6 +17,8 @@ public class ArtCreateDTO {
 
     Boolean isPrivate;
 
+    Integer eventId;
+
     BigInteger price;
 
     String description;

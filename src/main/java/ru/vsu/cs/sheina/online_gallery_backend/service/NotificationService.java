@@ -125,6 +125,50 @@ public class NotificationService {
         }
     }
 
+    public void sendArtBlockNotification(UUID artistId, String artName) {
+        NotificationEntity notificationEntity = new NotificationEntity();
+        notificationEntity.setType("artBlock");
+        notificationEntity.setText("Ваша работа " + artName + " была удалена в связи с нарушением правил площадки.");
+        notificationEntity.setReceiverId(artistId);
+        notificationEntity.setSenderId(null);
+        notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
+        notificationEntity.setSubjectId(null);
+
+        notificationRepository.save(notificationEntity);
+        NotificationShortDTO shortDTO = new NotificationShortDTO("", notificationEntity.getText());
+
+        if (subscriptions.containsKey(artistId)) {
+            ServerSentEvent<Object> event = ServerSentEvent.builder()
+                    .id(String.valueOf(notificationEntity.getId()))
+                    .event("ART_BLOCK")
+                    .data(shortDTO)
+                    .build();
+            subscriptions.get(artistId).next(event);
+        }
+    }
+
+    public void sendAuctionBlockNotification(UUID artistId, String auctionName) {
+        NotificationEntity notificationEntity = new NotificationEntity();
+        notificationEntity.setType("auctionBlock");
+        notificationEntity.setText("Ваш аукцион " + auctionName + " был удален в связи с нарушением правил площадки.");
+        notificationEntity.setReceiverId(artistId);
+        notificationEntity.setSenderId(null);
+        notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
+        notificationEntity.setSubjectId(null);
+
+        notificationRepository.save(notificationEntity);
+        NotificationShortDTO shortDTO = new NotificationShortDTO("", notificationEntity.getText());
+
+        if (subscriptions.containsKey(artistId)) {
+            ServerSentEvent<Object> event = ServerSentEvent.builder()
+                    .id(String.valueOf(notificationEntity.getId()))
+                    .event("AUCTION_BLOCK")
+                    .data(shortDTO)
+                    .build();
+            subscriptions.get(artistId).next(event);
+        }
+    }
+
     public void sendPrivateDeletedNotification(ArtistEntity artistEntity, PrivateSubscriptionEntity privateSubscriptionEntity) {
         List<CustomerPrivateSubscriptionEntity> subscriptionEntities = customerPrivateSubscriptionRepository.findAllByPrivateSubscriptionId(privateSubscriptionEntity.getId());
 
@@ -147,6 +191,32 @@ public class NotificationService {
                         .data(shortDTO)
                         .build();
                 subscriptions.get(subscriptionEntity.getCustomerId()).next(event);
+            }
+        }
+    }
+
+    public void sendEventCreatedNotification(EventEntity eventEntity) {
+        List<ArtistEntity> artists = artistRepository.findAll();
+
+        for (ArtistEntity artistEntity: artists) {
+            NotificationEntity notificationEntity = new NotificationEntity();
+            notificationEntity.setType("eventCreated");
+            notificationEntity.setText("Не пропустите событие \"" + eventEntity.getName() + "\". Вы можете принять в нем участие, добавив свои работы.");
+            notificationEntity.setReceiverId(artistEntity.getId());
+            notificationEntity.setSenderId(null);
+            notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
+            notificationEntity.setSubjectId(eventEntity.getId());
+
+            notificationRepository.save(notificationEntity);
+            NotificationShortDTO shortDTO = new NotificationShortDTO(artistEntity.getAvatarUrl(), notificationEntity.getText());
+
+            if (subscriptions.containsKey(artistEntity.getId())) {
+                ServerSentEvent<Object> event = ServerSentEvent.builder()
+                        .id(String.valueOf(notificationEntity.getId()))
+                        .event("EVENT")
+                        .data(shortDTO)
+                        .build();
+                subscriptions.get(artistEntity.getId()).next(event);
             }
         }
     }

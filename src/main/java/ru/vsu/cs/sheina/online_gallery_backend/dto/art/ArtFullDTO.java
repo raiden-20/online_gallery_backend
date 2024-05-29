@@ -26,6 +26,10 @@ public class ArtFullDTO {
 
     String artistName;
 
+    Integer eventId;
+
+    String eventName;
+
     String status;
 
     UUID customerId;
