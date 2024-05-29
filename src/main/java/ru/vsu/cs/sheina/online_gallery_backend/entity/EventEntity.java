@@ -20,6 +20,12 @@ public class EventEntity {
     @Column(name = "name")
     String name;
 
+    @Column(name = "status")
+    String status;
+
+    @Column(name = "type")
+    String type;
+
     @Column(name = "photo_url")
     String photoUrl;
 

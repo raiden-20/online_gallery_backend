@@ -200,6 +200,7 @@ CREATE TABLE event(
     start_date TIMESTAMP,
     end_date TIMESTAMP,
     description VARCHAR(500),
+    status VARCHAR(15),
     views INT,
     type VARCHAR(10)
 );
