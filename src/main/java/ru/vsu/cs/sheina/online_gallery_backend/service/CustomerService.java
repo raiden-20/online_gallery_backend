@@ -169,8 +169,6 @@ public class CustomerService {
             fileService.deleteFile(customerEntity.getCoverUrl());
         }
 
-        UUID artistId = customerEntity.getArtistId();
         customerRepository.delete(customerEntity);
-        artistRepository.deleteById(artistId);
     }
 }
