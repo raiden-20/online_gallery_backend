@@ -67,7 +67,6 @@ public class ArtService {
         artEntity.setPublishDate(new Timestamp(System.currentTimeMillis()));
         artEntity.setCreateDate(artCreateDTO.getCreateDate());
         artEntity.setViews(0);
-        artRepository.save(artEntity);
 
         boolean privateArt = artCreateDTO.getIsPrivate();
 
@@ -95,6 +94,8 @@ public class ArtService {
         } else {
             notificationService.sendNewPublicArtNotification(artEntity, artistEntity);
         }
+
+        artRepository.save(artEntity);
 
         return artEntity.getId();
     }
