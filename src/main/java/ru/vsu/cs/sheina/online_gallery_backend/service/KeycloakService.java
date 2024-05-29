@@ -11,7 +11,12 @@ import org.springframework.stereotype.Service;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.EmailDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.PasswordDTO;
 import org.keycloak.representations.idm.CredentialRepresentation;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.field.UUIDRequestDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.entity.CustomerEntity;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.EmailAlreadyExistsException;
+import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
+import ru.vsu.cs.sheina.online_gallery_backend.repository.ArtistRepository;
+import ru.vsu.cs.sheina.online_gallery_backend.repository.CustomerRepository;
 import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
 
 import java.util.UUID;
@@ -23,6 +28,8 @@ public class KeycloakService {
 
     private final Keycloak keycloak;
     private final JWTParser jwtParser;
+    private final ArtistRepository artistRepository;
+    private final CustomerRepository customerRepository;
 
     @Value("${keycloak.realm}")
     private String realm;
@@ -70,5 +77,43 @@ public class KeycloakService {
         UsersResource usersResource = realmResource.users();
 
         usersResource.delete(String.valueOf(userId));
+    }
+
+    public void blockUser(UUIDRequestDTO uuidRequestDTO) {
+        UUID userId = uuidRequestDTO.getId();
+        UUID customerId;
+
+        if (artistRepository.existsById(userId)) {
+            customerId =  customerRepository.findByArtistId(userId).orElseThrow(UserNotFoundException::new).getId();
+        } else {
+            customerId = userId;
+        }
+
+        RealmResource realmResource = keycloak.realm(realm);
+        UsersResource usersResource = realmResource.users();
+        UserResource userResource = usersResource.get(String.valueOf(customerId));
+        UserRepresentation userRepresentation = userResource.toRepresentation();
+
+        userRepresentation.setEnabled(false);
+        userResource.update(userRepresentation);
+    }
+
+    public void unblockUser(UUIDRequestDTO uuidRequestDTO) {
+        UUID userId = uuidRequestDTO.getId();
+        UUID customerId;
+
+        if (artistRepository.existsById(userId)) {
+            customerId =  customerRepository.findByArtistId(userId).orElseThrow(UserNotFoundException::new).getId();
+        } else {
+            customerId = userId;
+        }
+
+        RealmResource realmResource = keycloak.realm(realm);
+        UsersResource usersResource = realmResource.users();
+        UserResource userResource = usersResource.get(String.valueOf(customerId));
+        UserRepresentation userRepresentation = userResource.toRepresentation();
+
+        userRepresentation.setEnabled(true);
+        userResource.update(userRepresentation);
     }
 }
