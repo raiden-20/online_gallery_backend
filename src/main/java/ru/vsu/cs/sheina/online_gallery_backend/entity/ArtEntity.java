@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
 
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
@@ -28,7 +29,7 @@ public class ArtEntity {
     String type;
 
     @Column(name = "price")
-    Double price;
+    BigInteger price;
 
     @Column(name = "artist_id")
     UUID artistId;

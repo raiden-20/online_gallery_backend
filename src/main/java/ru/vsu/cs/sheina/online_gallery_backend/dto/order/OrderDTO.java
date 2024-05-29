@@ -3,6 +3,9 @@ package ru.vsu.cs.sheina.online_gallery_backend.dto.order;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
+import java.math.BigInteger;
+import java.sql.Timestamp;
+
 @Data
 @RequiredArgsConstructor
 public class OrderDTO {
@@ -33,9 +36,11 @@ public class OrderDTO {
 
     String artName;
 
-    Double price;
+    BigInteger price;
 
     String status;
 
     String artistComment;
+
+    Timestamp createDate;
 }

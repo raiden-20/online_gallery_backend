@@ -20,6 +20,6 @@ public class CartEntity {
     @Column(name = "customer_id")
     UUID customerId;
 
-    @Column(name = "art_id")
-    Integer artId;
+    @Column(name = "subject_id")
+    Integer subjectId;
 }

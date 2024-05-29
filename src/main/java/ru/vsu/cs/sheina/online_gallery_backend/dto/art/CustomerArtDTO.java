@@ -3,7 +3,7 @@ package ru.vsu.cs.sheina.online_gallery_backend.dto.art;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
-import java.util.UUID;
+import java.math.BigInteger;
 
 @Data
 @RequiredArgsConstructor
@@ -17,7 +17,7 @@ public class CustomerArtDTO {
 
     String photoUrl;
 
-    Double price;
+    BigInteger price;
 
     Boolean isPrivate;
 }

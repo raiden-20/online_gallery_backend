@@ -28,13 +28,19 @@ public class SecurityConfig {
                 .and()
                 .authorizeHttpRequests()
 //                    .requestMatchers("/change/**").hasRole(Role.USER.name())
-                    .requestMatchers("/customers", "/artists", "/search/**", "/customer/{id}",
-                            "/art/artId={artId}&currentId={currentId}", "/art/artist/artistId={artistId}&currentId={currentId}",
-                            "/artist/artistId={artistId}&currentId={currentId}",
-                            "/art/customer/{customerId}","/paintings", "/photos", "/sculptures").permitAll()
+                    .requestMatchers("/api/customers", "/api/artists", "/api/search/**", "/api/customer/{id}",
+                            "/api/art/artId={artId}&currentId={currentId}", "/api/art/artist/artistId={artistId}&currentId={currentId}",
+                            "/api/artist/artistId={artistId}&currentId={currentId}",
+                            "/api/art/customer/{customerId}","/api/paintings", "/api/photos", "/api/sculptures",
+                            "/api/auction/auctionId={auctionId}&currentId={currentId}",
+                            "/api/auction/artist/{artistId}", "/api/auctions").permitAll()
                 .and()
                 .authorizeHttpRequests()
                 .requestMatchers("swagger-ui/**", "swagger-ui**", "/v3/api-docs/**", "/v3/api-docs**")
+                .permitAll()
+                .and()
+                .authorizeHttpRequests()
+                .requestMatchers("/api/notification/sse/{id}", "/api/auction/rates/userId={userId}&auctionId={auctionId}")
                 .permitAll()
                 .anyRequest()
                 .authenticated();

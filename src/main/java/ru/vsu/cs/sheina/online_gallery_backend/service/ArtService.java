@@ -1,8 +1,6 @@
 package ru.vsu.cs.sheina.online_gallery_backend.service;
 
 import lombok.RequiredArgsConstructor;
-import org.checkerframework.checker.units.qual.C;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.art.*;
@@ -36,19 +34,19 @@ public class ArtService {
     private final ArtPrivateSubscriptionRepository artPrivateSubscriptionRepository;
     private final CustomerPrivateSubscriptionRepository customerPrivateSubscriptionRepository;
     private final OrderRepository orderRepository;
+    private final NotificationService notificationService;
+    private final NotificationRepository notificationRepository;
 
     public void movePrivatePaintings(Integer subscriptionId) {
         artPrivateSubscriptionRepository.deleteAllBySubscriptionId(subscriptionId);
     }
 
-    public void createArt(ArtCreateDTO artCreateDTO, List<MultipartFile> photos, String token) {
+    public Integer createArt(ArtCreateDTO artCreateDTO, List<MultipartFile> photos, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         UUID artistId = customerEntity.getArtistId();
 
-        if (!artistRepository.existsById(artistId)) {
-            throw new UserNotFoundException();
-        }
+        ArtistEntity artistEntity = artistRepository.findById(artistId).orElseThrow(UserNotFoundException::new);
 
         if (!artCreateDTO.getType().equals("PAINTING") && !artCreateDTO.getType().equals("PHOTO") && !artCreateDTO.getType().equals("SCULPTURE")) {
             throw new BadCredentialsException();
@@ -90,17 +88,27 @@ public class ArtService {
             artPhotoEntity.setDefaultPhoto(i == 0);
             artPhotoRepository.save(artPhotoEntity);
         }
+
+        if (artCreateDTO.getIsPrivate()) {
+            PrivateSubscriptionEntity privateSubscription = privateSubscriptionRepository.findByArtistId(artistId).get();
+            notificationService.sendNewPrivateArtNotification(artEntity, artistEntity, privateSubscription);
+        } else {
+            notificationService.sendNewPublicArtNotification(artEntity, artistEntity);
+        }
+
+        return artEntity.getId();
     }
 
     public ArtFullDTO getArt(Integer artId, String currentId) {
         ArtEntity artEntity = artRepository.findById(artId).orElseThrow(BadCredentialsException::new);
+        ArtistEntity artistEntity = artistRepository.findById(artEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
 
         ArtFullDTO artFullDTO = new ArtFullDTO();
         artFullDTO.setName(artEntity.getName());
         artFullDTO.setType(artEntity.getType());
         artFullDTO.setPrice(artEntity.getPrice());
         artFullDTO.setArtistId(artEntity.getArtistId());
-        artFullDTO.setArtistName(artEntity.getName());
+        artFullDTO.setArtistName(artistEntity.getArtistName());
         artFullDTO.setDescription(artEntity.getDescription());
         artFullDTO.setSize(artEntity.getSize());
         artFullDTO.setCreateDate(artEntity.getCreateDate());
@@ -141,7 +149,7 @@ public class ArtService {
             artFullDTO.setStatus("AVAILABLE");
         } else if (!currentId.equals("null") && artEntity.getOwnerId() == null) {
             UUID customerId = UUID.fromString(currentId);
-            if (cartRepository.existsByCustomerIdAndArtId(customerId, artId)) {
+            if (cartRepository.existsByCustomerIdAndSubjectId(customerId, artId)) {
                 artFullDTO.setStatus("CART");
             } else {
                 artFullDTO.setStatus("AVAILABLE");
@@ -190,6 +198,7 @@ public class ArtService {
         }
 
         artEntity.setName(artChangeDTO.getName());
+        artEntity.setCreateDate(artChangeDTO.getCreateDate());
         artEntity.setType(artChangeDTO.getType());
         artEntity.setPrice(artChangeDTO.getPrice());
         artEntity.setDescription(artChangeDTO.getDescription());
@@ -245,8 +254,9 @@ public class ArtService {
             throw new ForbiddenActionException();
         }
 
-        cartRepository.deleteAllByArtId(artEntity.getId());
-        orderRepository.deleteAllByArtId(artEntity.getId());
+        notificationRepository.deleteAllBySubjectId(artEntity.getId());
+        cartRepository.deleteAllBySubjectId(artEntity.getId());
+        orderRepository.deleteAllBySubjectId(artEntity.getId());
         artPrivateSubscriptionRepository.deleteAllByArtId(artEntity.getId());
 
         artPhotoRepository.findAllByArtId(artEntity.getId()).stream()

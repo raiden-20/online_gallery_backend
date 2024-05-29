@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.sql.Timestamp;
 import java.util.UUID;
 
 @Entity
@@ -23,11 +24,14 @@ public class OrderEntity {
     @Column(name = "artist_id")
     UUID artistId;
 
-    @Column(name = "art_id")
-    Integer artId;
+    @Column(name = "subject_id")
+    Integer subjectId;
 
     @Column(name = "status")
     String status;
+
+    @Column(name = "type")
+    String type;
 
     @Column(name = "artist_comment")
     String artistComment;
@@ -37,4 +41,7 @@ public class OrderEntity {
 
     @Column(name = "address_id")
     Integer addressId;
+
+    @Column(name = "create_date")
+    Timestamp createDate;
 }

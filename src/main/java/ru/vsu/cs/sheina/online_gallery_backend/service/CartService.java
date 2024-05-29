@@ -6,17 +6,11 @@ import org.springframework.stereotype.Service;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.art.ArtShortDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.order.PurchaseDTO;
-import ru.vsu.cs.sheina.online_gallery_backend.entity.ArtEntity;
-import ru.vsu.cs.sheina.online_gallery_backend.entity.ArtPhotoEntity;
-import ru.vsu.cs.sheina.online_gallery_backend.entity.ArtistEntity;
-import ru.vsu.cs.sheina.online_gallery_backend.entity.CartEntity;
+import ru.vsu.cs.sheina.online_gallery_backend.entity.*;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadActionException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentialsException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
-import ru.vsu.cs.sheina.online_gallery_backend.repository.ArtPhotoRepository;
-import ru.vsu.cs.sheina.online_gallery_backend.repository.ArtRepository;
-import ru.vsu.cs.sheina.online_gallery_backend.repository.ArtistRepository;
-import ru.vsu.cs.sheina.online_gallery_backend.repository.CartRepository;
+import ru.vsu.cs.sheina.online_gallery_backend.repository.*;
 import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
 
 import java.util.*;
@@ -30,7 +24,10 @@ public class CartService {
     private final ArtRepository artRepository;
     private final ArtistRepository artistRepository;
     private final ArtPhotoRepository artPhotoRepository;
+    private final OrderRepository orderRepository;
+    private final CustomerRepository customerRepository;
     private final OrderService orderService;
+    private final NotificationService notificationService;
 
     public void addArt(IntIdRequestDTO intIdRequestDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
@@ -39,24 +36,24 @@ public class CartService {
             throw new BadCredentialsException();
         }
 
-        if (cartRepository.existsByCustomerIdAndArtId(customerId, intIdRequestDTO.getId())) {
+        if (cartRepository.existsByCustomerIdAndSubjectId(customerId, intIdRequestDTO.getId())) {
             throw new BadActionException("Art has already been added to the cart");
         }
 
         CartEntity cartEntity = new CartEntity();
         cartEntity.setCustomerId(customerId);
-        cartEntity.setArtId(intIdRequestDTO.getId());
+        cartEntity.setSubjectId(intIdRequestDTO.getId());
         cartRepository.save(cartEntity);
     }
 
     public void deleteArtFromCart(IntIdRequestDTO intIdRequestDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
 
-        if (!cartRepository.existsByCustomerIdAndArtId(customerId, intIdRequestDTO.getId())) {
+        if (!cartRepository.existsByCustomerIdAndSubjectId(customerId, intIdRequestDTO.getId())) {
             throw new BadActionException("You can't do this action");
         }
 
-        CartEntity cartEntity = cartRepository.findByCustomerIdAndArtId(customerId, intIdRequestDTO.getId()).get();
+        CartEntity cartEntity = cartRepository.findByCustomerIdAndSubjectId(customerId, intIdRequestDTO.getId()).get();
 
         cartRepository.delete(cartEntity);
     }
@@ -65,7 +62,7 @@ public class CartService {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
 
         List<Integer> artIds = cartRepository.findAllByCustomerId(customerId).stream()
-                .map(CartEntity::getArtId)
+                .map(CartEntity::getSubjectId)
                 .toList();
         List<ArtShortDTO> dtos = new ArrayList<>();
 
@@ -98,8 +95,15 @@ public class CartService {
         List<Integer> orderIds = new ArrayList<>();
 
         for (Integer artId: purchaseDTO.getArts().keySet()) {
-            orderIds.add(orderService.createOrder(artId, customerId, purchaseDTO.getCardId(), purchaseDTO.getAddressId(), purchaseDTO.getArts().get(artId)));
-            cartRepository.deleteAllByArtId(artId);
+            Integer orderId = orderService.createOrder(artId, customerId, purchaseDTO.getCardId(), purchaseDTO.getAddressId(), purchaseDTO.getArts().get(artId));
+            orderIds.add(orderId);
+            cartRepository.deleteAllBySubjectId(artId);
+
+            OrderEntity orderEntity = orderRepository.findById(orderId).get();
+            CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
+            ArtEntity artEntity = artRepository.findById(artId).orElseThrow(BadCredentialsException::new);
+
+            notificationService.sendArtSoldNotification(orderEntity, customerEntity, artEntity);
         }
 
         return orderIds;
