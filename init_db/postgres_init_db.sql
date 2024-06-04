@@ -197,6 +197,7 @@ CREATE TABLE event(
     id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
     name VARCHAR(300),
     photo_url VARCHAR(500),
+    banner_url VARCHAR(500),
     start_date TIMESTAMP,
     end_date TIMESTAMP,
     description VARCHAR(500),

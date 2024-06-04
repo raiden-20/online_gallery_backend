@@ -75,7 +75,11 @@ public class AdminService {
         notificationService.sendAuctionBlockNotification(artistId, auctionName);
     }
 
-    public Integer createEvent(EventCreateDTO eventCreateDTO, MultipartFile photo) {
+    public Integer createEvent(EventCreateDTO eventCreateDTO, MultipartFile photo, MultipartFile banner) {
+        if (!eventCreateDTO.getType().equals("ART") && !eventCreateDTO.getType().equals("AUCTION")) {
+            throw new BadCredentialsException();
+        }
+
         EventEntity eventEntity = new EventEntity();
         eventEntity.setName(eventCreateDTO.getName());
         eventEntity.setDescription(eventCreateDTO.getDescription());
@@ -85,6 +89,7 @@ public class AdminService {
         eventEntity.setStartDate(eventCreateDTO.getStartDate());
         eventEntity.setEndDate(eventCreateDTO.getEndDate());
         eventEntity.setPhotoUrl(fileService.saveFile(photo));
+        eventEntity.setBannerUrl(fileService.saveFile(banner));
 
         eventRepository.save(eventEntity);
         notificationService.sendEventCreatedNotification(eventEntity);
@@ -92,7 +97,7 @@ public class AdminService {
         return eventEntity.getId();
     }
 
-    public void changeEvent(EventChangeDTO eventChangeDTO, MultipartFile newPhoto) {
+    public void changeEvent(EventChangeDTO eventChangeDTO, MultipartFile newPhoto, MultipartFile newBanner) {
         EventEntity eventEntity = eventRepository.findById(eventChangeDTO.getEventId()).orElseThrow(BadCredentialsException::new);
 
         if (!eventEntity.getStatus().equals("WAIT")) {
@@ -109,6 +114,13 @@ public class AdminService {
                 fileService.deleteFile(eventEntity.getPhotoUrl());
             }
             eventEntity.setPhotoUrl(fileService.saveFile(newPhoto));
+        }
+
+        if (eventChangeDTO.getChangeBanner()) {
+            if (!eventEntity.getBannerUrl().isEmpty()) {
+                fileService.deleteFile(eventEntity.getBannerUrl());
+            }
+            eventEntity.setBannerUrl(fileService.saveFile(newBanner));
         }
 
         eventRepository.save(eventEntity);

@@ -15,6 +15,8 @@ public class EventChangeDTO {
 
     Boolean changeMainPhoto;
 
+    Boolean changeBanner;
+
     String description;
 
     Timestamp startDate;

@@ -29,6 +29,10 @@ public class EventEntity {
     @Column(name = "photo_url")
     String photoUrl;
 
+    @Column(name = "banner_url")
+    String bannerUrl;
+
+
     @Column(name = "description")
     String description;
 

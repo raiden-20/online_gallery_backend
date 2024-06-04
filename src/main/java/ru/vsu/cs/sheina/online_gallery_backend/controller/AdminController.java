@@ -55,16 +55,18 @@ public class AdminController {
             MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createEvent(@RequestPart("EventCreateDTO") EventCreateDTO eventCreateDTO,
-                                         @RequestPart(value = "photo") MultipartFile photo) {
-        return ResponseEntity.ok(adminService.createEvent(eventCreateDTO, photo));
+                                         @RequestPart(value = "photo") MultipartFile photo,
+                                         @RequestPart(value = "banner") MultipartFile banner) {
+        return ResponseEntity.ok(adminService.createEvent(eventCreateDTO, photo, banner));
     }
 
     @PutMapping(value = "/event", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE,
             MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> changeEvent(@RequestPart("EventChangeDTO")EventChangeDTO eventCreateDTO,
-                                         @RequestPart(value = "newPhoto") MultipartFile newPhoto) {
-        adminService.changeEvent(eventCreateDTO, newPhoto);
+    public ResponseEntity<?> changeEvent(@RequestPart("EventChangeDTO") EventChangeDTO eventCreateDTO,
+                                         @RequestPart(value = "newPhoto") MultipartFile newPhoto,
+                                         @RequestPart(value = "newBanner") MultipartFile newBanner) {
+        adminService.changeEvent(eventCreateDTO, newPhoto, newBanner);
         return ResponseEntity.ok("Event changed successfully");
     }
 
