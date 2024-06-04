@@ -82,6 +82,11 @@ public class EventService {
             subjectDTOs = getEventSubjects(eventEntity, subjectEntities);
         }
         dto.setSubjects(subjectDTOs);
+
+        int views = eventEntity.getViews();
+        eventEntity.setViews(++views);
+        eventRepository.save(eventEntity);
+
         return dto;
     }
 
