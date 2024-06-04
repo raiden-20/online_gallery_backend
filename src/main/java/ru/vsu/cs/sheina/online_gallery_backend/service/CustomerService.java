@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.customer.CustomerFullDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.customer.CustomerRegistrationDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.customer.CustomerShortDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.customer.FirstEntryDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.ArtEntity;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.ArtistEntity;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.CustomerEntity;
@@ -39,6 +40,7 @@ public class CustomerService {
     private final OrderRepository orderRepository;
     private final FileService fileService;
     private final ArtistService artistService;
+    private final AdminService adminService;
     private final JWTParser jwtParser;
 
     public CustomerFullDTO getCustomerData(UUID id) {
@@ -59,9 +61,13 @@ public class CustomerService {
         return dto;
     }
 
-    public Boolean isFirstEntry(String token) {
+    public FirstEntryDTO isFirstEntry(String token) {
         UUID id = jwtParser.getIdFromAccessToken(token);
-        return !customerRepository.existsById(id);
+        FirstEntryDTO firstEntryDTO = new FirstEntryDTO();
+        firstEntryDTO.setFirstEntry(!customerRepository.existsById(id));
+        firstEntryDTO.setIsAdmin(adminService.checkAdmin(id));
+
+        return firstEntryDTO;
     }
 
     public void setCustomerData(String token, String customerName, String birthDate, String description, String gender, String avatarUrl, String coverUrl, MultipartFile avatar, MultipartFile cover) {
