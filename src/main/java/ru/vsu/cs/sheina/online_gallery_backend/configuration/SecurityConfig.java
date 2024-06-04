@@ -37,7 +37,9 @@ public class SecurityConfig {
                             "/api/artist/artistId={artistId}&currentId={currentId}",
                             "/api/art/customer/{customerId}","/api/paintings", "/api/photos", "/api/sculptures",
                             "/api/auction/auctionId={auctionId}&currentId={currentId}",
-                            "/api/auction/artist/{artistId}", "/api/auctions").permitAll()
+                            "/api/auction/artist/{artistId}", "/api/auctions",
+                            "/event/eventId={eventId}&currentId={currentId}",
+                            "/events/currentId={currentId}").permitAll()
                 .and()
                 .authorizeHttpRequests()
                 .requestMatchers("swagger-ui/**", "swagger-ui**", "/v3/api-docs/**", "/v3/api-docs**")

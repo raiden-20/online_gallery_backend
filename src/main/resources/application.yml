@@ -16,6 +16,12 @@ spring:
         jwt:
           issuer-uri: http://localhost:8000/realms/online_gallery
           jwk-ser-uri: http://localhost:8000/realms/online_gallery/protocol/openid-connect/certs
+  jwt:
+    auth:
+      converter:
+        principle-attribute: preferred_username
+        resource-id: backend
+
 minio:
   host: http://localhost:9000
   user: muser
