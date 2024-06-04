@@ -53,9 +53,10 @@ public class AuctionController {
         return ResponseEntity.ok(auctionFullDTO);
     }
 
-    @GetMapping("/auction/artist/{artistId}")
-    public ResponseEntity<?> getAllArtistAuction(@PathVariable UUID artistId){
-        List<AuctionShortDTO> auctions = auctionService.getArtistAuctions(artistId);
+    @GetMapping("/auction/artist/artistId={artistId}&currentId={currentId}")
+    public ResponseEntity<?> getAllArtistAuction(@PathVariable UUID artistId,
+                                                 @PathVariable String currentId){
+        List<AuctionShortDTO> auctions = auctionService.getArtistAuctions(artistId, currentId);
         return ResponseEntity.ok(auctions);
     }
 

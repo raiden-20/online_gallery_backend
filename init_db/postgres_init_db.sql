@@ -193,6 +193,29 @@ CREATE TABLE rate(
     create_date TIMESTAMP
 );
 
+CREATE TABLE event(
+    id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
+    name VARCHAR(300),
+    photo_url VARCHAR(500),
+    banner_url VARCHAR(500),
+    start_date TIMESTAMP,
+    end_date TIMESTAMP,
+    description VARCHAR(500),
+    status VARCHAR(15),
+    views INT,
+    type VARCHAR(10)
+);
+
+CREATE TABLE event_subject(
+    id INT PRIMARY KEY UNIQUE GENERATED ALWAYS AS IDENTITY NOT NULL,
+    event_id INT REFERENCES event(id),
+    subject_id INT
+);
+
+CREATE TABLE admin(
+    id UUID PRIMARY KEY UNIQUE NOT NULL
+);
+
 INSERT INTO customer (id, customer_name, gender, birth_date, avatar_url, description)
 VALUES (
     '00000000-0000-0000-0000-000000000000', 'anonymous', 'MAN', '2024-04-28', ' ', 'anonymous'

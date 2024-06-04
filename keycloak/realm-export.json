@@ -49,34 +49,6 @@
   "roles": {
     "realm": [
       {
-        "id": "895e23ca-2862-42a2-8ac1-720e92e97f18",
-        "name": "USER",
-        "description": "",
-        "composite": true,
-        "composites": {
-          "realm": [
-            "USER"
-          ]
-        },
-        "clientRole": false,
-        "containerId": "3768f229-31a6-4776-b426-12203d356b3c",
-        "attributes": {}
-      },
-      {
-        "id": "5ad84650-3567-4835-bca7-acaeed037b27",
-        "name": "ADMIN",
-        "description": "",
-        "composite": true,
-        "composites": {
-          "realm": [
-            "ADMIN"
-          ]
-        },
-        "clientRole": false,
-        "containerId": "3768f229-31a6-4776-b426-12203d356b3c",
-        "attributes": {}
-      },
-      {
         "id": "e7786159-a27f-4b7d-9e87-2e9903ff8e42",
         "name": "default-roles-online_gallery",
         "description": "${role_default-roles}",
@@ -84,8 +56,7 @@
         "composites": {
           "realm": [
             "offline_access",
-            "uma_authorization",
-            "USER"
+            "uma_authorization"
           ],
           "client": {
             "account": [
@@ -103,6 +74,22 @@
         "name": "offline_access",
         "description": "${role_offline-access}",
         "composite": false,
+        "clientRole": false,
+        "containerId": "3768f229-31a6-4776-b426-12203d356b3c",
+        "attributes": {}
+      },
+      {
+        "id": "d7951e7f-0815-4dfd-bc36-61f246577e3c",
+        "name": "ROLE_ADMIN",
+        "description": "",
+        "composite": true,
+        "composites": {
+          "client": {
+            "backend": [
+              "ROLE_ADMIN"
+            ]
+          }
+        },
         "clientRole": false,
         "containerId": "3768f229-31a6-4776-b426-12203d356b3c",
         "attributes": {}
@@ -334,6 +321,15 @@
       "admin-cli": [],
       "backend": [
         {
+          "id": "896a7927-7f8c-4cd1-b631-a79280282bea",
+          "name": "ROLE_ADMIN",
+          "description": "",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "23b9015b-9b9d-4053-bcb9-e54f9203da7d",
+          "attributes": {}
+        },
+        {
           "id": "6f79cd10-0ac4-493d-b606-9ecbfda887a7",
           "name": "BACKEND",
           "description": "",
@@ -536,7 +532,6 @@
       "disableableCredentialTypes": [],
       "requiredActions": [],
       "realmRoles": [
-        "ADMIN",
         "default-roles-online_gallery"
       ],
       "clientRoles": {
@@ -738,7 +733,7 @@
       "frontchannelLogout": true,
       "protocol": "openid-connect",
       "attributes": {
-        "client.secret.creation.time": "1712162757",
+        "client.secret.creation.time": "1716387588",
         "post.logout.redirect.uris": "+",
         "oauth2.device.authorization.grant.enabled": "false",
         "backchannel.logout.revoke.offline.tokens": "false",
@@ -766,6 +761,7 @@
           "config": {
             "user.session.note": "clientAddress",
             "introspection.token.claim": "true",
+            "userinfo.token.claim": "true",
             "id.token.claim": "true",
             "access.token.claim": "true",
             "claim.name": "clientAddress",
@@ -781,6 +777,7 @@
           "config": {
             "user.session.note": "client_id",
             "introspection.token.claim": "true",
+            "userinfo.token.claim": "true",
             "id.token.claim": "true",
             "access.token.claim": "true",
             "claim.name": "client_id",
@@ -796,6 +793,7 @@
           "config": {
             "user.session.note": "clientHost",
             "introspection.token.claim": "true",
+            "userinfo.token.claim": "true",
             "id.token.claim": "true",
             "access.token.claim": "true",
             "claim.name": "clientHost",
@@ -1695,14 +1693,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "oidc-usermodel-property-mapper",
             "oidc-usermodel-attribute-mapper",
-            "oidc-address-mapper",
             "saml-role-list-mapper",
             "saml-user-attribute-mapper",
             "saml-user-property-mapper",
             "oidc-full-name-mapper",
-            "oidc-sha256-pairwise-sub-mapper"
+            "oidc-usermodel-property-mapper",
+            "oidc-sha256-pairwise-sub-mapper",
+            "oidc-address-mapper"
           ]
         }
       },
@@ -1714,14 +1712,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "oidc-address-mapper",
-            "saml-role-list-mapper",
-            "oidc-usermodel-property-mapper",
             "oidc-sha256-pairwise-sub-mapper",
-            "oidc-full-name-mapper",
+            "saml-role-list-mapper",
             "oidc-usermodel-attribute-mapper",
+            "saml-user-property-mapper",
             "saml-user-attribute-mapper",
-            "saml-user-property-mapper"
+            "oidc-usermodel-property-mapper",
+            "oidc-address-mapper",
+            "oidc-full-name-mapper"
           ]
         }
       }
