@@ -284,7 +284,7 @@ public class ArtService {
         }
 
         notificationRepository.deleteAllBySubjectId(artEntity.getId());
-        eventSubjectRepository.deleteBySubjectId(artEntity.getId());
+        eventSubjectRepository.deleteAllBySubjectId(artEntity.getId());
         cartRepository.deleteAllBySubjectId(artEntity.getId());
         orderRepository.deleteAllBySubjectId(artEntity.getId());
         artPrivateSubscriptionRepository.deleteAllByArtId(artEntity.getId());

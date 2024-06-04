@@ -16,5 +16,5 @@ public interface EventSubjectRepository extends JpaRepository<EventSubjectEntity
     Optional<EventSubjectEntity> findBySubjectId(Integer subjectId);
 
     @Transactional
-    void deleteBySubjectId(Integer subjectId);
+    void deleteAllBySubjectId(Integer subjectId);
 }

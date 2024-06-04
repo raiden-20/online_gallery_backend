@@ -138,7 +138,7 @@ public class AdminService {
                     .map(eventSub -> artRepository.findById(eventSub.getId()).get())
                     .toList();
             for (ArtEntity artEntity: arts) {
-                eventSubjectRepository.deleteBySubjectId(artEntity.getId());
+                eventSubjectRepository.deleteAllBySubjectId(artEntity.getId());
                 artPhotoRepository.findAllByArtId(artEntity.getId()).stream()
                         .map(ArtPhotoEntity::getPhotoUrl)
                         .forEach(fileService::deleteFile);
@@ -151,7 +151,7 @@ public class AdminService {
                     .map(eventSub -> auctionRepository.findById(eventSub.getId()).get())
                     .toList();
             for (AuctionEntity auctionEntity: auctions) {
-                eventSubjectRepository.deleteBySubjectId(auctionEntity.getId());
+                eventSubjectRepository.deleteAllBySubjectId(auctionEntity.getId());
 
                 auctionPhotoRepository.findAllByAuctionId(auctionEntity.getId()).stream()
                         .map(AuctionPhotoEntity::getPhotoUrl)

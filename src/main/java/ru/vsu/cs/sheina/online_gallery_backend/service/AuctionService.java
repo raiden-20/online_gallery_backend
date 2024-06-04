@@ -185,7 +185,7 @@ public class AuctionService {
         }
 
         notificationRepository.deleteAllBySubjectId(auctionEntity.getId());
-        eventSubjectRepository.deleteBySubjectId(auctionEntity.getId());
+        eventSubjectRepository.deleteAllBySubjectId(auctionEntity.getId());
         cartRepository.deleteAllBySubjectId(auctionEntity.getId());
         orderRepository.deleteAllBySubjectId(auctionEntity.getId());
 
