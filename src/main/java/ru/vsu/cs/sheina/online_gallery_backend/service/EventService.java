@@ -57,6 +57,7 @@ public class EventService {
         EventFullDTO dto = new EventFullDTO();
         dto.setName(eventEntity.getName());
         dto.setPhotoUrl(eventEntity.getPhotoUrl());
+        dto.setBannerUrl(eventEntity.getBannerUrl());
         dto.setStartDate(eventEntity.getStartDate());
         dto.setEndDate(eventEntity.getEndDate());
         dto.setDescription(eventEntity.getDescription());
