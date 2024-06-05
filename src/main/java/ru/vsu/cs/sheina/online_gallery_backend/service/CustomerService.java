@@ -44,7 +44,7 @@ public class CustomerService {
     private final JWTParser jwtParser;
 
     public CustomerFullDTO getCustomerData(UUID id) {
-        if (id.compareTo(UUID.fromString("00000000-0000-0000-0000-000000000000")) == 0) {
+        if (id.compareTo(UUID.fromString("00000000-0000-0000-0000-000000000000")) == 0 || adminService.checkAdmin(id)) {
             throw new ForbiddenActionException();
         }
         CustomerEntity customerEntity = customerRepository.findById(id).orElseThrow(UserNotFoundException::new);
@@ -136,6 +136,7 @@ public class CustomerService {
     public List<CustomerShortDTO> getCustomers() {
         return customerRepository.findAll().stream()
                 .filter(ent -> ent.getId().compareTo(UUID.fromString("00000000-0000-0000-0000-000000000000")) != 0)
+                .filter(ent -> !adminService.checkAdmin(ent.getId()))
                 .map(cust -> new CustomerShortDTO(cust.getId(), cust.getCustomerName(), cust.getAvatarUrl()))
                 .toList();
     }
@@ -143,6 +144,7 @@ public class CustomerService {
     public List<CustomerShortDTO> searchCustomer(String input) {
         return customerRepository.findAll().stream()
                 .filter(ent -> ent.getId().compareTo(UUID.fromString("00000000-0000-0000-0000-000000000000")) != 0)
+                .filter(ent -> !adminService.checkAdmin(ent.getId()))
                 .filter(cust -> cust.getCustomerName().toUpperCase().contains(input.toUpperCase()))
                 .map(cust -> new CustomerShortDTO(cust.getId(), cust.getCustomerName(), cust.getAvatarUrl()))
                 .toList();
