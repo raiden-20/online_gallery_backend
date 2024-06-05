@@ -16,6 +16,8 @@ public class EventFullDTO {
 
     String bannerUrl;
 
+    String status;
+
     Timestamp startDate;
 
     Timestamp endDate;
