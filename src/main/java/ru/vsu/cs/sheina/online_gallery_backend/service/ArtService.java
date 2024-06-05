@@ -123,7 +123,7 @@ public class ArtService {
 
         if (eventSubjectRepository.existsBySubjectId(artId)) {
             EventSubjectEntity eventSubjectEntity = eventSubjectRepository.findBySubjectId(artId).get();
-            EventEntity eventEntity = eventRepository.findById(eventSubjectEntity.getSubjectId()).orElseThrow(BadCredentialsException::new);
+            EventEntity eventEntity = eventRepository.findById(eventSubjectEntity.getId()).orElseThrow(BadCredentialsException::new);
             if (eventEntity.getStatus().equals("WAIT") && currentId.equals("null")) {
                 throw new ForbiddenActionException();
             } else if (eventEntity.getStatus().equals("WAIT")) {
