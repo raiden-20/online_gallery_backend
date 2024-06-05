@@ -29,6 +29,7 @@ public class EventService {
     private final ArtPhotoRepository artPhotoRepository;
     private final AuctionPhotoRepository auctionPhotoRepository;
     private final EventSubjectRepository eventSubjectRepository;
+    private final CustomerRepository customerRepository;
     private final AdminService adminService;
 
     public void startEvent(EventEntity eventEntity) {
@@ -125,6 +126,13 @@ public class EventService {
                 subjectDTO.setMaterials(artEntity.getMaterials());
                 subjectDTO.setFrame(artEntity.getFrame());
 
+                if (artEntity.getOwnerId() != null) {
+                    CustomerEntity customerEntity = customerRepository.findById(artEntity.getOwnerId()).orElseThrow(UserNotFoundException::new);
+                    subjectDTO.setCustomerId(customerEntity.getId());
+                    subjectDTO.setCustomerName(customerEntity.getCustomerName());
+                    subjectDTO.setCustomerUrl(customerEntity.getAvatarUrl());
+                }
+
                 ArtistEntity artistEntity = artistRepository.findById(artEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
                 subjectDTO.setArtistName(artistEntity.getArtistName());
                 Optional<ArtPhotoEntity> artPhotoOpt = artPhotoRepository.findByArtIdAndAndDefaultPhoto(artEntity.getId(), true);
@@ -152,6 +160,13 @@ public class EventService {
                 subjectDTO.setTags(auctionEntity.getTags());
                 subjectDTO.setMaterials(auctionEntity.getMaterials());
                 subjectDTO.setFrame(auctionEntity.getFrame());
+
+                if (auctionEntity.getOwnerId() != null) {
+                    CustomerEntity customerEntity = customerRepository.findById(auctionEntity.getOwnerId()).orElseThrow(UserNotFoundException::new);
+                    subjectDTO.setCustomerId(customerEntity.getId());
+                    subjectDTO.setCustomerName(customerEntity.getCustomerName());
+                    subjectDTO.setCustomerUrl(customerEntity.getAvatarUrl());
+                }
 
                 ArtistEntity artistEntity = artistRepository.findById(auctionEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
                 subjectDTO.setArtistName(artistEntity.getArtistName());

@@ -26,6 +26,12 @@ public class EventSubjectDTO {
 
     BigInteger price;
 
+    UUID customerId;
+
+    String customerUrl;
+
+    String customerName;
+
     Integer viewCount;
 
     String size;
