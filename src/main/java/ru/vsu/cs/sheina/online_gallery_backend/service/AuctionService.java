@@ -99,7 +99,7 @@ public class AuctionService {
                 throw new BadActionException("Event's not active");
             }
 
-            if (!auctionEntity.getStartDate().before(eventEntity.getStartDate()) || !auctionEntity.getEndDate().after(eventEntity.getEndDate())) {
+            if (!auctionEntity.getStartDate().after(eventEntity.getStartDate()) || !auctionEntity.getEndDate().before(eventEntity.getEndDate())) {
                 throw new BadActionException("Bad auction timing");
             }
 
