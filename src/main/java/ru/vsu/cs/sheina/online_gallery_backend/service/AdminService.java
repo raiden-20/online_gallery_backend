@@ -88,10 +88,14 @@ public class AdminService {
         eventEntity.setStatus("WAIT");
         eventEntity.setStartDate(eventCreateDTO.getStartDate());
         eventEntity.setEndDate(eventCreateDTO.getEndDate());
+
+        eventRepository.save(eventEntity);
+
         eventEntity.setPhotoUrl(fileService.saveFile(photo, eventEntity.getId().toString()));
         eventEntity.setBannerUrl(fileService.saveFile(banner, eventEntity.getId().toString()));
 
         eventRepository.save(eventEntity);
+
         notificationService.sendEventCreatedNotification(eventEntity);
 
         return eventEntity.getId();

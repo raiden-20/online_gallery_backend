@@ -71,6 +71,8 @@ public class ArtService {
         artEntity.setCreateDate(artCreateDTO.getCreateDate());
         artEntity.setViews(0);
 
+        artRepository.save(artEntity);
+
         boolean privateArt = artCreateDTO.getIsPrivate();
 
         if (privateArt && !privateSubscriptionRepository.existsByArtistId(artistId)) {
