@@ -615,6 +615,7 @@ public class AuctionService {
             Integer orderId = orderService.createAuctionOrder(auctionEntity.getId(), auctionEntity.getArtistId(), customerEntity.getId());
             notificationService.sendAuctionWinningNotification(orderId, customerEntity, auctionEntity, artistEntity);
         } else {
+            eventSubjectRepository.deleteAllBySubjectId(auctionEntity.getId());
             auctionPhotoRepository.deleteAllByAuctionId(auctionEntity.getId());
             auctionRepository.delete(auctionEntity);
         }
