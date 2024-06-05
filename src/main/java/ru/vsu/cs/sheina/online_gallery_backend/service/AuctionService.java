@@ -17,6 +17,7 @@ import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.*;
 import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
 
+import javax.swing.text.html.Option;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -266,10 +267,12 @@ public class AuctionService {
         artistRepository.save(artistEntity);
 
         if (!currentId.equals("null")) {
-            CustomerEntity customerEntity = customerRepository.findById(UUID.fromString(currentId)).orElseThrow(UserNotFoundException::new);
-            Optional<MaxRateEntity> maxRateOptional = maxRateRepository.findByAuctionIdAndCustomerId(auctionId, customerEntity.getId());
-            maxRateOptional.ifPresent(maxRateEntity -> dto.setCurrentMaxRate(maxRateEntity.getRate()));
-
+            Optional<CustomerEntity> customerOptional = customerRepository.findById(UUID.fromString(currentId));
+            if (customerOptional.isPresent()) {
+                CustomerEntity customerEntity = customerOptional.get();
+                Optional<MaxRateEntity> maxRateOptional = maxRateRepository.findByAuctionIdAndCustomerId(auctionId, customerEntity.getId());
+                maxRateOptional.ifPresent(maxRateEntity -> dto.setCurrentMaxRate(maxRateEntity.getRate()));
+            }
             List<RateEntity> rateEntities = rateRepository.findAllByAuctionId(auctionId);
             rateEntities.sort(Comparator.comparing(RateEntity::getCreateDate));
 
@@ -289,10 +292,8 @@ public class AuctionService {
                     rateDTO.setCustomerUrl(customerRateEntity.getAvatarUrl());
                     rateDTO.setCustomerName(customerRateEntity.getCustomerName());
                 }
-
                 rateDTOS.add(rateDTO);
             }
-
             dto.setCustomerRates(rateDTOS);
         }
 
