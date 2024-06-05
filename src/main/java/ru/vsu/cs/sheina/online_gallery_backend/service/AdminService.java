@@ -88,8 +88,8 @@ public class AdminService {
         eventEntity.setStatus("WAIT");
         eventEntity.setStartDate(eventCreateDTO.getStartDate());
         eventEntity.setEndDate(eventCreateDTO.getEndDate());
-        eventEntity.setPhotoUrl(fileService.saveFile(photo));
-        eventEntity.setBannerUrl(fileService.saveFile(banner));
+        eventEntity.setPhotoUrl(fileService.saveFile(photo, eventEntity.getId().toString()));
+        eventEntity.setBannerUrl(fileService.saveFile(banner, eventEntity.getId().toString()));
 
         eventRepository.save(eventEntity);
         notificationService.sendEventCreatedNotification(eventEntity);
@@ -113,14 +113,14 @@ public class AdminService {
             if (!eventEntity.getPhotoUrl().isEmpty()) {
                 fileService.deleteFile(eventEntity.getPhotoUrl());
             }
-            eventEntity.setPhotoUrl(fileService.saveFile(newPhoto));
+            eventEntity.setPhotoUrl(fileService.saveFile(newPhoto, eventEntity.getId().toString()));
         }
 
         if (eventChangeDTO.getChangeBanner()) {
             if (!eventEntity.getBannerUrl().isEmpty()) {
                 fileService.deleteFile(eventEntity.getBannerUrl());
             }
-            eventEntity.setBannerUrl(fileService.saveFile(newBanner));
+            eventEntity.setBannerUrl(fileService.saveFile(newBanner, eventEntity.getId().toString()));
         }
 
         eventRepository.save(eventEntity);

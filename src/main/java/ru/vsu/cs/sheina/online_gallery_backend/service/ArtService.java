@@ -86,7 +86,7 @@ public class ArtService {
         for(int i = 0; i < photos.size(); i++) {
             ArtPhotoEntity artPhotoEntity = new ArtPhotoEntity();
             artPhotoEntity.setArtId(artEntity.getId());
-            artPhotoEntity.setPhotoUrl(fileService.saveFile(photos.get(i)));
+            artPhotoEntity.setPhotoUrl(fileService.saveFile(photos.get(i), artEntity.getId().toString()));
             artPhotoEntity.setDefaultPhoto(i == 0);
             artPhotoRepository.save(artPhotoEntity);
         }
@@ -245,7 +245,7 @@ public class ArtService {
         for (int i = 0; i < newPhotos.size(); i++) {
             ArtPhotoEntity artPhotoEntity = new ArtPhotoEntity();
             artPhotoEntity.setArtId(artEntity.getId());
-            artPhotoEntity.setPhotoUrl(fileService.saveFile(newPhotos.get(i)));
+            artPhotoEntity.setPhotoUrl(fileService.saveFile(newPhotos.get(i), artEntity.getId().toString()));
 
             if (artChangeDTO.getChangeMainPhoto() && i == 0){
                 Optional<ArtPhotoEntity> mainPhoto = artPhotoRepository.findByArtIdAndAndDefaultPhoto(artEntity.getId(), true);

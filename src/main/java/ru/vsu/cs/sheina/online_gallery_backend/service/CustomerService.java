@@ -91,7 +91,7 @@ public class CustomerService {
             if (!customerEntity.getAvatarUrl().isEmpty()) {
                 fileService.deleteFile(customerEntity.getAvatarUrl());
             }
-            String url = fileService.saveFile(avatar);
+            String url = fileService.saveFile(avatar, customerEntity.getId().toString());
             customerEntity.setAvatarUrl(url);
         } else if (avatarUrl.equals("delete") && avatar.isEmpty()) {
             fileService.deleteFile(customerEntity.getAvatarUrl());
@@ -102,7 +102,7 @@ public class CustomerService {
             if (!customerEntity.getCoverUrl().isEmpty()) {
                 fileService.deleteFile(customerEntity.getCoverUrl());
             }
-            String url = fileService.saveFile(cover);
+            String url = fileService.saveFile(cover, customerEntity.getId().toString());
             customerEntity.setCoverUrl(url);
         } else if (coverUrl.equals("delete") && cover.isEmpty()) {
             fileService.deleteFile(customerEntity.getCoverUrl());

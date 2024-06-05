@@ -88,7 +88,7 @@ public class PostService {
         for (int i = 0; i < photos.size(); i++) {
             PostPhotoEntity postPhotoEntity = new PostPhotoEntity();
             postPhotoEntity.setPostId(postEntity.getId());
-            postPhotoEntity.setPhotoUrl(fileService.saveFile(photos.get(i)));
+            postPhotoEntity.setPhotoUrl(fileService.saveFile(photos.get(i), postEntity.getId().toString()));
 
             postPhotoEntity.setDefaultPhoto(i == 0);
 
@@ -124,7 +124,7 @@ public class PostService {
             PostPhotoEntity postPhotoEntity = new PostPhotoEntity();
 
             postPhotoEntity.setPostId(postChangeDTO.getPostId());
-            postPhotoEntity.setPhotoUrl(fileService.saveFile(photos.get(i)));
+            postPhotoEntity.setPhotoUrl(fileService.saveFile(photos.get(i), postEntity.getId().toString()));
 
             postPhotoEntity.setDefaultPhoto(i == 0);
 

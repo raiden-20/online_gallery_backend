@@ -101,7 +101,7 @@ public class ArtistService {
             if (!artistEntity.getAvatarUrl().isEmpty()) {
                 fileService.deleteFile(artistEntity.getAvatarUrl());
             }
-            String url = fileService.saveFile(avatar);
+            String url = fileService.saveFile(avatar, artistId.toString());
             artistEntity.setAvatarUrl(url);
         } else if (avatarUrl.equals("delete") && avatar.isEmpty()) {
             fileService.deleteFile(artistEntity.getAvatarUrl());
@@ -112,7 +112,7 @@ public class ArtistService {
             if (!artistEntity.getCoverUrl().isEmpty()) {
                 fileService.deleteFile(artistEntity.getCoverUrl());
             }
-            String url = fileService.saveFile(cover);
+            String url = fileService.saveFile(cover, artistId.toString());
             artistEntity.setCoverUrl(url);
         } else if (coverUrl.equals("delete") && cover.isEmpty()) {
             fileService.deleteFile(artistEntity.getCoverUrl());

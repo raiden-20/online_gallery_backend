@@ -88,7 +88,7 @@ public class AuctionService {
             AuctionPhotoEntity auctionPhotoEntity = new AuctionPhotoEntity();
             auctionPhotoEntity.setAuctionId(auctionEntity.getId());
             auctionPhotoEntity.setDefaultPhoto(i == 0);
-            auctionPhotoEntity.setPhotoUrl(fileService.saveFile(photos.get(i)));
+            auctionPhotoEntity.setPhotoUrl(fileService.saveFile(photos.get(i), auctionEntity.getId().toString()));
 
             auctionPhotoRepository.save(auctionPhotoEntity);
         }
@@ -157,7 +157,7 @@ public class AuctionService {
         for (int i = 0; i < newPhotos.size(); i++) {
             AuctionPhotoEntity auctionPhotoEntity = new AuctionPhotoEntity();
             auctionPhotoEntity.setAuctionId(auctionEntity.getId());
-            auctionPhotoEntity.setPhotoUrl(fileService.saveFile(newPhotos.get(i)));
+            auctionPhotoEntity.setPhotoUrl(fileService.saveFile(newPhotos.get(i), auctionEntity.getId().toString()));
 
             if (auctionChangeDTO.getChangeMainPhoto() && i == 0){
                 Optional<AuctionPhotoEntity> mainPhoto = auctionPhotoRepository.findByAuctionIdAndDefaultPhoto(auctionEntity.getId(), true);
