@@ -204,7 +204,7 @@ public class AuctionService {
 
         if (eventSubjectRepository.existsBySubjectId(auctionId)) {
             EventSubjectEntity eventSubjectEntity = eventSubjectRepository.findBySubjectId(auctionId).get();
-            EventEntity eventEntity = eventRepository.findById(eventSubjectEntity.getSubjectId()).orElseThrow(BadCredentialsException::new);
+            EventEntity eventEntity = eventRepository.findById(eventSubjectEntity.getEventId()).orElseThrow(BadCredentialsException::new);
             if (eventEntity.getStatus().equals("WAIT") && currentId.equals("null")) {
                 throw new ForbiddenActionException();
             } else if (eventEntity.getStatus().equals("WAIT")) {
