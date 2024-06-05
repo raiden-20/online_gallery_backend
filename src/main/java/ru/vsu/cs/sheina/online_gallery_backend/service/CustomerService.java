@@ -44,7 +44,7 @@ public class CustomerService {
     private final JWTParser jwtParser;
 
     public CustomerFullDTO getCustomerData(UUID id) {
-        if (id.compareTo(UUID.fromString("00000000-0000-0000-0000-000000000000")) == 0 || adminService.checkAdmin(id)) {
+        if (id.compareTo(UUID.fromString("00000000-0000-0000-0000-000000000000")) == 0) {
             throw new ForbiddenActionException();
         }
         CustomerEntity customerEntity = customerRepository.findById(id).orElseThrow(UserNotFoundException::new);
