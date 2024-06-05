@@ -39,7 +39,7 @@ public class SecurityConfig {
                             "/api/auction/auctionId={auctionId}&currentId={currentId}",
                             "/api/auction/artist/{artistId}", "/api/auctions",
                             "/api/event/eventId={eventId}&currentId={currentId}",
-                            "/api/events/currentId={currentId}").permitAll()
+                            "/api/events").permitAll()
                 .and()
                 .authorizeHttpRequests()
                 .requestMatchers("swagger-ui/**", "swagger-ui**", "/v3/api-docs/**", "/v3/api-docs**")

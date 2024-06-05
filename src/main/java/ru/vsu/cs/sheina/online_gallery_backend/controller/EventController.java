@@ -26,9 +26,9 @@ public class EventController {
         return ResponseEntity.ok(eventFullDTO);
     }
 
-    @GetMapping("/events/currentId={currentId}")
-    public ResponseEntity<?> getEvents(@PathVariable String currentId) {
-        List<EventShortDTO> events = eventService.getEvents(currentId);
+    @GetMapping("/events")
+    public ResponseEntity<?> getEvents() {
+        List<EventShortDTO> events = eventService.getEvents();
         return ResponseEntity.ok(events);
     }
 }

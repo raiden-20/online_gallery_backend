@@ -58,6 +58,7 @@ public class EventService {
         dto.setName(eventEntity.getName());
         dto.setPhotoUrl(eventEntity.getPhotoUrl());
         dto.setBannerUrl(eventEntity.getBannerUrl());
+        dto.setStatus(eventEntity.getStatus());
         dto.setStartDate(eventEntity.getStartDate());
         dto.setEndDate(eventEntity.getEndDate());
         dto.setDescription(eventEntity.getDescription());
@@ -160,22 +161,8 @@ public class EventService {
         return subjectDTOs;
     }
 
-    public List<EventShortDTO> getEvents(String currentId) {
+    public List<EventShortDTO> getEvents() {
         List<EventEntity> eventEntities = eventRepository.findAll();
-
-        if (currentId.equals("null")) {
-            eventEntities = eventEntities.stream()
-                    .filter(ent -> !ent.getStatus().equals("WAIT"))
-                    .toList();
-        } else {
-            UUID userId = UUID.fromString(currentId);
-            if (!adminService.checkAdmin(userId) && !artistRepository.existsById(userId)) {
-                eventEntities = eventEntities.stream()
-                        .filter(ent -> !ent.getStatus().equals("WAIT"))
-                        .toList();
-            }
-        }
-
         List<EventShortDTO> dtos = new ArrayList<>();
 
         for (EventEntity eventEntity: eventEntities) {
