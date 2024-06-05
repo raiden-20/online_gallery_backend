@@ -491,6 +491,11 @@ public class AuctionService {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
 
         AuctionEntity auctionEntity = auctionRepository.findById(maxRateCreateDTO.getAuctionId()).orElseThrow(BadCredentialsException::new);
+
+        if (maxRateRepository.existsByAuctionIdAndAndCustomerId(maxRateCreateDTO.getAuctionId(), customerId)) {
+            throw new BadActionException("You have already placed the max rate");
+        }
+
         ArtistEntity artistEntity = artistRepository.findById(auctionEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
         int comparison = maxRateCreateDTO.getMaxRate().compareTo(auctionEntity.getCurrentPrice());
 
