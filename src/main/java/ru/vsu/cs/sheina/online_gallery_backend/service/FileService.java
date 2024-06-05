@@ -29,7 +29,7 @@ public class FileService {
             throw new FileTooBigException();
         }
 
-        String newUrl = storageHost + "/" + MinioBucket.PICTURE.toString() + "/" + file.getOriginalFilename() + id.hashCode();
+        String newUrl = storageHost + "/" + MinioBucket.PICTURE.toString() + "/" + + id.hashCode() + file.getOriginalFilename();
 
         minioService.saveFile(file);
 
