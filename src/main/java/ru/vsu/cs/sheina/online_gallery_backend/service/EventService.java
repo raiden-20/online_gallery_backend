@@ -72,10 +72,17 @@ public class EventService {
                 List<EventSubjectEntity> subjectEntities = eventSubjectRepository.findAllByEventId(eventEntity.getId());
                 subjectDTOs = getEventSubjects(eventEntity, subjectEntities);
             } else if (artistRepository.existsById(userId)) {
-                List<EventSubjectEntity> subjectEntities = eventSubjectRepository.findAllByEventId(eventEntity.getId()).stream()
-                        .filter(ent -> artRepository.findById(ent.getSubjectId()).get().getArtistId().equals(userId))
-                        .toList();
-                subjectDTOs = getEventSubjects(eventEntity, subjectEntities);
+                if (eventEntity.getType().equals("ART")) {
+                    List<EventSubjectEntity> subjectEntities = eventSubjectRepository.findAllByEventId(eventEntity.getId()).stream()
+                            .filter(ent -> artRepository.findById(ent.getSubjectId()).get().getArtistId().equals(userId))
+                            .toList();
+                    subjectDTOs = getEventSubjects(eventEntity, subjectEntities);
+                } else {
+                    List<EventSubjectEntity> subjectEntities = eventSubjectRepository.findAllByEventId(eventEntity.getId()).stream()
+                            .filter(ent -> auctionRepository.findById(ent.getSubjectId()).get().getArtistId().equals(userId))
+                            .toList();
+                    subjectDTOs = getEventSubjects(eventEntity, subjectEntities);
+                }
             }
         } else if (eventEntity.getStatus().equals("WAIT")) {
             subjectDTOs = null;
