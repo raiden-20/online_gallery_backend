@@ -56,6 +56,10 @@ public class AuctionService {
             throw new BadCredentialsException();
         }
 
+        if (auctionCreateDTO.getStartDate().compareTo(auctionCreateDTO.getEndDate()) >= 0) {
+            throw new BadActionException("Incorrect date");
+        }
+
         AuctionEntity auctionEntity = new AuctionEntity();
         auctionEntity.setName(auctionCreateDTO.getName());
         auctionEntity.setType(auctionCreateDTO.getType());
@@ -76,23 +80,8 @@ public class AuctionService {
         auctionEntity.setPublishDate(new Timestamp(System.currentTimeMillis()));
         auctionEntity.setViews(0);
 
-        if (auctionCreateDTO.getStartDate().compareTo(auctionCreateDTO.getEndDate()) >= 0) {
-            throw new BadActionException("Incorrect date");
-        }
-
         auctionEntity.setStartDate(auctionCreateDTO.getStartDate());
         auctionEntity.setEndDate(auctionCreateDTO.getEndDate());
-
-        auctionRepository.save(auctionEntity);
-
-        for(int i = 0; i < photos.size(); i++) {
-            AuctionPhotoEntity auctionPhotoEntity = new AuctionPhotoEntity();
-            auctionPhotoEntity.setAuctionId(auctionEntity.getId());
-            auctionPhotoEntity.setDefaultPhoto(i == 0);
-            auctionPhotoEntity.setPhotoUrl(fileService.saveFile(photos.get(i), auctionEntity.getId().toString()));
-
-            auctionPhotoRepository.save(auctionPhotoEntity);
-        }
 
         if (auctionCreateDTO.getEventId() != null) {
             EventEntity eventEntity = eventRepository.findById(auctionCreateDTO.getEventId()).orElseThrow(BadCredentialsException::new);
@@ -110,6 +99,17 @@ public class AuctionService {
             eventSubjectRepository.save(eventSubjectEntity);
         } else {
             notificationService.sendNewPublicAuctionNotification(artistEntity, auctionEntity);
+        }
+
+        auctionRepository.save(auctionEntity);
+
+        for(int i = 0; i < photos.size(); i++) {
+            AuctionPhotoEntity auctionPhotoEntity = new AuctionPhotoEntity();
+            auctionPhotoEntity.setAuctionId(auctionEntity.getId());
+            auctionPhotoEntity.setDefaultPhoto(i == 0);
+            auctionPhotoEntity.setPhotoUrl(fileService.saveFile(photos.get(i), auctionEntity.getId().toString()));
+
+            auctionPhotoRepository.save(auctionPhotoEntity);
         }
 
         return auctionEntity.getId();
