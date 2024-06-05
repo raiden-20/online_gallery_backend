@@ -37,7 +37,7 @@ public class SecurityConfig {
                             "/api/artist/artistId={artistId}&currentId={currentId}",
                             "/api/art/customer/{customerId}","/api/paintings", "/api/photos", "/api/sculptures",
                             "/api/auction/auctionId={auctionId}&currentId={currentId}",
-                            "/api/auction/artist/{artistId}", "/api/auctions",
+                            "/api/auction/artist/artistId={artistId}&currentId={currentId}", "/api/auctions",
                             "/api/event/eventId={eventId}&currentId={currentId}",
                             "/api/events").permitAll()
                 .and()
