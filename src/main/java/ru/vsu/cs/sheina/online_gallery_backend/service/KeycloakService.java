@@ -79,8 +79,7 @@ public class KeycloakService {
         usersResource.delete(String.valueOf(userId));
     }
 
-    public void blockUser(UUIDRequestDTO uuidRequestDTO) {
-        UUID userId = uuidRequestDTO.getId();
+    public void blockUser(UUID userId) {
         UUID customerId;
 
         if (artistRepository.existsById(userId)) {
@@ -98,8 +97,7 @@ public class KeycloakService {
         userResource.update(userRepresentation);
     }
 
-    public void unblockUser(UUIDRequestDTO uuidRequestDTO) {
-        UUID userId = uuidRequestDTO.getId();
+    public void unblockUser(UUID userId) {
         UUID customerId;
 
         if (artistRepository.existsById(userId)) {

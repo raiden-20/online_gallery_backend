@@ -76,7 +76,7 @@ public class ScheduledTasks {
                 rateRepository.deleteAllByAuctionId(orderEntity.getSubjectId());
                 auctionRepository.deleteById(orderEntity.getSubjectId());
 
-                keycloakService.blockUser(new UUIDRequestDTO(orderEntity.getCustomerId()));
+                keycloakService.blockUser(orderEntity.getCustomerId());
                 notificationService.sendAuctionFailedNotification(orderEntity.getCustomerId(), artistEntity);
 
                 orderRepository.deleteAllBySubjectId(orderEntity.getSubjectId());

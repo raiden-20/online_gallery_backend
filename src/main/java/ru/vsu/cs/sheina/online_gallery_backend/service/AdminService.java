@@ -6,9 +6,11 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.event.EventChangeDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.event.EventCreateDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.field.UUIDRequestDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.*;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadActionException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentialsException;
+import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.*;
 
 import java.util.List;
@@ -19,6 +21,7 @@ import java.util.UUID;
 public class AdminService {
 
     private final NotificationService notificationService;
+    private final KeycloakService keycloakService;
     private final AdminRepository adminRepository;
     private final NotificationRepository notificationRepository;
     private final CartRepository cartRepository;
@@ -32,6 +35,9 @@ public class AdminService {
     private final RateRepository rateRepository;
     private final EventRepository eventRepository;
     private final EventSubjectRepository eventSubjectRepository;
+    private final BlockUserRepository blockUserRepository;
+    private final ArtistRepository artistRepository;
+    private final CustomerRepository customerRepository;
 
     public void deleteArt(IntIdRequestDTO intIdRequestDTO) {
         ArtEntity artEntity = artRepository.findById(intIdRequestDTO.getId()).orElseThrow(BadCredentialsException::new);
@@ -172,5 +178,44 @@ public class AdminService {
 
     public Boolean checkAdmin(UUID id) {
         return adminRepository.existsById(id);
+    }
+
+    public void blockUser(UUIDRequestDTO uuidRequestDTO) {
+        UUID userId = uuidRequestDTO.getId();
+        keycloakService.blockUser(userId);
+        UUID customerId, artistId;
+
+        if (artistRepository.existsById(userId)) {
+            customerId =  customerRepository.findByArtistId(userId).orElseThrow(UserNotFoundException::new).getId();
+            artistId = userId;
+        } else {
+            customerId = userId;
+            artistId = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new).getArtistId();
+        }
+
+        BlockUserEntity blockCustomer = new BlockUserEntity();
+        blockCustomer.setId(customerId);
+        BlockUserEntity blockArtist = new BlockUserEntity();
+        blockArtist.setId(artistId);
+
+        blockUserRepository.save(blockCustomer);
+        blockUserRepository.save(blockArtist);
+    }
+
+    public void unblockUser(UUIDRequestDTO uuidRequestDTO) {
+        UUID userId = uuidRequestDTO.getId();
+        keycloakService.unblockUser(userId);
+        UUID customerId, artistId;
+
+        if (artistRepository.existsById(userId)) {
+            customerId =  customerRepository.findByArtistId(userId).orElseThrow(UserNotFoundException::new).getId();
+            artistId = userId;
+        } else {
+            customerId = userId;
+            artistId = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new).getArtistId();
+        }
+
+        blockUserRepository.deleteAllById(customerId);
+        blockUserRepository.deleteAllById(artistId);
     }
 }

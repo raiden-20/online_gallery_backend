@@ -20,20 +20,19 @@ import java.util.List;
 @RequestMapping("/api/admin")
 public class AdminController {
 
-    private final KeycloakService keycloakService;
     private final AdminService adminService;
 
     @PostMapping("/block")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> blockUser(@RequestBody UUIDRequestDTO uuidRequestDTO) {
-        keycloakService.blockUser(uuidRequestDTO);
+        adminService.blockUser(uuidRequestDTO);
         return ResponseEntity.ok("User blocked successfully");
     }
 
     @PostMapping("/unblock")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> unblockUser(@RequestBody UUIDRequestDTO uuidRequestDTO) {
-        keycloakService.unblockUser(uuidRequestDTO);
+        adminService.unblockUser(uuidRequestDTO);
         return ResponseEntity.ok("User unblocked successfully");
     }
 
