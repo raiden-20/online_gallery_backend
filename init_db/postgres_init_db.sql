@@ -216,6 +216,10 @@ CREATE TABLE admin(
     id UUID PRIMARY KEY UNIQUE NOT NULL
 );
 
+CREATE TABLE block_user(
+    id UUID PRIMARY KEY UNIQUE NOT NULL
+);
+
 INSERT INTO customer (id, customer_name, gender, birth_date, avatar_url, description)
 VALUES (
     '00000000-0000-0000-0000-000000000000', 'anonymous', 'MAN', '2024-04-28', ' ', 'anonymous'
