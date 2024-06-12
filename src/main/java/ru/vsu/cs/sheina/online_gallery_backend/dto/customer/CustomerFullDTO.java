@@ -14,6 +14,8 @@ public class CustomerFullDTO {
 
     Timestamp birthDate;
 
+    Boolean isBlocked;
+
     String gender;
 
     String avatarUrl;

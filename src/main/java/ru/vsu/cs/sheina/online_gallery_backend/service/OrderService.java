@@ -7,10 +7,7 @@ import ru.vsu.cs.sheina.online_gallery_backend.dto.order.ChangeOrderDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.order.OrderDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.order.OrderShortDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.*;
-import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadActionException;
-import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentialsException;
-import ru.vsu.cs.sheina.online_gallery_backend.exceptions.ForbiddenActionException;
-import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
+import ru.vsu.cs.sheina.online_gallery_backend.exceptions.*;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.*;
 import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
 
@@ -35,8 +32,18 @@ public class OrderService {
     private final CardRepository cardRepository;
     private final AddressRepository addressRepository;
     private final NotificationService notificationService;
+    private final BlockUserRepository blockUserRepository;
 
     public Integer createAuctionOrder(Integer auctionId, UUID artistId, UUID customerId) {
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
+        if (blockUserRepository.existsById(artistId)) {
+            throw new BlockUserException();
+        }
+
         OrderEntity orderEntity = new OrderEntity();
         orderEntity.setCustomerId(customerId);
         orderEntity.setArtistId(artistId);
@@ -51,6 +58,10 @@ public class OrderService {
 
     public void changeOrder(ChangeOrderDTO changeOrderDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
 
         OrderEntity orderEntity = orderRepository.findById(changeOrderDTO.getOrderId()).orElseThrow(BadCredentialsException::new);
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
@@ -74,6 +85,10 @@ public class OrderService {
 
     public Integer createOrder(Integer artId, UUID customerId, Integer cardId, Integer addressId, Boolean anonymous) {
         ArtEntity artEntity = artRepository.findById(artId).orElseThrow(BadCredentialsException::new);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
 
         OrderEntity orderEntity = new OrderEntity();
 
@@ -102,6 +117,11 @@ public class OrderService {
 
     public List<OrderDTO> getOrders(UUID userId, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         UUID artistId = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new).getArtistId();
         List<Integer> orderIds = new ArrayList<>();
 
@@ -127,6 +147,11 @@ public class OrderService {
 
     public OrderDTO getOrder(Integer orderId, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         UUID artistId = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new).getArtistId();
 
         OrderEntity orderEntity = orderRepository.findById(orderId).orElseThrow(BadCredentialsException::new);
@@ -140,6 +165,10 @@ public class OrderService {
 
     public void receive(IntIdRequestDTO intIdDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
 
         OrderEntity orderEntity = orderRepository.findById(intIdDTO.getId()).orElseThrow(BadCredentialsException::new);
 
@@ -161,6 +190,11 @@ public class OrderService {
 
     public void send(OrderShortDTO orderShortDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         ArtistEntity artistEntity = artistRepository.findById(customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new).getArtistId()).orElseThrow(UserNotFoundException::new);
 
         OrderEntity orderEntity = orderRepository.findById(orderShortDTO.getId()).orElseThrow(BadCredentialsException::new);
@@ -179,6 +213,11 @@ public class OrderService {
 
     public void edit(OrderShortDTO orderShortDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         ArtistEntity artistEntity = artistRepository.findById(customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new).getArtistId()).orElseThrow(UserNotFoundException::new);
 
         OrderEntity orderEntity = orderRepository.findById(orderShortDTO.getId()).orElseThrow(BadCredentialsException::new);
@@ -200,6 +239,14 @@ public class OrderService {
 
         CustomerEntity customerEntity = customerRepository.findById(orderEntity.getCustomerId()).orElseThrow(UserNotFoundException::new);
         ArtistEntity artistEntity = artistRepository.findById(orderEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
+
+        if (blockUserRepository.existsById(customerEntity.getId())) {
+            throw new BlockUserException();
+        }
+
+        if (blockUserRepository.existsById(artistEntity.getId())) {
+            throw new BlockUserException();
+        }
 
         OrderDTO orderDTO = new OrderDTO();
         orderDTO.setOrderId(orderId);

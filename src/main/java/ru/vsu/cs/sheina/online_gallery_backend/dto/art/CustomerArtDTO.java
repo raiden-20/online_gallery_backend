@@ -17,6 +17,8 @@ public class CustomerArtDTO {
 
     String photoUrl;
 
+    String customerName;
+
     BigInteger price;
 
     Boolean isPrivate;

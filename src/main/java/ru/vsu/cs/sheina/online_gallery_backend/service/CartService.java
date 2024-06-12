@@ -9,6 +9,7 @@ import ru.vsu.cs.sheina.online_gallery_backend.dto.order.PurchaseDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.*;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadActionException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentialsException;
+import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BlockUserException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.*;
 import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
@@ -28,9 +29,14 @@ public class CartService {
     private final CustomerRepository customerRepository;
     private final OrderService orderService;
     private final NotificationService notificationService;
+    private final BlockUserRepository blockUserRepository;
 
     public void addArt(IntIdRequestDTO intIdRequestDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
 
         if (!artRepository.existsById(intIdRequestDTO.getId())) {
             throw new BadCredentialsException();
@@ -49,6 +55,10 @@ public class CartService {
     public void deleteArtFromCart(IntIdRequestDTO intIdRequestDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
 
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         if (!cartRepository.existsByCustomerIdAndSubjectId(customerId, intIdRequestDTO.getId())) {
             throw new BadActionException("You can't do this action");
         }
@@ -60,6 +70,10 @@ public class CartService {
 
     public List<ArtShortDTO> getCartData(String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
 
         List<Integer> artIds = cartRepository.findAllByCustomerId(customerId).stream()
                 .map(CartEntity::getSubjectId)
@@ -91,6 +105,10 @@ public class CartService {
 
     public List<Integer> buy(PurchaseDTO purchaseDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
 
         List<Integer> orderIds = new ArrayList<>();
 

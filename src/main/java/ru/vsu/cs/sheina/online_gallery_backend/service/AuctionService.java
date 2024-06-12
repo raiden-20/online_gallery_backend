@@ -10,10 +10,7 @@ import ru.vsu.cs.sheina.online_gallery_backend.configuration.AuctionSSE;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.auction.*;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.*;
-import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadActionException;
-import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentialsException;
-import ru.vsu.cs.sheina.online_gallery_backend.exceptions.ForbiddenActionException;
-import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
+import ru.vsu.cs.sheina.online_gallery_backend.exceptions.*;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.*;
 import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
 
@@ -44,11 +41,17 @@ public class AuctionService {
     private final EventSubjectRepository eventSubjectRepository;
     private final JWTParser jwtParser;
     private final AdminService adminService;
+    private final BlockUserRepository blockUserRepository;
 
     Map<AuctionSSE<UUID, Integer>, FluxSink<ServerSentEvent>> subscriptions = new HashMap<>();
 
     public Integer createAuction(AuctionCreateDTO auctionCreateDTO, List<MultipartFile> photos, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         ArtistEntity artistEntity = artistRepository.findById(customerEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
 
@@ -117,6 +120,11 @@ public class AuctionService {
 
     public void changeAuction(AuctionChangeDTO auctionChangeDTO, List<MultipartFile> newPhotos, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         ArtistEntity artistEntity = artistRepository.findById(customerEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
 
@@ -177,6 +185,11 @@ public class AuctionService {
 
     public void deleteAuction(IntIdRequestDTO intIdRequestDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         UUID artistId = customerEntity.getArtistId();
         AuctionEntity auctionEntity = auctionRepository.findById(intIdRequestDTO.getId()).orElseThrow(BadCredentialsException::new);
@@ -201,6 +214,11 @@ public class AuctionService {
     public AuctionFullDTO getAuction(Integer auctionId, String currentId) {
         AuctionEntity auctionEntity = auctionRepository.findById(auctionId).orElseThrow(BadCredentialsException::new);
         ArtistEntity artistEntity = artistRepository.findById(auctionEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
+
+        if (blockUserRepository.existsById(artistEntity.getId())) {
+            throw new BlockUserException();
+        }
+
         AuctionFullDTO dto = new AuctionFullDTO();
 
         if (eventSubjectRepository.existsBySubjectId(auctionId)) {
@@ -303,6 +321,10 @@ public class AuctionService {
     public List<AuctionShortDTO> getArtistAuctions(UUID artistId, String currentId) {
         ArtistEntity artistEntity = artistRepository.findById(artistId).orElseThrow(UserNotFoundException::new);
 
+        if (blockUserRepository.existsById(artistId)) {
+            throw new BlockUserException();
+        }
+
         List<AuctionEntity> auctionEntities = auctionRepository.findAllByArtistId(artistId);
 
         for (AuctionEntity auctionEntity: auctionEntities) {
@@ -369,6 +391,7 @@ public class AuctionService {
     public List<AuctionShortDTO> searchAuctions(String input) {
         List<AuctionEntity> auctionEntities = auctionRepository.findAll().stream()
                 .filter(ent -> ent.getName().toUpperCase().contains(input.toUpperCase()))
+                .filter(art -> !blockUserRepository.existsById(art.getArtistId()))
                 .toList();
 
         for (AuctionEntity auctionEntity: auctionEntities) {
@@ -429,7 +452,9 @@ public class AuctionService {
     }
 
     public List<AuctionShortDTO> getAllAuctions() {
-        List<AuctionEntity> auctionEntities = auctionRepository.findAll();
+        List<AuctionEntity> auctionEntities = auctionRepository.findAll().stream()
+                .filter(art -> !blockUserRepository.existsById(art.getArtistId()))
+                .toList();
 
         for (AuctionEntity auctionEntity: auctionEntities) {
             if (eventSubjectRepository.existsBySubjectId(auctionEntity.getId())) {
@@ -490,6 +515,10 @@ public class AuctionService {
 
     public void createMaxRate(MaxRateCreateDTO maxRateCreateDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
 
         AuctionEntity auctionEntity = auctionRepository.findById(maxRateCreateDTO.getAuctionId()).orElseThrow(BadCredentialsException::new);
 
@@ -559,6 +588,11 @@ public class AuctionService {
 
     public void createRate(RateCreateDTO rateCreateDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         AuctionEntity auctionEntity = auctionRepository.findById(rateCreateDTO.getAuctionId()).orElseThrow(BadCredentialsException::new);
         ArtistEntity artistEntity = artistRepository.findById(auctionEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
 

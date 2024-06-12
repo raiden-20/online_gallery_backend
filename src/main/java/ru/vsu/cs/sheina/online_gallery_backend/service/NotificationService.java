@@ -1,6 +1,7 @@
 package ru.vsu.cs.sheina.online_gallery_backend.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cglib.core.Block;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.FluxSink;
@@ -8,6 +9,7 @@ import ru.vsu.cs.sheina.online_gallery_backend.dto.notification.NotificationDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.notification.NotificationShortDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.notification.NotificationType;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.*;
+import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BlockUserException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.*;
 import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
@@ -25,6 +27,7 @@ public class NotificationService {
     private final ArtistRepository artistRepository;
     private final PublicSubscriptionRepository publicSubscriptionRepository;
     private final CustomerPrivateSubscriptionRepository customerPrivateSubscriptionRepository;
+    private final BlockUserRepository blockUserRepository;
 
     Map<UUID, FluxSink<ServerSentEvent>> subscriptions = new HashMap<>();
 
@@ -421,6 +424,11 @@ public class NotificationService {
 
     public List<NotificationDTO> getArtistNotification(String token) {
         UUID receiverId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(receiverId)) {
+            throw new BlockUserException();
+        }
+
         CustomerEntity customerEntity = customerRepository.findById(receiverId).orElseThrow(UserNotFoundException::new);
         UUID artistId = customerEntity.getArtistId();
 
@@ -453,6 +461,10 @@ public class NotificationService {
         UUID receiverId = jwtParser.getIdFromAccessToken(token);
         if (!customerRepository.existsById(receiverId)) {
             throw new UserNotFoundException();
+        }
+
+        if (blockUserRepository.existsById(receiverId)) {
+            throw new BlockUserException();
         }
 
         List<NotificationEntity> notificationEntities = notificationRepository.findAllByReceiverId(receiverId);

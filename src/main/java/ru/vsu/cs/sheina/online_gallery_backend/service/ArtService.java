@@ -6,10 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.art.*;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.*;
-import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadActionException;
-import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentialsException;
-import ru.vsu.cs.sheina.online_gallery_backend.exceptions.ForbiddenActionException;
-import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
+import ru.vsu.cs.sheina.online_gallery_backend.exceptions.*;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.*;
 import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
 
@@ -39,6 +36,7 @@ public class ArtService {
     private final NotificationRepository notificationRepository;
     private final EventRepository eventRepository;
     private final EventSubjectRepository eventSubjectRepository;
+    private final BlockUserRepository blockUserRepository;
 
     public void movePrivatePaintings(Integer subscriptionId) {
         artPrivateSubscriptionRepository.deleteAllBySubscriptionId(subscriptionId);
@@ -46,6 +44,11 @@ public class ArtService {
 
     public Integer createArt(ArtCreateDTO artCreateDTO, List<MultipartFile> photos, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         UUID artistId = customerEntity.getArtistId();
 
@@ -168,13 +171,12 @@ public class ArtService {
         }
 
         if (artEntity.getOwnerId() != null) {
-            CustomerEntity customerEntity = customerRepository.findById(artEntity.getOwnerId()).orElseThrow(UserNotFoundException::new);
-            artFullDTO.setCustomerId(artEntity.getOwnerId());
-            artFullDTO.setCustomerName(customerEntity.getCustomerName());
-            artFullDTO.setStatus("SOLD");
-        } else {
-            artFullDTO.setCustomerName(null);
-            artFullDTO.setCustomerId(null);
+            if (!blockUserRepository.existsById(artEntity.getOwnerId())) {
+                CustomerEntity customerEntity = customerRepository.findById(artEntity.getOwnerId()).orElseThrow(UserNotFoundException::new);
+                artFullDTO.setCustomerId(artEntity.getOwnerId());
+                artFullDTO.setCustomerName(customerEntity.getCustomerName());
+                artFullDTO.setStatus("SOLD");
+            }
         }
 
         if (currentId.equals("null") && artEntity.getOwnerId() == null) {
@@ -212,6 +214,11 @@ public class ArtService {
 
     public void changeArt(ArtChangeDTO artChangeDTO, List<MultipartFile> newPhotos, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         UUID artistId = customerEntity.getArtistId();
 
@@ -245,22 +252,24 @@ public class ArtService {
         }
 
         for (int i = 0; i < newPhotos.size(); i++) {
-            ArtPhotoEntity artPhotoEntity = new ArtPhotoEntity();
-            artPhotoEntity.setArtId(artEntity.getId());
-            artPhotoEntity.setPhotoUrl(fileService.saveFile(newPhotos.get(i), artEntity.getId().toString()));
+            if (!newPhotos.get(i).isEmpty()) {
+                ArtPhotoEntity artPhotoEntity = new ArtPhotoEntity();
+                artPhotoEntity.setArtId(artEntity.getId());
+                artPhotoEntity.setPhotoUrl(fileService.saveFile(newPhotos.get(i), artEntity.getId().toString()));
 
-            if (artChangeDTO.getChangeMainPhoto() && i == 0){
-                Optional<ArtPhotoEntity> mainPhoto = artPhotoRepository.findByArtIdAndAndDefaultPhoto(artEntity.getId(), true);
-                if (mainPhoto.isPresent()) {
-                    ArtPhotoEntity mainPhotoEntity = mainPhoto.get();
-                    mainPhotoEntity.setDefaultPhoto(false);
-                    artPhotoRepository.save(mainPhotoEntity);
+                if (artChangeDTO.getChangeMainPhoto() && i == 0) {
+                    Optional<ArtPhotoEntity> mainPhoto = artPhotoRepository.findByArtIdAndAndDefaultPhoto(artEntity.getId(), true);
+                    if (mainPhoto.isPresent()) {
+                        ArtPhotoEntity mainPhotoEntity = mainPhoto.get();
+                        mainPhotoEntity.setDefaultPhoto(false);
+                        artPhotoRepository.save(mainPhotoEntity);
+                    }
+                    artPhotoEntity.setDefaultPhoto(true);
+                } else {
+                    artPhotoEntity.setDefaultPhoto(false);
                 }
-                artPhotoEntity.setDefaultPhoto(true);
-            } else {
-                artPhotoEntity.setDefaultPhoto(false);
+                artPhotoRepository.save(artPhotoEntity);
             }
-            artPhotoRepository.save(artPhotoEntity);
         }
 
         if (artChangeDTO.getIsPrivate() && !privateSubscriptionRepository.existsByArtistId(artistId)) {
@@ -278,6 +287,11 @@ public class ArtService {
 
     public void deleteArt(IntIdRequestDTO intIdRequestDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         UUID artistId = customerEntity.getArtistId();
         ArtEntity artEntity = artRepository.findById(intIdRequestDTO.getId()).orElseThrow(BadCredentialsException::new);
@@ -301,8 +315,10 @@ public class ArtService {
     }
 
     public List<ArtistArtDTO> getArtistArt(UUID artistId, String currentId) {
-        if (!artistRepository.existsById(artistId)) {
-            throw new UserNotFoundException();
+        ArtistEntity artistEntity = artistRepository.findById(artistId).orElseThrow(UserNotFoundException::new);
+
+        if (blockUserRepository.existsById(artistId)) {
+            throw new BlockUserException();
         }
 
         List<ArtEntity> artEntities = artRepository.findAllByArtistId(artistId);
@@ -327,6 +343,7 @@ public class ArtService {
         for (ArtEntity artEntity: artEntities) {
             ArtistArtDTO dto = new ArtistArtDTO();
             dto.setArtId(artEntity.getId());
+            dto.setArtistName(artistEntity.getArtistName());
             dto.setName(artEntity.getName());
             dto.setPrice(artEntity.getPrice());
 
@@ -369,8 +386,10 @@ public class ArtService {
     }
 
     public List<CustomerArtDTO> getCustomerArt(UUID customerId) {
-        if (!customerRepository.existsById(customerId)) {
-            throw new UserNotFoundException();
+        CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
         }
 
         List<ArtEntity> artEntities = artRepository.findAllByOwnerId(customerId);
@@ -381,6 +400,7 @@ public class ArtService {
             dto.setArtId(artEntity.getId());
             dto.setName(artEntity.getName());
             dto.setPrice(artEntity.getPrice());
+            dto.setCustomerName(customerEntity.getCustomerName());
 
             ArtistEntity artistEntity = artistRepository.findById(artEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
             dto.setArtistName(artistEntity.getArtistName());
@@ -412,6 +432,7 @@ public class ArtService {
 
         List<ArtEntity> entities = artRepository.findAllByType(artType).stream()
                 .filter(art -> !artPrivateSubscriptionRepository.existsByArtId(art.getId()) || art.getSold())
+                .filter(art -> !blockUserRepository.existsById(art.getArtistId()))
                 .toList();
 
         for (ArtEntity artEntity: entities) {
@@ -437,6 +458,7 @@ public class ArtService {
         List<ArtEntity> artEntities = artRepository.findAll().stream()
                 .filter(art -> !artPrivateSubscriptionRepository.existsByArtId(art.getId()) || art.getSold())
                 .filter(art -> art.getType().equals("PAINTING"))
+                .filter(art -> !blockUserRepository.existsById(art.getArtistId()))
                 .filter(art -> art.getName().toUpperCase().contains(input.toUpperCase()))
                 .toList();
 
@@ -462,6 +484,7 @@ public class ArtService {
         List<ArtEntity> artEntities = artRepository.findAll().stream()
                 .filter(art -> !artPrivateSubscriptionRepository.existsByArtId(art.getId()) || art.getSold())
                 .filter(art -> art.getType().equals("PHOTO"))
+                .filter(art -> !blockUserRepository.existsById(art.getArtistId()))
                 .filter(art -> art.getName().toUpperCase().contains(input.toUpperCase()))
                 .toList();
 
@@ -487,6 +510,7 @@ public class ArtService {
         List<ArtEntity> artEntities = artRepository.findAll().stream()
                 .filter(art -> !artPrivateSubscriptionRepository.existsByArtId(art.getId()) || art.getSold())
                 .filter(art -> art.getType().equals("SCULPTURE"))
+                .filter(art -> !blockUserRepository.existsById(art.getArtistId()))
                 .filter(art -> art.getName().toUpperCase().contains(input.toUpperCase()))
                 .toList();
 
@@ -513,6 +537,12 @@ public class ArtService {
         dto.setArtId(entity.getId());
         dto.setName(entity.getName());
         dto.setPrice(entity.getPrice());
+        dto.setSize(entity.getSize());
+        dto.setCreateDate(entity.getCreateDate());
+        dto.setTags(entity.getTags());
+        dto.setMaterials(entity.getMaterials());
+        dto.setFrame(entity.getFrame());
+        dto.setViewCount(entity.getViews());
 
         ArtistEntity artistEntity = artistRepository.findById(entity.getArtistId()).get();
 
@@ -525,15 +555,13 @@ public class ArtService {
             dto.setIsPrivate(false);
         }
 
-        if (entity.getOwnerId() == null) {
-            dto.setCustomerId(null);
-            dto.setCustomerName(null);
-            dto.setAvatarUrl(null);
-        } else {
-            CustomerEntity customerEntity = customerRepository.findById(entity.getOwnerId()).get();
-            dto.setCustomerId(customerEntity.getId());
-            dto.setCustomerName(customerEntity.getCustomerName());
-            dto.setAvatarUrl(customerEntity.getAvatarUrl());
+        if (entity.getOwnerId() != null) {
+            if (!blockUserRepository.existsById(entity.getArtistId()) && customerRepository.existsById(entity.getOwnerId())) {
+                CustomerEntity customerEntity = customerRepository.findById(entity.getOwnerId()).get();
+                dto.setCustomerId(customerEntity.getId());
+                dto.setCustomerName(customerEntity.getCustomerName());
+                dto.setAvatarUrl(customerEntity.getAvatarUrl());
+            }
         }
 
         Optional<ArtPhotoEntity> artPhotoEntity = artPhotoRepository.findByArtIdAndAndDefaultPhoto(entity.getId(), true);

@@ -28,7 +28,7 @@ public class CustomerController {
 
     private final CustomerService customerService;
 
-    @GetMapping("/customer/{customerId}")
+    @GetMapping("/customer/customerId={customerId}&currentId={currentId}")
     @Operation(summary = "Получить данные покупателя")
     @ApiResponse(responseCode = "200",
             description = "Отправлены данные покупателя",
@@ -39,8 +39,8 @@ public class CustomerController {
     @ApiResponse(responseCode = "403",
             description = "Действие запрещено",
             content = @Content(schema = @Schema(implementation = ForbiddenActionException.class)))
-    public ResponseEntity<?> getCustomerData(@PathVariable UUID customerId) {
-        CustomerFullDTO customerFullDTO = customerService.getCustomerData(customerId);
+    public ResponseEntity<?> getCustomerData(@PathVariable UUID customerId, @PathVariable String currentId) {
+        CustomerFullDTO customerFullDTO = customerService.getCustomerData(customerId, currentId);
         return ResponseEntity.ok(customerFullDTO);
     }
 

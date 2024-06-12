@@ -8,6 +8,7 @@ import ru.vsu.cs.sheina.online_gallery_backend.dto.artist.ArtistFullDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.artist.ArtistRegistrationDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.artist.ArtistShortDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.*;
+import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BlockUserException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserAlreadyExistsException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.*;
@@ -35,16 +36,30 @@ public class ArtistService {
     private final FileService fileService;
     private final JWTParser jwtParser;
     private final NotificationRepository notificationRepository;
+    private final AdminService adminService;
+    private final BlockUserRepository blockUserRepository;
 
     public ArtistFullDTO getArtistData(UUID artistId, String currentId) {
         ArtistEntity artistEntity = artistRepository.findById(artistId).orElseThrow(UserNotFoundException::new);
         CustomerEntity customerEntity = customerRepository.findByArtistId(artistId).orElseThrow(UserNotFoundException::new);
 
+        ArtistFullDTO dto = new ArtistFullDTO();
+
+        if (currentId.equals("null") && blockUserRepository.existsById(artistId)) {
+            throw new BlockUserException();
+        } else if (!currentId.equals("null") && blockUserRepository.existsById(artistId)) {
+            if (adminService.checkAdmin(UUID.fromString(currentId))) {
+                dto.setIsBlocked(true);
+            } else {
+                throw new BlockUserException();
+            }
+        } else {
+            dto.setIsBlocked(false);
+        }
+
         int views = artistEntity.getViews();
         artistEntity.setViews(++views);
         artistRepository.save(artistEntity);
-
-        ArtistFullDTO dto = new ArtistFullDTO();
 
         dto.setArtistName(artistEntity.getArtistName());
         dto.setDescription(artistEntity.getDescription());
@@ -92,6 +107,10 @@ public class ArtistService {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
         UUID artistId = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new).getArtistId();
 
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         ArtistEntity artistEntity = artistRepository.findById(artistId).orElseThrow(UserNotFoundException::new);
 
         artistEntity.setArtistName(artistName);
@@ -125,6 +144,10 @@ public class ArtistService {
     public UUID createArtist(ArtistRegistrationDTO artistRegistrationDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
 
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         if (customerEntity.getArtistId() != null){
             throw new UserAlreadyExistsException();
@@ -149,6 +172,7 @@ public class ArtistService {
 
     public List<ArtistArtDTO> getArtists() {
         List<ArtistArtDTO> dtos = artistRepository.findAll().stream()
+                .filter(ent -> !blockUserRepository.existsById(ent.getId()))
                 .map(art -> new ArtistArtDTO(art.getId(), art.getArtistName(), art.getAvatarUrl(), art.getViews(), null))
                 .toList();
         for (ArtistArtDTO dto: dtos) {
@@ -175,6 +199,7 @@ public class ArtistService {
 
     public List<ArtistShortDTO> searchArtist(String input) {
         return artistRepository.findAll().stream()
+                .filter(ent -> !blockUserRepository.existsById(ent.getId()))
                 .filter(art -> art.getArtistName().toUpperCase().contains(input.toUpperCase()))
                 .map(art -> new ArtistShortDTO(art.getId(), art.getArtistName(), art.getAvatarUrl(), art.getViews()))
                 .toList();
