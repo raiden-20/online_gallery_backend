@@ -201,4 +201,26 @@ public class EventService {
         }
         return dtos;
     }
+
+    public List<EventShortDTO> searchEvents(String input) {
+        List<EventEntity> eventEntities = eventRepository.findAll().stream()
+                .filter(ent -> ent.getName().toUpperCase().contains(input.toUpperCase()))
+                .toList();
+
+        List<EventShortDTO> dtos = new ArrayList<>();
+
+        for (EventEntity eventEntity: eventEntities) {
+            EventShortDTO eventShortDTO = new EventShortDTO();
+            eventShortDTO.setEventId(eventEntity.getId());
+            eventShortDTO.setPhotoUrl(eventEntity.getPhotoUrl());
+            eventShortDTO.setName(eventEntity.getName());
+            eventShortDTO.setStartDate(eventEntity.getStartDate());
+            eventShortDTO.setEndDate(eventEntity.getEndDate());
+            eventShortDTO.setDescription(eventEntity.getDescription());
+            eventShortDTO.setStatus(eventEntity.getStatus());
+
+            dtos.add(eventShortDTO);
+        }
+        return dtos;
+    }
 }

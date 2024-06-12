@@ -31,4 +31,10 @@ public class EventController {
         List<EventShortDTO> events = eventService.getEvents();
         return ResponseEntity.ok(events);
     }
+
+    @GetMapping("/search/event/object={input}")
+    public ResponseEntity<?> searchEvents(@PathVariable String input){
+        List<EventShortDTO> events = eventService.searchEvents(input);
+        return ResponseEntity.ok(events);
+    }
 }
