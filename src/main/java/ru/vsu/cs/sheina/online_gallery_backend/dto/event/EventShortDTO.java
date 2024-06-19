@@ -13,6 +13,8 @@ public class EventShortDTO {
 
     String photoUrl;
 
+    String bannerUrl;
+
     String name;
 
     Timestamp startDate;

@@ -193,6 +193,7 @@ public class EventService {
             eventShortDTO.setPhotoUrl(eventEntity.getPhotoUrl());
             eventShortDTO.setName(eventEntity.getName());
             eventShortDTO.setStartDate(eventEntity.getStartDate());
+            eventShortDTO.setBannerUrl(eventEntity.getBannerUrl());
             eventShortDTO.setEndDate(eventEntity.getEndDate());
             eventShortDTO.setDescription(eventEntity.getDescription());
             eventShortDTO.setStatus(eventEntity.getStatus());
@@ -215,6 +216,7 @@ public class EventService {
             eventShortDTO.setPhotoUrl(eventEntity.getPhotoUrl());
             eventShortDTO.setName(eventEntity.getName());
             eventShortDTO.setStartDate(eventEntity.getStartDate());
+            eventShortDTO.setBannerUrl(eventEntity.getBannerUrl());
             eventShortDTO.setEndDate(eventEntity.getEndDate());
             eventShortDTO.setDescription(eventEntity.getDescription());
             eventShortDTO.setStatus(eventEntity.getStatus());

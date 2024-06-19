@@ -321,8 +321,12 @@ public class AuctionService {
     public List<AuctionShortDTO> getArtistAuctions(UUID artistId, String currentId) {
         ArtistEntity artistEntity = artistRepository.findById(artistId).orElseThrow(UserNotFoundException::new);
 
-        if (blockUserRepository.existsById(artistId)) {
+        if (currentId.equals("null") && blockUserRepository.existsById(artistId)) {
             throw new BlockUserException();
+        } else if (!currentId.equals("null") && blockUserRepository.existsById(artistId)) {
+            if (!adminService.checkAdmin(UUID.fromString(currentId))) {
+                throw new BlockUserException();
+            }
         }
 
         List<AuctionEntity> auctionEntities = auctionRepository.findAllByArtistId(artistId);
@@ -389,17 +393,19 @@ public class AuctionService {
     }
 
     public List<AuctionShortDTO> searchAuctions(String input) {
-        List<AuctionEntity> auctionEntities = auctionRepository.findAll().stream()
+        List<AuctionEntity> auctionEntities = new ArrayList<>();
+        auctionRepository.findAll().stream()
                 .filter(ent -> ent.getName().toUpperCase().contains(input.toUpperCase()))
                 .filter(art -> !blockUserRepository.existsById(art.getArtistId()))
-                .toList();
+                .forEach(auctionEntities::add);
 
-        for (AuctionEntity auctionEntity: auctionEntities) {
+        for (Iterator<AuctionEntity> iterator = auctionEntities.iterator(); iterator.hasNext(); ) {
+            AuctionEntity auctionEntity = iterator.next();
             if (eventSubjectRepository.existsBySubjectId(auctionEntity.getId())) {
                 EventSubjectEntity eventSubjectEntity = eventSubjectRepository.findBySubjectId(auctionEntity.getId()).get();
                 EventEntity eventEntity = eventRepository.findById(eventSubjectEntity.getEventId()).orElseThrow(BadCredentialsException::new);
                 if (eventEntity.getStatus().equals("WAIT")) {
-                    auctionEntities.remove(auctionEntity);
+                    iterator.remove();
                 }
             }
         }
@@ -452,16 +458,18 @@ public class AuctionService {
     }
 
     public List<AuctionShortDTO> getAllAuctions() {
-        List<AuctionEntity> auctionEntities = auctionRepository.findAll().stream()
+        List<AuctionEntity> auctionEntities = new ArrayList<>();
+        auctionRepository.findAll().stream()
                 .filter(art -> !blockUserRepository.existsById(art.getArtistId()))
-                .toList();
+                .forEach(auctionEntities::add);
 
-        for (AuctionEntity auctionEntity: auctionEntities) {
+        for (Iterator<AuctionEntity> iterator = auctionEntities.iterator(); iterator.hasNext(); ) {
+            AuctionEntity auctionEntity = iterator.next();
             if (eventSubjectRepository.existsBySubjectId(auctionEntity.getId())) {
                 EventSubjectEntity eventSubjectEntity = eventSubjectRepository.findBySubjectId(auctionEntity.getId()).get();
                 EventEntity eventEntity = eventRepository.findById(eventSubjectEntity.getEventId()).orElseThrow(BadCredentialsException::new);
                 if (eventEntity.getStatus().equals("WAIT")) {
-                    auctionEntities.remove(auctionEntity);
+                    iterator.remove();
                 }
             }
         }

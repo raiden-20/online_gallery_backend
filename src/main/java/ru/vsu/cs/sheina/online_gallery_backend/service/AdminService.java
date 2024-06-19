@@ -190,16 +190,19 @@ public class AdminService {
             artistId = userId;
         } else {
             customerId = userId;
-            artistId = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new).getArtistId();
+            artistId = null;
         }
 
         BlockUserEntity blockCustomer = new BlockUserEntity();
         blockCustomer.setId(customerId);
-        BlockUserEntity blockArtist = new BlockUserEntity();
-        blockArtist.setId(artistId);
-
         blockUserRepository.save(blockCustomer);
-        blockUserRepository.save(blockArtist);
+
+        if (artistId != null) {
+            BlockUserEntity blockArtist = new BlockUserEntity();
+            blockArtist.setId(artistId);
+            blockUserRepository.save(blockArtist);
+        }
+
     }
 
     public void unblockUser(UUIDRequestDTO uuidRequestDTO) {
@@ -212,10 +215,13 @@ public class AdminService {
             artistId = userId;
         } else {
             customerId = userId;
-            artistId = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new).getArtistId();
+            artistId = null;
         }
 
         blockUserRepository.deleteAllById(customerId);
-        blockUserRepository.deleteAllById(artistId);
+
+        if (artistId != null) {
+            blockUserRepository.deleteAllById(artistId);
+        }
     }
 }
