@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -19,6 +21,18 @@ public class CommonArtDTO {
     BigInteger price;
 
     Boolean isPrivate;
+
+    String size;
+
+    Timestamp createDate;
+
+    List<String> tags;
+
+    List<String> materials;
+
+    Boolean frame;
+
+    Integer viewCount;
 
     UUID artistId;
 

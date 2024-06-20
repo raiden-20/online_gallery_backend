@@ -22,11 +22,11 @@ public class MinioService {
         }
     }
 
-    public void saveFile(MultipartFile file) {
+    public void saveFile(MultipartFile file, String fileName) {
         try {
             minioClient.putObject(PutObjectArgs.builder()
                     .bucket(MinioBucket.PICTURE.toString())
-                    .object(file.getOriginalFilename())
+                    .object(fileName)
                     .stream(file.getInputStream(), file.getSize(), 5 * 1024 * 1024)
                     .build());
         } catch (Exception e) {

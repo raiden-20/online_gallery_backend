@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import ru.vsu.cs.sheina.online_gallery_backend.configuration.minio.MinioBucket;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.FileTooBigException;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class FileService {
@@ -14,7 +16,7 @@ public class FileService {
     private final MinioService minioService;
     private final Integer FILE_MAX_SIZE = 2 * 1024 * 1024;
 
-    @Value("${minio.host}")
+    @Value("${minio.bucket}")
     private String storageHost;
 
     public void deleteFile(String url) {
@@ -22,14 +24,15 @@ public class FileService {
         minioService.deleteFile(fileName);
     }
 
-    public String saveFile(MultipartFile file) {
+    public String saveFile(MultipartFile file, String id) {
         if (!file.isEmpty() && file.getSize() > FILE_MAX_SIZE) {
             throw new FileTooBigException();
         }
 
-        String newUrl = storageHost + "/" + MinioBucket.PICTURE.toString() + "/" + file.getOriginalFilename();
+        String fileName = id.hashCode() + file.getOriginalFilename();
+        String newUrl = storageHost + "/" + MinioBucket.PICTURE.toString() + "/" + fileName;
 
-        minioService.saveFile(file);
+        minioService.saveFile(file, fileName);
 
         return newUrl;
     }

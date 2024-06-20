@@ -8,8 +8,10 @@ import ru.vsu.cs.sheina.online_gallery_backend.dto.field.UUIDRequestDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.CustomerEntity;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.PublicSubscriptionEntity;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadActionException;
+import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BlockUserException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.ArtistRepository;
+import ru.vsu.cs.sheina.online_gallery_backend.repository.BlockUserRepository;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.CustomerRepository;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.PublicSubscriptionRepository;
 import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
@@ -26,9 +28,15 @@ public class PublicSubscriptionService {
     private final CustomerRepository customerRepository;
     private final ArtistRepository artistRepository;
     private final JWTParser jwtParser;
+    private final BlockUserRepository blockUserRepository;
 
     public void actionWithSubscription(UUIDRequestDTO uuidRequestDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         UUID artistId = uuidRequestDTO.getId();
 
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
@@ -56,6 +64,10 @@ public class PublicSubscriptionService {
     public List<ArtistShortDTO> getSubscriptions(String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
 
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         if (!customerRepository.existsById(customerId)) {
             throw new UserNotFoundException();
         }
@@ -70,6 +82,11 @@ public class PublicSubscriptionService {
 
     public List<CustomerShortDTO> getSubscribers(String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
 
         UUID artistId = customerEntity.getArtistId();
@@ -89,6 +106,10 @@ public class PublicSubscriptionService {
     public List<CustomerShortDTO> searchCustomerUsers(String input, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
 
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         UUID artistId = customerEntity.getArtistId();
 
@@ -107,6 +128,10 @@ public class PublicSubscriptionService {
 
     public List<ArtistShortDTO> searchArtistUsers(String input, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
 
         if (!customerRepository.existsById(customerId)) {
             throw new UserNotFoundException();

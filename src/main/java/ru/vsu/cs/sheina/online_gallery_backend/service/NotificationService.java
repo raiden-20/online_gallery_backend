@@ -1,6 +1,7 @@
 package ru.vsu.cs.sheina.online_gallery_backend.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cglib.core.Block;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.FluxSink;
@@ -8,6 +9,7 @@ import ru.vsu.cs.sheina.online_gallery_backend.dto.notification.NotificationDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.notification.NotificationShortDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.notification.NotificationType;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.*;
+import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BlockUserException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.*;
 import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
@@ -25,6 +27,7 @@ public class NotificationService {
     private final ArtistRepository artistRepository;
     private final PublicSubscriptionRepository publicSubscriptionRepository;
     private final CustomerPrivateSubscriptionRepository customerPrivateSubscriptionRepository;
+    private final BlockUserRepository blockUserRepository;
 
     Map<UUID, FluxSink<ServerSentEvent>> subscriptions = new HashMap<>();
 
@@ -125,6 +128,50 @@ public class NotificationService {
         }
     }
 
+    public void sendArtBlockNotification(UUID artistId, String artName) {
+        NotificationEntity notificationEntity = new NotificationEntity();
+        notificationEntity.setType("artBlock");
+        notificationEntity.setText("Ваша работа " + artName + " была удалена в связи с нарушением правил площадки.");
+        notificationEntity.setReceiverId(artistId);
+        notificationEntity.setSenderId(null);
+        notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
+        notificationEntity.setSubjectId(null);
+
+        notificationRepository.save(notificationEntity);
+        NotificationShortDTO shortDTO = new NotificationShortDTO("", notificationEntity.getText());
+
+        if (subscriptions.containsKey(artistId)) {
+            ServerSentEvent<Object> event = ServerSentEvent.builder()
+                    .id(String.valueOf(notificationEntity.getId()))
+                    .event("ART_BLOCK")
+                    .data(shortDTO)
+                    .build();
+            subscriptions.get(artistId).next(event);
+        }
+    }
+
+    public void sendAuctionBlockNotification(UUID artistId, String auctionName) {
+        NotificationEntity notificationEntity = new NotificationEntity();
+        notificationEntity.setType("auctionBlock");
+        notificationEntity.setText("Ваш аукцион " + auctionName + " был удален в связи с нарушением правил площадки.");
+        notificationEntity.setReceiverId(artistId);
+        notificationEntity.setSenderId(null);
+        notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
+        notificationEntity.setSubjectId(null);
+
+        notificationRepository.save(notificationEntity);
+        NotificationShortDTO shortDTO = new NotificationShortDTO("", notificationEntity.getText());
+
+        if (subscriptions.containsKey(artistId)) {
+            ServerSentEvent<Object> event = ServerSentEvent.builder()
+                    .id(String.valueOf(notificationEntity.getId()))
+                    .event("AUCTION_BLOCK")
+                    .data(shortDTO)
+                    .build();
+            subscriptions.get(artistId).next(event);
+        }
+    }
+
     public void sendPrivateDeletedNotification(ArtistEntity artistEntity, PrivateSubscriptionEntity privateSubscriptionEntity) {
         List<CustomerPrivateSubscriptionEntity> subscriptionEntities = customerPrivateSubscriptionRepository.findAllByPrivateSubscriptionId(privateSubscriptionEntity.getId());
 
@@ -147,6 +194,32 @@ public class NotificationService {
                         .data(shortDTO)
                         .build();
                 subscriptions.get(subscriptionEntity.getCustomerId()).next(event);
+            }
+        }
+    }
+
+    public void sendEventCreatedNotification(EventEntity eventEntity) {
+        List<ArtistEntity> artists = artistRepository.findAll();
+
+        for (ArtistEntity artistEntity: artists) {
+            NotificationEntity notificationEntity = new NotificationEntity();
+            notificationEntity.setType("eventCreated");
+            notificationEntity.setText("Не пропустите событие \"" + eventEntity.getName() + "\". Вы можете принять в нем участие, добавив свои работы.");
+            notificationEntity.setReceiverId(artistEntity.getId());
+            notificationEntity.setSenderId(null);
+            notificationEntity.setCreateDate(new Timestamp(System.currentTimeMillis()));
+            notificationEntity.setSubjectId(eventEntity.getId());
+
+            notificationRepository.save(notificationEntity);
+            NotificationShortDTO shortDTO = new NotificationShortDTO(artistEntity.getAvatarUrl(), notificationEntity.getText());
+
+            if (subscriptions.containsKey(artistEntity.getId())) {
+                ServerSentEvent<Object> event = ServerSentEvent.builder()
+                        .id(String.valueOf(notificationEntity.getId()))
+                        .event("EVENT")
+                        .data(shortDTO)
+                        .build();
+                subscriptions.get(artistEntity.getId()).next(event);
             }
         }
     }
@@ -351,6 +424,11 @@ public class NotificationService {
 
     public List<NotificationDTO> getArtistNotification(String token) {
         UUID receiverId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(receiverId)) {
+            throw new BlockUserException();
+        }
+
         CustomerEntity customerEntity = customerRepository.findById(receiverId).orElseThrow(UserNotFoundException::new);
         UUID artistId = customerEntity.getArtistId();
 
@@ -383,6 +461,10 @@ public class NotificationService {
         UUID receiverId = jwtParser.getIdFromAccessToken(token);
         if (!customerRepository.existsById(receiverId)) {
             throw new UserNotFoundException();
+        }
+
+        if (blockUserRepository.existsById(receiverId)) {
+            throw new BlockUserException();
         }
 
         List<NotificationEntity> notificationEntities = notificationRepository.findAllByReceiverId(receiverId);

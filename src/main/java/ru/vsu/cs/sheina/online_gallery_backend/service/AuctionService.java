@@ -10,13 +10,11 @@ import ru.vsu.cs.sheina.online_gallery_backend.configuration.AuctionSSE;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.auction.*;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.*;
-import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadActionException;
-import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentialsException;
-import ru.vsu.cs.sheina.online_gallery_backend.exceptions.ForbiddenActionException;
-import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
+import ru.vsu.cs.sheina.online_gallery_backend.exceptions.*;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.*;
 import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
 
+import javax.swing.text.html.Option;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -39,17 +37,30 @@ public class AuctionService {
     private final NotificationService notificationService;
     private final CustomerRepository customerRepository;
     private final ArtistRepository artistRepository;
+    private final EventRepository eventRepository;
+    private final EventSubjectRepository eventSubjectRepository;
     private final JWTParser jwtParser;
+    private final AdminService adminService;
+    private final BlockUserRepository blockUserRepository;
 
     Map<AuctionSSE<UUID, Integer>, FluxSink<ServerSentEvent>> subscriptions = new HashMap<>();
 
     public Integer createAuction(AuctionCreateDTO auctionCreateDTO, List<MultipartFile> photos, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         ArtistEntity artistEntity = artistRepository.findById(customerEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
 
         if (!auctionCreateDTO.getType().equals("PHOTO") && !auctionCreateDTO.getType().equals("PAINTING") && !auctionCreateDTO.getType().equals("SCULPTURE")) {
             throw new BadCredentialsException();
+        }
+
+        if (auctionCreateDTO.getStartDate().compareTo(auctionCreateDTO.getEndDate()) >= 0) {
+            throw new BadActionException("Incorrect date");
         }
 
         AuctionEntity auctionEntity = new AuctionEntity();
@@ -72,12 +83,26 @@ public class AuctionService {
         auctionEntity.setPublishDate(new Timestamp(System.currentTimeMillis()));
         auctionEntity.setViews(0);
 
-        if (auctionCreateDTO.getStartDate().compareTo(auctionCreateDTO.getEndDate()) >= 0) {
-            throw new BadActionException("Incorrect date");
-        }
-
         auctionEntity.setStartDate(auctionCreateDTO.getStartDate());
         auctionEntity.setEndDate(auctionCreateDTO.getEndDate());
+
+        if (auctionCreateDTO.getEventId() != null) {
+            EventEntity eventEntity = eventRepository.findById(auctionCreateDTO.getEventId()).orElseThrow(BadCredentialsException::new);
+            if (!eventEntity.getStatus().equals("WAIT")) {
+                throw new BadActionException("Event's not active");
+            }
+
+            if (!auctionEntity.getStartDate().after(eventEntity.getStartDate()) || !auctionEntity.getEndDate().before(eventEntity.getEndDate())) {
+                throw new BadActionException("Bad auction timing");
+            }
+
+            EventSubjectEntity eventSubjectEntity = new EventSubjectEntity();
+            eventSubjectEntity.setSubjectId(auctionEntity.getId());
+            eventSubjectEntity.setEventId(eventEntity.getId());
+            eventSubjectRepository.save(eventSubjectEntity);
+        } else {
+            notificationService.sendNewPublicAuctionNotification(artistEntity, auctionEntity);
+        }
 
         auctionRepository.save(auctionEntity);
 
@@ -85,18 +110,21 @@ public class AuctionService {
             AuctionPhotoEntity auctionPhotoEntity = new AuctionPhotoEntity();
             auctionPhotoEntity.setAuctionId(auctionEntity.getId());
             auctionPhotoEntity.setDefaultPhoto(i == 0);
-            auctionPhotoEntity.setPhotoUrl(fileService.saveFile(photos.get(i)));
+            auctionPhotoEntity.setPhotoUrl(fileService.saveFile(photos.get(i), auctionEntity.getId().toString()));
 
             auctionPhotoRepository.save(auctionPhotoEntity);
         }
-
-        notificationService.sendNewPublicAuctionNotification(artistEntity, auctionEntity);
 
         return auctionEntity.getId();
     }
 
     public void changeAuction(AuctionChangeDTO auctionChangeDTO, List<MultipartFile> newPhotos, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         ArtistEntity artistEntity = artistRepository.findById(customerEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
 
@@ -138,7 +166,7 @@ public class AuctionService {
         for (int i = 0; i < newPhotos.size(); i++) {
             AuctionPhotoEntity auctionPhotoEntity = new AuctionPhotoEntity();
             auctionPhotoEntity.setAuctionId(auctionEntity.getId());
-            auctionPhotoEntity.setPhotoUrl(fileService.saveFile(newPhotos.get(i)));
+            auctionPhotoEntity.setPhotoUrl(fileService.saveFile(newPhotos.get(i), auctionEntity.getId().toString()));
 
             if (auctionChangeDTO.getChangeMainPhoto() && i == 0){
                 Optional<AuctionPhotoEntity> mainPhoto = auctionPhotoRepository.findByAuctionIdAndDefaultPhoto(auctionEntity.getId(), true);
@@ -157,6 +185,11 @@ public class AuctionService {
 
     public void deleteAuction(IntIdRequestDTO intIdRequestDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         UUID artistId = customerEntity.getArtistId();
         AuctionEntity auctionEntity = auctionRepository.findById(intIdRequestDTO.getId()).orElseThrow(BadCredentialsException::new);
@@ -166,6 +199,7 @@ public class AuctionService {
         }
 
         notificationRepository.deleteAllBySubjectId(auctionEntity.getId());
+        eventSubjectRepository.deleteAllBySubjectId(auctionEntity.getId());
         cartRepository.deleteAllBySubjectId(auctionEntity.getId());
         orderRepository.deleteAllBySubjectId(auctionEntity.getId());
 
@@ -180,7 +214,27 @@ public class AuctionService {
     public AuctionFullDTO getAuction(Integer auctionId, String currentId) {
         AuctionEntity auctionEntity = auctionRepository.findById(auctionId).orElseThrow(BadCredentialsException::new);
         ArtistEntity artistEntity = artistRepository.findById(auctionEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
+
+        if (blockUserRepository.existsById(artistEntity.getId())) {
+            throw new BlockUserException();
+        }
+
         AuctionFullDTO dto = new AuctionFullDTO();
+
+        if (eventSubjectRepository.existsBySubjectId(auctionId)) {
+            EventSubjectEntity eventSubjectEntity = eventSubjectRepository.findBySubjectId(auctionId).get();
+            EventEntity eventEntity = eventRepository.findById(eventSubjectEntity.getEventId()).orElseThrow(BadCredentialsException::new);
+            if (eventEntity.getStatus().equals("WAIT") && currentId.equals("null")) {
+                throw new ForbiddenActionException();
+            } else if (eventEntity.getStatus().equals("WAIT")) {
+                UUID userId = UUID.fromString(currentId);
+                if (!auctionEntity.getArtistId().equals(userId) && !adminService.checkAdmin(userId)) {
+                    throw new ForbiddenActionException();
+                }
+            }
+            dto.setEventId(eventEntity.getId());
+            dto.setEventName(eventEntity.getName());
+        }
 
         dto.setAuctionId(auctionEntity.getId());
         dto.setName(auctionEntity.getName());
@@ -231,10 +285,12 @@ public class AuctionService {
         artistRepository.save(artistEntity);
 
         if (!currentId.equals("null")) {
-            CustomerEntity customerEntity = customerRepository.findById(UUID.fromString(currentId)).orElseThrow(UserNotFoundException::new);
-            Optional<MaxRateEntity> maxRateOptional = maxRateRepository.findByAuctionIdAndCustomerId(auctionId, customerEntity.getId());
-            maxRateOptional.ifPresent(maxRateEntity -> dto.setCurrentMaxRate(maxRateEntity.getRate()));
-
+            Optional<CustomerEntity> customerOptional = customerRepository.findById(UUID.fromString(currentId));
+            if (customerOptional.isPresent()) {
+                CustomerEntity customerEntity = customerOptional.get();
+                Optional<MaxRateEntity> maxRateOptional = maxRateRepository.findByAuctionIdAndCustomerId(auctionId, customerEntity.getId());
+                maxRateOptional.ifPresent(maxRateEntity -> dto.setCurrentMaxRate(maxRateEntity.getRate()));
+            }
             List<RateEntity> rateEntities = rateRepository.findAllByAuctionId(auctionId);
             rateEntities.sort(Comparator.comparing(RateEntity::getCreateDate));
 
@@ -254,20 +310,42 @@ public class AuctionService {
                     rateDTO.setCustomerUrl(customerRateEntity.getAvatarUrl());
                     rateDTO.setCustomerName(customerRateEntity.getCustomerName());
                 }
-
                 rateDTOS.add(rateDTO);
             }
-
             dto.setCustomerRates(rateDTOS);
         }
 
         return dto;
     }
 
-    public List<AuctionShortDTO> getArtistAuctions(UUID artistId) {
+    public List<AuctionShortDTO> getArtistAuctions(UUID artistId, String currentId) {
         ArtistEntity artistEntity = artistRepository.findById(artistId).orElseThrow(UserNotFoundException::new);
 
+        if (currentId.equals("null") && blockUserRepository.existsById(artistId)) {
+            throw new BlockUserException();
+        } else if (!currentId.equals("null") && blockUserRepository.existsById(artistId)) {
+            if (!adminService.checkAdmin(UUID.fromString(currentId))) {
+                throw new BlockUserException();
+            }
+        }
+
         List<AuctionEntity> auctionEntities = auctionRepository.findAllByArtistId(artistId);
+
+        for (AuctionEntity auctionEntity: auctionEntities) {
+            if (eventSubjectRepository.existsBySubjectId(auctionEntity.getId())) {
+                EventSubjectEntity eventSubjectEntity = eventSubjectRepository.findBySubjectId(auctionEntity.getId()).get();
+                EventEntity eventEntity = eventRepository.findById(eventSubjectEntity.getEventId()).orElseThrow(BadCredentialsException::new);
+                if (eventEntity.getStatus().equals("WAIT") && currentId.equals("null")) {
+                    auctionEntities.remove(auctionEntity);
+                } else if (eventEntity.getStatus().equals("WAIT")) {
+                    UUID userId = UUID.fromString(currentId);
+                    if (!auctionEntity.getArtistId().equals(userId) && !adminService.checkAdmin(userId)) {
+                        auctionEntities.remove(auctionEntity);
+                    }
+                }
+            }
+        }
+
         List<AuctionShortDTO> dtos = new ArrayList<>();
 
         for (AuctionEntity auctionEntity: auctionEntities) {
@@ -315,9 +393,22 @@ public class AuctionService {
     }
 
     public List<AuctionShortDTO> searchAuctions(String input) {
-        List<AuctionEntity> auctionEntities = auctionRepository.findAll().stream()
+        List<AuctionEntity> auctionEntities = new ArrayList<>();
+        auctionRepository.findAll().stream()
                 .filter(ent -> ent.getName().toUpperCase().contains(input.toUpperCase()))
-                .toList();
+                .filter(art -> !blockUserRepository.existsById(art.getArtistId()))
+                .forEach(auctionEntities::add);
+
+        for (Iterator<AuctionEntity> iterator = auctionEntities.iterator(); iterator.hasNext(); ) {
+            AuctionEntity auctionEntity = iterator.next();
+            if (eventSubjectRepository.existsBySubjectId(auctionEntity.getId())) {
+                EventSubjectEntity eventSubjectEntity = eventSubjectRepository.findBySubjectId(auctionEntity.getId()).get();
+                EventEntity eventEntity = eventRepository.findById(eventSubjectEntity.getEventId()).orElseThrow(BadCredentialsException::new);
+                if (eventEntity.getStatus().equals("WAIT")) {
+                    iterator.remove();
+                }
+            }
+        }
 
         List<AuctionShortDTO> dtos = new ArrayList<>();
 
@@ -367,7 +458,22 @@ public class AuctionService {
     }
 
     public List<AuctionShortDTO> getAllAuctions() {
-        List<AuctionEntity> auctionEntities = auctionRepository.findAll();
+        List<AuctionEntity> auctionEntities = new ArrayList<>();
+        auctionRepository.findAll().stream()
+                .filter(art -> !blockUserRepository.existsById(art.getArtistId()))
+                .forEach(auctionEntities::add);
+
+        for (Iterator<AuctionEntity> iterator = auctionEntities.iterator(); iterator.hasNext(); ) {
+            AuctionEntity auctionEntity = iterator.next();
+            if (eventSubjectRepository.existsBySubjectId(auctionEntity.getId())) {
+                EventSubjectEntity eventSubjectEntity = eventSubjectRepository.findBySubjectId(auctionEntity.getId()).get();
+                EventEntity eventEntity = eventRepository.findById(eventSubjectEntity.getEventId()).orElseThrow(BadCredentialsException::new);
+                if (eventEntity.getStatus().equals("WAIT")) {
+                    iterator.remove();
+                }
+            }
+        }
+
         List<AuctionShortDTO> dtos = new ArrayList<>();
 
         for (AuctionEntity auctionEntity: auctionEntities) {
@@ -418,7 +524,16 @@ public class AuctionService {
     public void createMaxRate(MaxRateCreateDTO maxRateCreateDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
 
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         AuctionEntity auctionEntity = auctionRepository.findById(maxRateCreateDTO.getAuctionId()).orElseThrow(BadCredentialsException::new);
+
+        if (maxRateRepository.existsByAuctionIdAndAndCustomerId(maxRateCreateDTO.getAuctionId(), customerId)) {
+            throw new BadActionException("You have already placed the max rate");
+        }
+
         ArtistEntity artistEntity = artistRepository.findById(auctionEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
         int comparison = maxRateCreateDTO.getMaxRate().compareTo(auctionEntity.getCurrentPrice());
 
@@ -481,6 +596,11 @@ public class AuctionService {
 
     public void createRate(RateCreateDTO rateCreateDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         AuctionEntity auctionEntity = auctionRepository.findById(rateCreateDTO.getAuctionId()).orElseThrow(BadCredentialsException::new);
         ArtistEntity artistEntity = artistRepository.findById(auctionEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
 
@@ -537,6 +657,7 @@ public class AuctionService {
             Integer orderId = orderService.createAuctionOrder(auctionEntity.getId(), auctionEntity.getArtistId(), customerEntity.getId());
             notificationService.sendAuctionWinningNotification(orderId, customerEntity, auctionEntity, artistEntity);
         } else {
+            eventSubjectRepository.deleteAllBySubjectId(auctionEntity.getId());
             auctionPhotoRepository.deleteAllByAuctionId(auctionEntity.getId());
             auctionRepository.delete(auctionEntity);
         }

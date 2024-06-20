@@ -10,6 +10,7 @@ import ru.vsu.cs.sheina.online_gallery_backend.dto.subscription.SubscribeDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.*;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadActionException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentialsException;
+import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BlockUserException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.*;
 import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
@@ -29,11 +30,17 @@ public class PrivateSubscriptionService {
     private final ArtistRepository artistRepository;
     private final JWTParser jwtParser;
     private final NotificationService notificationService;
+    private final BlockUserRepository blockUserRepository;
 
     private final Integer DAYS_BETWEEN_PAYMENT = 30;
 
     public void subscribe(SubscribeDTO subscribeDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         UUID artistId = subscribeDTO.getArtistId();
 
         if (!customerRepository.existsById(customerId) || !artistRepository.existsById(artistId)) {
@@ -67,6 +74,11 @@ public class PrivateSubscriptionService {
 
     public void unsubscribe(UUIDRequestDTO uuidRequestDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         UUID artistId = uuidRequestDTO.getId();
 
         if (!customerRepository.existsById(customerId)) {
@@ -84,6 +96,10 @@ public class PrivateSubscriptionService {
 
     public List<PrivateSubscriptionDTO> getSubscriptions(String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
 
         if (!customerRepository.existsById(customerId)) {
             throw new UserNotFoundException();
@@ -123,6 +139,10 @@ public class PrivateSubscriptionService {
             throw new BadActionException("You already have a subscription");
         }
 
+        if (blockUserRepository.existsById(priceDTO.getArtistId())) {
+            throw new BlockUserException();
+        }
+
         PrivateSubscriptionEntity entity = new PrivateSubscriptionEntity();
         entity.setArtistId(priceDTO.getArtistId());
         entity.setPrice(priceDTO.getPrice());
@@ -133,6 +153,11 @@ public class PrivateSubscriptionService {
 
     public List<CustomerShortDTO> getSubscribers(String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         PrivateSubscriptionEntity subscriptionEntity = privateSubscriptionRepository.findByArtistId(customerEntity.getArtistId()).orElseThrow(BadCredentialsException::new);
 
@@ -147,11 +172,20 @@ public class PrivateSubscriptionService {
     public PriceDTO getSubscriptionData(UUID artistId) {
         PrivateSubscriptionEntity entity = privateSubscriptionRepository.findByArtistId(artistId).orElseThrow(BadCredentialsException::new);
 
+        if (blockUserRepository.existsById(artistId)) {
+            throw new BlockUserException();
+        }
+
         return new PriceDTO(artistId, entity.getPrice());
     }
 
     public void deleteSubscription(String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         UUID artistId = customerEntity.getArtistId();
         ArtistEntity artistEntity = artistRepository.findById(artistId).orElseThrow(UserNotFoundException::new);
@@ -166,6 +200,11 @@ public class PrivateSubscriptionService {
 
     public List<CustomerShortDTO> searchCustomerUsers(String input, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         PrivateSubscriptionEntity subscriptionEntity = privateSubscriptionRepository.findByArtistId(customerEntity.getArtistId()).orElseThrow(BadCredentialsException::new);
 
@@ -180,6 +219,10 @@ public class PrivateSubscriptionService {
 
     public List<PrivateSubscriptionDTO> searchArtistUsers(String input, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
 
         if (!customerRepository.existsById(customerId)) {
             throw new UserNotFoundException();

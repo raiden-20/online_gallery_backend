@@ -1,4 +1,4 @@
-package ru.vsu.cs.sheina.online_gallery_backend.dto.art;
+package ru.vsu.cs.sheina.online_gallery_backend.dto.event;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -10,35 +10,35 @@ import java.util.UUID;
 
 @Data
 @RequiredArgsConstructor
-public class ArtFullDTO {
+public class EventSubjectDTO {
 
-    String name;
-
-    String type;
-
-    List<String> photoUrls;
-
-    BigInteger price;
-
-    Boolean isPrivate;
+    Integer subjectId;
 
     UUID artistId;
 
     String artistName;
 
-    Integer eventId;
+    String subjectName;
 
-    String eventName;
+    String photoUrl;
 
     String status;
 
+    BigInteger price;
+
     UUID customerId;
+
+    String customerUrl;
 
     String customerName;
 
-    String description;
+    Integer viewCount;
 
     String size;
+
+    Timestamp startDate;
+
+    Timestamp endDate;
 
     Timestamp createDate;
 
@@ -47,6 +47,4 @@ public class ArtFullDTO {
     List<String> materials;
 
     Boolean frame;
-
-    Timestamp publishDate;
 }

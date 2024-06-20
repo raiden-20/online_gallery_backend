@@ -10,8 +10,10 @@ import ru.vsu.cs.sheina.online_gallery_backend.entity.CardEntity;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.OrderEntity;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadActionException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentialsException;
+import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BlockUserException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.ForbiddenActionException;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.AddressRepository;
+import ru.vsu.cs.sheina.online_gallery_backend.repository.BlockUserRepository;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.OrderRepository;
 import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
 
@@ -26,9 +28,15 @@ public class AddressService {
     private final AddressRepository addressRepository;
     private final OrderRepository orderRepository;
     private final JWTParser jwtParser;
+    private final BlockUserRepository blockUserRepository;
 
     public List<AddressDTO> getAddresses(String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         return addressRepository.findAllByCustomerId(customerId).stream()
                 .map(ent -> new AddressDTO(ent.getId(), ent.getName(), ent.getCountry(), ent.getRegion(),
                         ent.getCity(), ent.getIndex(), ent.getLocation(), ent.getIsDefault()))
@@ -37,6 +45,11 @@ public class AddressService {
 
     public void addNewAddress(AddressNewDTO addressNewDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         AddressEntity addressEntity = new AddressEntity();
         addressEntity.setCustomerId(customerId);
         addressEntity.setName(addressNewDTO.getName());
@@ -63,6 +76,10 @@ public class AddressService {
 
     public void changeAddress(AddressDTO addressDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
 
         AddressEntity addressEntity = addressRepository.findById(addressDTO.getAddressId()).orElseThrow(BadCredentialsException::new);
 
@@ -94,6 +111,10 @@ public class AddressService {
 
     public void deleteAddress(IntIdRequestDTO intIdRequestDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
 
         AddressEntity addressEntity = addressRepository.findById(intIdRequestDTO.getId()).orElseThrow(BadCredentialsException::new);
 

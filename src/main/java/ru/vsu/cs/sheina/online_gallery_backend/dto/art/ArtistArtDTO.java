@@ -27,5 +27,7 @@ public class ArtistArtDTO {
     String customerName;
 
     String avatarUrl;
+
+    String artistName;
 }
 

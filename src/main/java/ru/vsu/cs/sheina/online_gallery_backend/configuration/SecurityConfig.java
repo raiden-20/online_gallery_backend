@@ -1,5 +1,6 @@
 package ru.vsu.cs.sheina.online_gallery_backend.configuration;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -14,9 +15,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 @Configuration
+@RequiredArgsConstructor
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+
+    private final JwtAuthConverter jwtAuthConverter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -33,7 +37,9 @@ public class SecurityConfig {
                             "/api/artist/artistId={artistId}&currentId={currentId}",
                             "/api/art/customer/{customerId}","/api/paintings", "/api/photos", "/api/sculptures",
                             "/api/auction/auctionId={auctionId}&currentId={currentId}",
-                            "/api/auction/artist/{artistId}", "/api/auctions").permitAll()
+                            "/api/auction/artist/artistId={artistId}&currentId={currentId}", "/api/auctions",
+                            "/api/event/eventId={eventId}&currentId={currentId}",
+                            "/api/events").permitAll()
                 .and()
                 .authorizeHttpRequests()
                 .requestMatchers("swagger-ui/**", "swagger-ui**", "/v3/api-docs/**", "/v3/api-docs**")
@@ -47,7 +53,7 @@ public class SecurityConfig {
 
         http
                 .oauth2ResourceServer()
-                .jwt();
+                .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthConverter));
 
         http
                 .sessionManagement()

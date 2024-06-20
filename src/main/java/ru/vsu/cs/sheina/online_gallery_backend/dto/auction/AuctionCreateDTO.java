@@ -15,6 +15,8 @@ public class AuctionCreateDTO {
 
     String type;
 
+    Integer eventId;
+
     BigInteger startPrice;
 
     String description;

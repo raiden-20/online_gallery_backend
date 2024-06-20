@@ -24,6 +24,10 @@ public class AuctionFullDTO {
 
     BigInteger lastPrice;
 
+    Integer eventId;
+
+    String eventName;
+
     UUID artistId;
 
     String artistName;

@@ -16,6 +16,8 @@ public class ArtistFullDTO {
 
     String coverUrl;
 
+    Boolean isBlocked;
+
     UUID customerId;
 
     String description;

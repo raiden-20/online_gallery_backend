@@ -9,6 +9,7 @@ import ru.vsu.cs.sheina.online_gallery_backend.dto.post.PostDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.*;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentialsException;
+import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BlockUserException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.ForbiddenActionException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.*;
@@ -33,9 +34,15 @@ public class PostService {
     private final FileService fileService;
     private final NotificationService notificationService;
     private final JWTParser jwtParser;
+    private final BlockUserRepository blockUserRepository;
 
     public List<PostDTO> getPosts(UUID artistId, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         PrivateSubscriptionEntity privateSubscriptionEntity = privateSubscriptionRepository.findByArtistId(artistId).orElseThrow(BadCredentialsException::new);
 
@@ -75,6 +82,11 @@ public class PostService {
 
     public void createPost(List<MultipartFile> photos, PostCreateDTO postCreateDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         UUID artistId = customerEntity.getArtistId();
 
@@ -88,7 +100,7 @@ public class PostService {
         for (int i = 0; i < photos.size(); i++) {
             PostPhotoEntity postPhotoEntity = new PostPhotoEntity();
             postPhotoEntity.setPostId(postEntity.getId());
-            postPhotoEntity.setPhotoUrl(fileService.saveFile(photos.get(i)));
+            postPhotoEntity.setPhotoUrl(fileService.saveFile(photos.get(i), postEntity.getId().toString()));
 
             postPhotoEntity.setDefaultPhoto(i == 0);
 
@@ -103,6 +115,11 @@ public class PostService {
 
     public void changePost(List<MultipartFile> photos, PostChangeDTO postChangeDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         UUID artistId = customerEntity.getArtistId();
 
@@ -121,19 +138,26 @@ public class PostService {
         }
 
         for (int i = 0; i < photos.size(); i++) {
-            PostPhotoEntity postPhotoEntity = new PostPhotoEntity();
+            if (!photos.get(i).isEmpty()) {
+                PostPhotoEntity postPhotoEntity = new PostPhotoEntity();
 
-            postPhotoEntity.setPostId(postChangeDTO.getPostId());
-            postPhotoEntity.setPhotoUrl(fileService.saveFile(photos.get(i)));
+                postPhotoEntity.setPostId(postChangeDTO.getPostId());
+                postPhotoEntity.setPhotoUrl(fileService.saveFile(photos.get(i), postEntity.getId().toString()));
 
-            postPhotoEntity.setDefaultPhoto(i == 0);
+                postPhotoEntity.setDefaultPhoto(i == 0);
 
-            postPhotoRepository.save(postPhotoEntity);
+                postPhotoRepository.save(postPhotoEntity);
+            }
         }
     }
 
     public void delete(IntIdRequestDTO intIdRequestDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         UUID artistId = customerEntity.getArtistId();
 

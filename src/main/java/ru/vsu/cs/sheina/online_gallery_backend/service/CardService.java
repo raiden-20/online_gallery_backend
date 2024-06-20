@@ -10,7 +10,9 @@ import ru.vsu.cs.sheina.online_gallery_backend.entity.CardEntity;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.CustomerPrivateSubscriptionEntity;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.OrderEntity;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentialsException;
+import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BlockUserException;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.ForbiddenActionException;
+import ru.vsu.cs.sheina.online_gallery_backend.repository.BlockUserRepository;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.CardRepository;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.CustomerPrivateSubscriptionRepository;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.OrderRepository;
@@ -28,9 +30,15 @@ public class CardService {
     private final CardRepository cardRepository;
     private final CustomerPrivateSubscriptionRepository customerPrivateSubscriptionRepository;
     private final OrderRepository orderRepository;
+    private final BlockUserRepository blockUserRepository;
 
     public List<CardDTO> getCards(String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         return cardRepository.findAllByCustomerId(customerId).stream()
                 .map(ent -> new CardDTO(ent.getId(), ent.getType(), ent.getNumber(), ent.getDate(), ent.getCvv(), ent.getIsDefault()))
                 .toList();
@@ -38,6 +46,11 @@ public class CardService {
 
     public void addCard(CardNewDTO cardNewDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         CardEntity cardEntity = new CardEntity();
         cardEntity.setNumber(cardNewDTO.getNumber());
         cardEntity.setDate(cardNewDTO.getDate());
@@ -71,6 +84,10 @@ public class CardService {
 
     public void changeCard(CardDTO cardDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
 
         CardEntity cardEntity = cardRepository.findById(cardDTO.getCardId()).orElseThrow(BadCredentialsException::new);
 
@@ -109,6 +126,10 @@ public class CardService {
 
     public void deleteCard(IntIdRequestDTO intIdRequestDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
 
         CardEntity cardEntity = cardRepository.findById(intIdRequestDTO.getId()).orElseThrow(BadCredentialsException::new);
 

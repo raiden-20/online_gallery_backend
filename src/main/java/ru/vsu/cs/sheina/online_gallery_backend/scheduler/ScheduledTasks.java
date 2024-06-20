@@ -3,15 +3,11 @@ package ru.vsu.cs.sheina.online_gallery_backend.scheduler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import ru.vsu.cs.sheina.online_gallery_backend.entity.ArtistEntity;
-import ru.vsu.cs.sheina.online_gallery_backend.entity.AuctionEntity;
-import ru.vsu.cs.sheina.online_gallery_backend.entity.AuctionPhotoEntity;
-import ru.vsu.cs.sheina.online_gallery_backend.entity.OrderEntity;
+import ru.vsu.cs.sheina.online_gallery_backend.dto.field.UUIDRequestDTO;
+import ru.vsu.cs.sheina.online_gallery_backend.entity.*;
 import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.*;
-import ru.vsu.cs.sheina.online_gallery_backend.service.AuctionService;
-import ru.vsu.cs.sheina.online_gallery_backend.service.FileService;
-import ru.vsu.cs.sheina.online_gallery_backend.service.NotificationService;
+import ru.vsu.cs.sheina.online_gallery_backend.service.*;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -21,6 +17,8 @@ import java.util.List;
 public class ScheduledTasks {
 
     private final AuctionRepository auctionRepository;
+    private final EventRepository eventRepository;
+    private final EventService eventService;
     private final NotificationRepository notificationRepository;
     private final FileService fileService;
     private final MaxRateRepository maxRateRepository;
@@ -30,11 +28,13 @@ public class ScheduledTasks {
     private final NotificationService notificationService;
     private final AuctionService auctionService;
     private final ArtistRepository artistRepository;
+    private final KeycloakService keycloakService;
 
 
     @Scheduled(fixedRate = 10000)
     private void doScheduledTasks() {
         Timestamp time = new Timestamp(System.currentTimeMillis());
+        changeEvents(time);
         changeAuctions(time);
         checkOrders(time);
     }
@@ -64,10 +64,8 @@ public class ScheduledTasks {
             Timestamp endOrderDate = new Timestamp(orderEntity.getCreateDate().getTime() + 24 * 60 * 60 * 1000);
             if (orderEntity.getStatus().equals("AWAIT") && endOrderDate.before(time)) {
                 ArtistEntity artistEntity = artistRepository.findById(orderEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
-                orderRepository.deleteAllBySubjectId(orderEntity.getSubjectId());
 
                 notificationRepository.deleteAllBySubjectId(orderEntity.getSubjectId());
-                orderRepository.deleteAllBySubjectId(orderEntity.getSubjectId());
 
                 auctionPhotoRepository.findAllByAuctionId(orderEntity.getSubjectId()).stream()
                         .map(AuctionPhotoEntity::getPhotoUrl)
@@ -78,9 +76,24 @@ public class ScheduledTasks {
                 rateRepository.deleteAllByAuctionId(orderEntity.getSubjectId());
                 auctionRepository.deleteById(orderEntity.getSubjectId());
 
-                //TODO блок пользователя
-
+                keycloakService.blockUser(orderEntity.getCustomerId());
                 notificationService.sendAuctionFailedNotification(orderEntity.getCustomerId(), artistEntity);
+
+                orderRepository.deleteAllBySubjectId(orderEntity.getSubjectId());
+            }
+        }
+    }
+
+    private void changeEvents(Timestamp time) {
+        List<EventEntity> events = eventRepository.findAll();
+
+        for (EventEntity eventEntity: events) {
+            if (eventEntity.getStartDate().before(time) && eventEntity.getStatus().equals("WAIT")) {
+                eventService.startEvent(eventEntity);
+            }
+
+            if (eventEntity.getEndDate().before(time) && eventEntity.getStatus().equals("AVAILABLE")) {
+                eventService.finishEvent(eventEntity);
             }
         }
     }

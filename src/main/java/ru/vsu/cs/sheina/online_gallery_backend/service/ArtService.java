@@ -6,24 +6,20 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.art.*;
 import ru.vsu.cs.sheina.online_gallery_backend.dto.field.IntIdRequestDTO;
 import ru.vsu.cs.sheina.online_gallery_backend.entity.*;
-import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadActionException;
-import ru.vsu.cs.sheina.online_gallery_backend.exceptions.BadCredentialsException;
-import ru.vsu.cs.sheina.online_gallery_backend.exceptions.ForbiddenActionException;
-import ru.vsu.cs.sheina.online_gallery_backend.exceptions.UserNotFoundException;
+import ru.vsu.cs.sheina.online_gallery_backend.exceptions.*;
 import ru.vsu.cs.sheina.online_gallery_backend.repository.*;
 import ru.vsu.cs.sheina.online_gallery_backend.utils.JWTParser;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ArtService {
 
     private final JWTParser jwtParser;
+    private final AdminService adminService;
     private final ArtRepository artRepository;
     private final ArtPhotoRepository artPhotoRepository;
     private final CustomerRepository customerRepository;
@@ -36,6 +32,9 @@ public class ArtService {
     private final OrderRepository orderRepository;
     private final NotificationService notificationService;
     private final NotificationRepository notificationRepository;
+    private final EventRepository eventRepository;
+    private final EventSubjectRepository eventSubjectRepository;
+    private final BlockUserRepository blockUserRepository;
 
     public void movePrivatePaintings(Integer subscriptionId) {
         artPrivateSubscriptionRepository.deleteAllBySubscriptionId(subscriptionId);
@@ -43,6 +42,11 @@ public class ArtService {
 
     public Integer createArt(ArtCreateDTO artCreateDTO, List<MultipartFile> photos, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         UUID artistId = customerEntity.getArtistId();
 
@@ -67,6 +71,7 @@ public class ArtService {
         artEntity.setPublishDate(new Timestamp(System.currentTimeMillis()));
         artEntity.setCreateDate(artCreateDTO.getCreateDate());
         artEntity.setViews(0);
+
         artRepository.save(artEntity);
 
         boolean privateArt = artCreateDTO.getIsPrivate();
@@ -84,17 +89,30 @@ public class ArtService {
         for(int i = 0; i < photos.size(); i++) {
             ArtPhotoEntity artPhotoEntity = new ArtPhotoEntity();
             artPhotoEntity.setArtId(artEntity.getId());
-            artPhotoEntity.setPhotoUrl(fileService.saveFile(photos.get(i)));
+            artPhotoEntity.setPhotoUrl(fileService.saveFile(photos.get(i), artEntity.getId().toString()));
             artPhotoEntity.setDefaultPhoto(i == 0);
             artPhotoRepository.save(artPhotoEntity);
+        }
+
+        if (artCreateDTO.getEventId() != null) {
+            EventEntity eventEntity = eventRepository.findById(artCreateDTO.getEventId()).orElseThrow(BadCredentialsException::new);
+            if (!eventEntity.getStatus().equals("WAIT")) {
+                throw new BadActionException("Event's not active");
+            }
+            EventSubjectEntity eventSubjectEntity = new EventSubjectEntity();
+            eventSubjectEntity.setSubjectId(artEntity.getId());
+            eventSubjectEntity.setEventId(eventEntity.getId());
+            eventSubjectRepository.save(eventSubjectEntity);
         }
 
         if (artCreateDTO.getIsPrivate()) {
             PrivateSubscriptionEntity privateSubscription = privateSubscriptionRepository.findByArtistId(artistId).get();
             notificationService.sendNewPrivateArtNotification(artEntity, artistEntity, privateSubscription);
-        } else {
+        } else if (artCreateDTO.getEventId() == null){
             notificationService.sendNewPublicArtNotification(artEntity, artistEntity);
         }
+
+        artRepository.save(artEntity);
 
         return artEntity.getId();
     }
@@ -102,8 +120,27 @@ public class ArtService {
     public ArtFullDTO getArt(Integer artId, String currentId) {
         ArtEntity artEntity = artRepository.findById(artId).orElseThrow(BadCredentialsException::new);
         ArtistEntity artistEntity = artistRepository.findById(artEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
-
         ArtFullDTO artFullDTO = new ArtFullDTO();
+
+        if (blockUserRepository.existsById(artistEntity.getId())) {
+            throw new BlockUserException();
+        }
+
+        if (eventSubjectRepository.existsBySubjectId(artId)) {
+            EventSubjectEntity eventSubjectEntity = eventSubjectRepository.findBySubjectId(artId).get();
+            EventEntity eventEntity = eventRepository.findById(eventSubjectEntity.getEventId()).orElseThrow(BadCredentialsException::new);
+            if (eventEntity.getStatus().equals("WAIT") && currentId.equals("null")) {
+                throw new ForbiddenActionException();
+            } else if (eventEntity.getStatus().equals("WAIT")) {
+                UUID userId = UUID.fromString(currentId);
+                if (!artEntity.getArtistId().equals(userId) && !adminService.checkAdmin(userId)) {
+                    throw new ForbiddenActionException();
+                }
+            }
+            artFullDTO.setEventId(eventEntity.getId());
+            artFullDTO.setEventName(eventEntity.getName());
+        }
+
         artFullDTO.setName(artEntity.getName());
         artFullDTO.setType(artEntity.getType());
         artFullDTO.setPrice(artEntity.getPrice());
@@ -123,12 +160,22 @@ public class ArtService {
             artFullDTO.setStatus("AVAILABLE");
             artFullDTO.setIsPrivate(false);
         } else if (!currentId.equals("null") && artPrivateSubscriptionRepository.existsByArtId(artId)){
-            UUID customerId = UUID.fromString(currentId);
-            CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
+            UUID userId = UUID.fromString(currentId);
             PrivateSubscriptionEntity privateSubscriptionEntity = privateSubscriptionRepository.findByArtistId(artEntity.getArtistId()).get();
-            if (!customerPrivateSubscriptionRepository.existsByCustomerIdAndPrivateSubscriptionId(customerId, privateSubscriptionEntity.getId()) &&
-                    !customerEntity.getArtistId().equals(artEntity.getArtistId())) {
-                throw new ForbiddenActionException();
+            Optional<CustomerEntity> currentCustomerOpt = customerRepository.findById(userId);
+            Optional<ArtistEntity> currentArtistOpt = artistRepository.findById(userId);
+
+            if (currentCustomerOpt.isPresent()) {
+                if (!customerPrivateSubscriptionRepository.existsByCustomerIdAndPrivateSubscriptionId(userId, privateSubscriptionEntity.getId()) &&
+                        !currentCustomerOpt.get().getArtistId().equals(artEntity.getArtistId()) && !adminService.checkAdmin(userId)) {
+                    throw new ForbiddenActionException();
+                }
+            } else {
+                CustomerEntity customerEntity = customerRepository.findByArtistId(currentArtistOpt.get().getId()).get();
+                if (!customerPrivateSubscriptionRepository.existsByCustomerIdAndPrivateSubscriptionId(customerEntity.getId(), privateSubscriptionEntity.getId()) &&
+                        !userId.equals(artEntity.getArtistId()) && !adminService.checkAdmin(userId)) {
+                    throw new ForbiddenActionException();
+                }
             }
             artFullDTO.setIsPrivate(true);
         } else {
@@ -136,13 +183,12 @@ public class ArtService {
         }
 
         if (artEntity.getOwnerId() != null) {
-            CustomerEntity customerEntity = customerRepository.findById(artEntity.getOwnerId()).orElseThrow(UserNotFoundException::new);
-            artFullDTO.setCustomerId(artEntity.getOwnerId());
-            artFullDTO.setCustomerName(customerEntity.getCustomerName());
-            artFullDTO.setStatus("SOLD");
-        } else {
-            artFullDTO.setCustomerName(null);
-            artFullDTO.setCustomerId(null);
+            if (!blockUserRepository.existsById(artEntity.getOwnerId())) {
+                CustomerEntity customerEntity = customerRepository.findById(artEntity.getOwnerId()).orElseThrow(UserNotFoundException::new);
+                artFullDTO.setCustomerId(artEntity.getOwnerId());
+                artFullDTO.setCustomerName(customerEntity.getCustomerName());
+                artFullDTO.setStatus("SOLD");
+            }
         }
 
         if (currentId.equals("null") && artEntity.getOwnerId() == null) {
@@ -180,6 +226,11 @@ public class ArtService {
 
     public void changeArt(ArtChangeDTO artChangeDTO, List<MultipartFile> newPhotos, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         UUID artistId = customerEntity.getArtistId();
 
@@ -213,22 +264,24 @@ public class ArtService {
         }
 
         for (int i = 0; i < newPhotos.size(); i++) {
-            ArtPhotoEntity artPhotoEntity = new ArtPhotoEntity();
-            artPhotoEntity.setArtId(artEntity.getId());
-            artPhotoEntity.setPhotoUrl(fileService.saveFile(newPhotos.get(i)));
+            if (!newPhotos.get(i).isEmpty()) {
+                ArtPhotoEntity artPhotoEntity = new ArtPhotoEntity();
+                artPhotoEntity.setArtId(artEntity.getId());
+                artPhotoEntity.setPhotoUrl(fileService.saveFile(newPhotos.get(i), artEntity.getId().toString()));
 
-            if (artChangeDTO.getChangeMainPhoto() && i == 0){
-                Optional<ArtPhotoEntity> mainPhoto = artPhotoRepository.findByArtIdAndAndDefaultPhoto(artEntity.getId(), true);
-                if (mainPhoto.isPresent()) {
-                    ArtPhotoEntity mainPhotoEntity = mainPhoto.get();
-                    mainPhotoEntity.setDefaultPhoto(false);
-                    artPhotoRepository.save(mainPhotoEntity);
+                if (artChangeDTO.getChangeMainPhoto() && i == 0) {
+                    Optional<ArtPhotoEntity> mainPhoto = artPhotoRepository.findByArtIdAndAndDefaultPhoto(artEntity.getId(), true);
+                    if (mainPhoto.isPresent()) {
+                        ArtPhotoEntity mainPhotoEntity = mainPhoto.get();
+                        mainPhotoEntity.setDefaultPhoto(false);
+                        artPhotoRepository.save(mainPhotoEntity);
+                    }
+                    artPhotoEntity.setDefaultPhoto(true);
+                } else {
+                    artPhotoEntity.setDefaultPhoto(false);
                 }
-                artPhotoEntity.setDefaultPhoto(true);
-            } else {
-                artPhotoEntity.setDefaultPhoto(false);
+                artPhotoRepository.save(artPhotoEntity);
             }
-            artPhotoRepository.save(artPhotoEntity);
         }
 
         if (artChangeDTO.getIsPrivate() && !privateSubscriptionRepository.existsByArtistId(artistId)) {
@@ -242,10 +295,17 @@ public class ArtService {
         } else if (!artChangeDTO.getIsPrivate() && artPrivateSubscriptionRepository.existsByArtId(artEntity.getId())) {
             artPrivateSubscriptionRepository.deleteAllByArtId(artEntity.getId());
         }
+
+        artRepository.save(artEntity);
     }
 
     public void deleteArt(IntIdRequestDTO intIdRequestDTO, String token) {
         UUID customerId = jwtParser.getIdFromAccessToken(token);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
+        }
+
         CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
         UUID artistId = customerEntity.getArtistId();
         ArtEntity artEntity = artRepository.findById(intIdRequestDTO.getId()).orElseThrow(BadCredentialsException::new);
@@ -255,6 +315,7 @@ public class ArtService {
         }
 
         notificationRepository.deleteAllBySubjectId(artEntity.getId());
+        eventSubjectRepository.deleteAllBySubjectId(artEntity.getId());
         cartRepository.deleteAllBySubjectId(artEntity.getId());
         orderRepository.deleteAllBySubjectId(artEntity.getId());
         artPrivateSubscriptionRepository.deleteAllByArtId(artEntity.getId());
@@ -268,16 +329,39 @@ public class ArtService {
     }
 
     public List<ArtistArtDTO> getArtistArt(UUID artistId, String currentId) {
-        if (!artistRepository.existsById(artistId)) {
-            throw new UserNotFoundException();
+        ArtistEntity artistEntity = artistRepository.findById(artistId).orElseThrow(UserNotFoundException::new);
+
+        if (currentId.equals("null") && blockUserRepository.existsById(artistId)) {
+            throw new BlockUserException();
+        } else if (!currentId.equals("null") && blockUserRepository.existsById(artistId)) {
+            if (!adminService.checkAdmin(UUID.fromString(currentId))) {
+                throw new BlockUserException();
+            }
         }
 
         List<ArtEntity> artEntities = artRepository.findAllByArtistId(artistId);
+
+        for (ArtEntity artEntity: artEntities) {
+            if (eventSubjectRepository.existsBySubjectId(artEntity.getId())) {
+                EventSubjectEntity eventSubjectEntity = eventSubjectRepository.findBySubjectId(artEntity.getId()).get();
+                EventEntity eventEntity = eventRepository.findById(eventSubjectEntity.getEventId()).orElseThrow(BadCredentialsException::new);
+                if (eventEntity.getStatus().equals("WAIT") && currentId.equals("null")) {
+                    artEntities.remove(artEntity);
+                } else if (eventEntity.getStatus().equals("WAIT")) {
+                    UUID userId = UUID.fromString(currentId);
+                    if (!artEntity.getArtistId().equals(userId) && !adminService.checkAdmin(userId)) {
+                        artEntities.remove(artEntity);
+                    }
+                }
+            }
+        }
+
         List<ArtistArtDTO> dtos = new ArrayList<>();
 
         for (ArtEntity artEntity: artEntities) {
             ArtistArtDTO dto = new ArtistArtDTO();
             dto.setArtId(artEntity.getId());
+            dto.setArtistName(artistEntity.getArtistName());
             dto.setName(artEntity.getName());
             dto.setPrice(artEntity.getPrice());
 
@@ -305,8 +389,13 @@ public class ArtService {
                 if (!currentId.equals("null")) {
                     UUID customerId = UUID.fromString(currentId);
                     CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
-                    dto.setAvailable(customerPrivateSubscriptionRepository.existsByCustomerIdAndPrivateSubscriptionId(customerId, artPrivSub.get().getSubscriptionId()) ||
-                            customerEntity.getArtistId().equals(artistId));
+                    if (customerEntity.getArtistId() != null) {
+                        dto.setAvailable(customerPrivateSubscriptionRepository.existsByCustomerIdAndPrivateSubscriptionId(customerId, artPrivSub.get().getSubscriptionId())|| adminService.checkAdmin(customerId)
+                        || customerEntity.getArtistId().equals(artEntity.getArtistId()));
+                    } else {
+                        dto.setAvailable(customerPrivateSubscriptionRepository.existsByCustomerIdAndPrivateSubscriptionId(customerId, artPrivSub.get().getSubscriptionId())|| adminService.checkAdmin(customerId));
+                    }
+                    dto.setAvailable(customerPrivateSubscriptionRepository.existsByCustomerIdAndPrivateSubscriptionId(customerId, artPrivSub.get().getSubscriptionId())|| adminService.checkAdmin(customerId));
                 } else {
                     dto.setAvailable(false);
                 }
@@ -320,8 +409,10 @@ public class ArtService {
     }
 
     public List<CustomerArtDTO> getCustomerArt(UUID customerId) {
-        if (!customerRepository.existsById(customerId)) {
-            throw new UserNotFoundException();
+        CustomerEntity customerEntity = customerRepository.findById(customerId).orElseThrow(UserNotFoundException::new);
+
+        if (blockUserRepository.existsById(customerId)) {
+            throw new BlockUserException();
         }
 
         List<ArtEntity> artEntities = artRepository.findAllByOwnerId(customerId);
@@ -332,6 +423,7 @@ public class ArtService {
             dto.setArtId(artEntity.getId());
             dto.setName(artEntity.getName());
             dto.setPrice(artEntity.getPrice());
+            dto.setCustomerName(customerEntity.getCustomerName());
 
             ArtistEntity artistEntity = artistRepository.findById(artEntity.getArtistId()).orElseThrow(UserNotFoundException::new);
             dto.setArtistName(artistEntity.getArtistName());
@@ -361,9 +453,22 @@ public class ArtService {
             default -> "";
         };
 
-        List<ArtEntity> entities = artRepository.findAllByType(artType).stream()
+        List<ArtEntity> entities = new ArrayList<>();
+        artRepository.findAllByType(artType).stream()
                 .filter(art -> !artPrivateSubscriptionRepository.existsByArtId(art.getId()) || art.getSold())
-                .toList();
+                .filter(art -> !blockUserRepository.existsById(art.getArtistId()))
+                .forEach(entities::add);
+
+        for (Iterator<ArtEntity> iterator = entities.iterator(); iterator.hasNext(); ) {
+            ArtEntity artEntity = iterator.next();
+            if (eventSubjectRepository.existsBySubjectId(artEntity.getId())) {
+                EventSubjectEntity eventSubjectEntity = eventSubjectRepository.findBySubjectId(artEntity.getId()).get();
+                EventEntity eventEntity = eventRepository.findById(eventSubjectEntity.getEventId()).orElseThrow(BadCredentialsException::new);
+                if (eventEntity.getStatus().equals("WAIT")) {
+                    iterator.remove();
+                }
+            }
+        }
 
         List<CommonArtDTO> dtos = new ArrayList<>();
 
@@ -375,11 +480,24 @@ public class ArtService {
     }
 
     public List<CommonArtDTO> searchPaintings(String input) {
-        List<ArtEntity> artEntities = artRepository.findAll().stream()
+        List<ArtEntity> artEntities = new ArrayList<>();
+        artRepository.findAll().stream()
                 .filter(art -> !artPrivateSubscriptionRepository.existsByArtId(art.getId()) || art.getSold())
                 .filter(art -> art.getType().equals("PAINTING"))
+                .filter(art -> !blockUserRepository.existsById(art.getArtistId()))
                 .filter(art -> art.getName().toUpperCase().contains(input.toUpperCase()))
-                .toList();
+                .forEach(artEntities::add);
+
+        for (Iterator<ArtEntity> iterator = artEntities.iterator(); iterator.hasNext(); ) {
+            ArtEntity artEntity = iterator.next();
+            if (eventSubjectRepository.existsBySubjectId(artEntity.getId())) {
+                EventSubjectEntity eventSubjectEntity = eventSubjectRepository.findBySubjectId(artEntity.getId()).get();
+                EventEntity eventEntity = eventRepository.findById(eventSubjectEntity.getEventId()).orElseThrow(BadCredentialsException::new);
+                if (eventEntity.getStatus().equals("WAIT")) {
+                    iterator.remove();
+                }
+            }
+        }
 
         List<CommonArtDTO> dtos = new ArrayList<>();
 
@@ -390,11 +508,24 @@ public class ArtService {
     }
 
     public List<CommonArtDTO> searchPhotos(String input) {
-        List<ArtEntity> artEntities = artRepository.findAll().stream()
+        List<ArtEntity> artEntities = new ArrayList<>();
+        artRepository.findAll().stream()
                 .filter(art -> !artPrivateSubscriptionRepository.existsByArtId(art.getId()) || art.getSold())
                 .filter(art -> art.getType().equals("PHOTO"))
+                .filter(art -> !blockUserRepository.existsById(art.getArtistId()))
                 .filter(art -> art.getName().toUpperCase().contains(input.toUpperCase()))
-                .toList();
+                .forEach(artEntities::add);
+
+        for (Iterator<ArtEntity> iterator = artEntities.iterator(); iterator.hasNext(); ) {
+            ArtEntity artEntity = iterator.next();
+            if (eventSubjectRepository.existsBySubjectId(artEntity.getId())) {
+                EventSubjectEntity eventSubjectEntity = eventSubjectRepository.findBySubjectId(artEntity.getId()).get();
+                EventEntity eventEntity = eventRepository.findById(eventSubjectEntity.getEventId()).orElseThrow(BadCredentialsException::new);
+                if (eventEntity.getStatus().equals("WAIT")) {
+                    iterator.remove();
+                }
+            }
+        }
 
         List<CommonArtDTO> dtos = new ArrayList<>();
 
@@ -405,11 +536,24 @@ public class ArtService {
     }
 
     public List<CommonArtDTO> searchSculptures(String input) {
-        List<ArtEntity> artEntities = artRepository.findAll().stream()
+        List<ArtEntity> artEntities = new ArrayList<>();
+        artRepository.findAll().stream()
                 .filter(art -> !artPrivateSubscriptionRepository.existsByArtId(art.getId()) || art.getSold())
                 .filter(art -> art.getType().equals("SCULPTURE"))
+                .filter(art -> !blockUserRepository.existsById(art.getArtistId()))
                 .filter(art -> art.getName().toUpperCase().contains(input.toUpperCase()))
-                .toList();
+                .forEach(artEntities::add);
+
+        for (Iterator<ArtEntity> iterator = artEntities.iterator(); iterator.hasNext(); ) {
+            ArtEntity artEntity = iterator.next();
+            if (eventSubjectRepository.existsBySubjectId(artEntity.getId())) {
+                EventSubjectEntity eventSubjectEntity = eventSubjectRepository.findBySubjectId(artEntity.getId()).get();
+                EventEntity eventEntity = eventRepository.findById(eventSubjectEntity.getEventId()).orElseThrow(BadCredentialsException::new);
+                if (eventEntity.getStatus().equals("WAIT")) {
+                    iterator.remove();
+                }
+            }
+        }
 
         List<CommonArtDTO> dtos = new ArrayList<>();
 
@@ -424,6 +568,12 @@ public class ArtService {
         dto.setArtId(entity.getId());
         dto.setName(entity.getName());
         dto.setPrice(entity.getPrice());
+        dto.setSize(entity.getSize());
+        dto.setCreateDate(entity.getCreateDate());
+        dto.setTags(entity.getTags());
+        dto.setMaterials(entity.getMaterials());
+        dto.setFrame(entity.getFrame());
+        dto.setViewCount(entity.getViews());
 
         ArtistEntity artistEntity = artistRepository.findById(entity.getArtistId()).get();
 
@@ -436,15 +586,13 @@ public class ArtService {
             dto.setIsPrivate(false);
         }
 
-        if (entity.getOwnerId() == null) {
-            dto.setCustomerId(null);
-            dto.setCustomerName(null);
-            dto.setAvatarUrl(null);
-        } else {
-            CustomerEntity customerEntity = customerRepository.findById(entity.getOwnerId()).get();
-            dto.setCustomerId(customerEntity.getId());
-            dto.setCustomerName(customerEntity.getCustomerName());
-            dto.setAvatarUrl(customerEntity.getAvatarUrl());
+        if (entity.getOwnerId() != null) {
+            if (!blockUserRepository.existsById(entity.getArtistId()) && customerRepository.existsById(entity.getOwnerId())) {
+                CustomerEntity customerEntity = customerRepository.findById(entity.getOwnerId()).get();
+                dto.setCustomerId(customerEntity.getId());
+                dto.setCustomerName(customerEntity.getCustomerName());
+                dto.setAvatarUrl(customerEntity.getAvatarUrl());
+            }
         }
 
         Optional<ArtPhotoEntity> artPhotoEntity = artPhotoRepository.findByArtIdAndAndDefaultPhoto(entity.getId(), true);

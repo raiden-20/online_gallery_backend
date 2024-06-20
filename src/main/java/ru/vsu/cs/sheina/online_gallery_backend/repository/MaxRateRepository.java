@@ -13,6 +13,8 @@ public interface MaxRateRepository extends JpaRepository<MaxRateEntity, Integer>
 
     Optional<MaxRateEntity> findByAuctionId(Integer auctionId);
 
+    boolean existsByAuctionIdAndAndCustomerId(Integer auctionId, UUID customerId);
+
     @Transactional
     void deleteById(Integer id);
 
