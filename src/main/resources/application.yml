@@ -3,9 +3,9 @@ server:
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5000/main_db
-    username: postgres_secret
-    password: postgres_secret
+    url: ${POSTGRES_URL}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: false
@@ -14,22 +14,22 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8000/realms/online_gallery
-          jwk-ser-uri: http://localhost:8000/realms/online_gallery/protocol/openid-connect/certs
+          issuer-uri: ${JWT_ISSUER}
+          jwk-ser-uri: ${JWK_SER}
   jwt:
     auth:
       converter:
         principle-attribute: preferred_username
         resource-id: backend
-
 minio:
-  host: http://localhost:9000
-  user: muser
-  password: mpassword
+  bucket: ${MINIO_BUCKET_HOST}
+  host: ${MINIO_HOST}
+  user: ${MINIO_ROOT_USER}
+  password: ${MINIO_ROOT_PASSWORD}
 keycloak:
-  url: http://localhost:8000
-  realm: online_gallery
-  clientId: backend
-  clientSecret: fXAvWBxMpzOGSYJvGRe4ZOOp3NFCwdSf
-  username: backend@backend
-  password: 123456789
+  url: ${KEYCLOAK_URL}
+  realm: ${KEYCLOAK_REALM}
+  clientId: ${KEYCLOAK_CLIENT}
+  clientSecret: ${KEYCLOAK_SECRET}
+  username: ${KEYCLOAK_USER}
+  password: ${KEYCLOAK_PASSWORD}

@@ -1,46 +1,25 @@
 version: "3.9"
 services:
-  #  nginx:
-  #    image: nginx:${NGINX_VERSION}
-  #    container_name: nginx
-  #    restart: on-failure
-  #    volumes:
-  #      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-  #    ports:
-  #      - ${NGINX_PORT}:8080
-  #    healthcheck:
-  #      test: ["CMD", "service", "nginx", "status"]
-  #      interval: 10s
-  #      timeout: 10s
-  #      retries: 5
-  #    networks:
-  #      - online_gallery
-
-  # backend:
-  #   container_name: backend
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile   
-  #   environment:
-  #     POSTGRES_URL: ${POSTGRES_URL}
-  #     POSTGRES_USER: ${POSTGRES_USER}
-  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-  #     JWT_ISSUER: ${JWT_ISSUER}
-  #     JWK_SER: ${JWK_SER}
-  #     MINIO_HOST: ${MINIO_HOST}
-  #     MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-  #     MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-  #     KEYCLOAK_URL: ${KEYCLOAK_URL}
-  #     KEYCLOAK_REALM: ${KEYCLOAK_REALM}
-  #     KEYCLOAK_CLIENT: ${KEYCLOAK_CLIENT}
-  #     KEYCLOAK_SECRET: ${KEYCLOAK_SECRET}
-  #     KEYCLOAK_USER: ${KEYCLOAK_USER}
-  #     KEYCLOAK_PASSWORD: ${KEYCLOAK_PASSWORD}
-  #   depends_on:
-  #     postgres_db:
-  #       condition: service_healthy
-  #   networks:
-  #     - online_gallery
+  nginx:
+    image: nginx:${NGINX_VERSION}
+    container_name: nginx
+    restart: on-failure
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/cert/private.key:/etc/ssl/private.key
+      - ./nginx/cert/www_gallery_lindero_ru_2024_12_25.crt:/etc/ssl/bundle.crt
+#      - ./nginx/index.html:/var/www/html/index.html
+      - ./nginx/dhparams4096.pem:/dhparams4096.pem
+    ports:
+      - 80:80
+      - 443:443
+    healthcheck:
+      test: ["CMD", "service", "nginx", "status"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    networks:
+      - online_gallery
 
   postgres_db:
     container_name: postgres_db
@@ -51,11 +30,11 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       KC_DB_USERNAME: ${KEYCLOAK_POSTGRES_USER}
       KC_DB_PASSWORD: ${KEYCLOAK_POSTGRES_PASSWORD}
+    ports:
+      - 5432:5432
     volumes:
       - postgres_db:/var/lib/postgresql/data
       - ./init_db/postgres_init_db.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - ${POSTGRES_PORT}:5432
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d ${POSTGRES_DB} -U ${POSTGRES_USER}"]
       interval: 10s
@@ -77,10 +56,10 @@ services:
       KC_DB_PASSWORD: ${KEYCLOAK_POSTGRES_PASSWORD}
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-    volumes:
-      - ./keycloak/gallery_login:/opt/keycloak/themes/gallery_login
     ports:
-      - ${KEYCLOAK_PORT}:8080
+      - 8080:8080
+    volumes:
+      - ./keycloak/gallery-login:/opt/keycloak/themes/gallery_login
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://0.0.0.0:8080/realms/master" ]
       start_period: 10s
@@ -96,9 +75,6 @@ services:
   minio:
     container_name: minio
     image: minio/minio:${MINIO_VERSION}
-    ports:
-      - ${MINIO_GUI_PORT}:9001
-      - ${MINIO_PORT}:9000
     volumes:
       - minio:/data
     environment:
@@ -111,7 +87,7 @@ services:
       retries: 3
     networks:
       - online_gallery
-    command: server --console-address ":9001" /data
+    command: server --console-address ":9001" /data   
 
 networks:
   online_gallery:
@@ -121,4 +97,4 @@ volumes:
   postgres_db:
     name: postgres_db
   minio:
-    name: minio
+    name: minio 

@@ -1,0 +1,44 @@
+version: "3.9"
+services:
+  frontend:
+    container_name: frontend
+    image: raiden20/gallery-frontend
+    environment:
+      KEYCLOAK_CLIENT: ${KEYCLOAK_CLIENT_FRONTEND}
+      KEYCLOAK_SECRET: ${KEYCLOAK_SECRET_FRONTEND}
+      JWT_ISSUER: ${KEYCLOAK_ISSUER}
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      END_SESSION_URL: ${END_SESSION_URL}
+      LOGOUT_FIRST_PART: ${LOGOUT_FIRST_PART}
+      LOGOUT_SECOND_PART: ${LOGOUT_SECOND_PART}
+      REFRESH_TOKEN_URL: ${REFRESH_TOKEN_URL}
+      GITHUB: ${GITHUB}
+      API_URL: ${API_URL}
+    depends_on:
+      - backend
+
+  backend:
+    container_name: backend
+    image: raiden20/gallery-backend
+    environment:
+      POSTGRES_URL: ${POSTGRES_URL}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWK_SER: ${JWK_SER}
+      MINIO_HOST: ${MINIO_HOST}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      KEYCLOAK_URL: ${KEYCLOAK_URL}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM}
+      KEYCLOAK_CLIENT: ${KEYCLOAK_CLIENT_BACKEND}
+      KEYCLOAK_SECRET: ${KEYCLOAK_SECRET_BACKEND}
+      KEYCLOAK_USER: ${KEYCLOAK_USER}
+      KEYCLOAK_PASSWORD: ${KEYCLOAK_PASSWORD}
+    networks:
+      - online_gallery
+
+networks:
+  online_gallery:
+    name: online_gallery

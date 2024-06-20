@@ -16,7 +16,7 @@ public class FileService {
     private final MinioService minioService;
     private final Integer FILE_MAX_SIZE = 2 * 1024 * 1024;
 
-    @Value("${minio.host}")
+    @Value("${minio.bucket}")
     private String storageHost;
 
     public void deleteFile(String url) {
